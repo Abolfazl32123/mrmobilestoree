@@ -24,8 +24,12 @@ async function ensureProductColumns(env){
   const names=new Set(cols.map(x=>x.name));
   if(!names.has('category')) await env.DB.prepare("ALTER TABLE products ADD COLUMN category TEXT NOT NULL DEFAULT 'موبایل'").run();
   if(!names.has('badge')) await env.DB.prepare("ALTER TABLE products ADD COLUMN badge TEXT NOT NULL DEFAULT ''").run();
+  if(!names.has('sale_price')) await env.DB.prepare("ALTER TABLE products ADD COLUMN sale_price TEXT NOT NULL DEFAULT ''").run();
+  if(!names.has('featured')) await env.DB.prepare("ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0").run();
+  if(!names.has('bestseller')) await env.DB.prepare("ALTER TABLE products ADD COLUMN bestseller INTEGER NOT NULL DEFAULT 0").run();
+  if(!names.has('new_arrival')) await env.DB.prepare("ALTER TABLE products ADD COLUMN new_arrival INTEGER NOT NULL DEFAULT 0").run();
 }
-async function listProducts(env,all=false){await ensureProductColumns(env);let q='SELECT id,name,price,condition,description,image_key,image_url,category,badge,available,created_at FROM products';if(!all)q+=' WHERE available=1';q+=' ORDER BY id DESC';return (await env.DB.prepare(q).all()).results}
+async function listProducts(env,all=false){await ensureProductColumns(env);let q='SELECT id,name,price,sale_price,condition,description,image_key,image_url,category,badge,featured,bestseller,new_arrival,available,created_at FROM products';if(!all)q+=' WHERE available=1';q+=' ORDER BY id DESC';return (await env.DB.prepare(q).all()).results}
 
 export default {async fetch(request,env){
   const url=new URL(request.url),path=url.pathname;
@@ -55,8 +59,8 @@ export default {async fetch(request,env){
     if(path==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_admin','',0)})
     if(path==='/api/products'&&request.method==='GET'){const all=url.searchParams.get('admin')==='1'&&await adminOK(request,env);return json(await listProducts(env,all))}
     if(path.startsWith('/api/products/')&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM products WHERE id=?').bind(id).run();return json({ok:true})}
-    if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,condition,description,image_key,image_url,category,badge,available) VALUES(?,?,?,?,?,?,?,?,?)').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.category||'موبایل',b.badge||'',b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
-    if(path.startsWith('/api/products/')&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const id=Number(path.split('/').pop()),b=await request.json().catch(()=>({}));if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);await env.DB.prepare('UPDATE products SET name=?,price=?,condition=?,description=?,image_key=?,image_url=?,category=?,badge=?,available=? WHERE id=?').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.category||'موبایل',b.badge||'',b.available?1:0,id).run();return json({ok:true})}
+    if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,sale_price,condition,description,image_key,image_url,category,badge,featured,bestseller,new_arrival,available) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(b.name,b.price,b.sale_price||'',b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.category||'موبایل',b.badge||'',b.featured?1:0,b.bestseller?1:0,b.new_arrival?1:0,b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
+    if(path.startsWith('/api/products/')&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const id=Number(path.split('/').pop()),b=await request.json().catch(()=>({}));if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);await env.DB.prepare('UPDATE products SET name=?,price=?,sale_price=?,condition=?,description=?,image_key=?,image_url=?,category=?,badge=?,featured=?,bestseller=?,new_arrival=?,available=? WHERE id=?').bind(b.name,b.price,b.sale_price||'',b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.category||'موبایل',b.badge||'',b.featured?1:0,b.bestseller?1:0,b.new_arrival?1:0,b.available?1:0,id).run();return json({ok:true})}
     if(path==='/api/admin/stats'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);
       await ensureCustomerTables(env);
@@ -75,21 +79,11 @@ export default {async fetch(request,env){
       return json(rows);
     }
     if(path.startsWith('/api/admin/orders/')&&path.endsWith('/status')&&request.method==='PUT'){
-      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const allowed=['در انتظار بررسی','تأیید شده','آماده ارسال','ارسال شده','در حال ارسال','تکمیل شده','لغو شده'];if(!allowed.includes(b.status))return json({error:'وضعیت نامعتبر است.'},400);await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(b.status,id).run();return json({ok:true});
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const allowed=['در انتظار بررسی','تأیید شده','در حال ارسال','تکمیل شده','لغو شده'];if(!allowed.includes(b.status))return json({error:'وضعیت نامعتبر است.'},400);await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(b.status,id).run();return json({ok:true});
     }
     if(path==='/api/admin/users'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      const rows=(await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count,COALESCE(SUM(CASE WHEN o.status!='لغو شده' THEN o.total ELSE 0 END),0) AS total_spent,MAX(o.created_at) AS last_order_at FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results;
-      return json(rows);
-    }
-    if(path.startsWith('/api/admin/users/')&&request.method==='GET'){
-      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      const id=Number(path.split('/').pop());
-      if(!Number.isFinite(id))return json({error:'کاربر نامعتبر است.'},400);
-      const user=await env.DB.prepare(`SELECT id,name,phone,created_at FROM users WHERE id=?`).bind(id).first();
-      if(!user)return json({error:'کاربر پیدا نشد.'},404);
-      const orders=(await env.DB.prepare(`SELECT id,total,status,created_at FROM orders WHERE user_id=? ORDER BY id DESC`).bind(id).all()).results;
-      return json({user,orders});
+      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
     }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
     return env.ASSETS.fetch(request);
