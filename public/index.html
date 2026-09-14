@@ -3,220 +3,173 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#090b0c">
-  <title>آقای موبایل | فروش موبایل و لوازم جانبی</title>
+  <meta name="theme-color" content="#0a0d0e">
+  <title>آقای موبایل | فروشگاه موبایل و لوازم جانبی</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+<div id="toast" class="toast"></div>
+
+<header class="site-header">
   <div class="top-strip">
-    <div class="container top-inner">
-      <div>🛡️ <span>با اطمینان خرید کنید</span></div>
-      <div class="top-location">📍 مازندران، قائمشهر، ابتدای خیابان کوچکسرا، نبش شقایق</div>
-      <a href="tel:09393699909">☎ ۰۹۳۹۳۶۹۹۹۰۹</a>
+    <span>📍 مازندران، قائمشهر، ابتدای خیابان کوچکسرا، نبش شقایق</span>
+    <span>☎️ 09393699909</span>
+    <div class="top-actions">
+      <button class="link-btn" onclick="openAuth('login')">ورود</button>
+      <span>|</span>
+      <button class="link-btn" onclick="openAuth('register')">ثبت نام</button>
     </div>
   </div>
 
-  <header class="site-header">
-    <div class="container header-main">
-      <button class="icon-btn menu-btn" type="button" aria-label="منو" onclick="toggleMenu()">☰</button>
+  <div class="main-header container">
+    <a class="brand" href="/">
+      <img src="/assets/mr-mobile-logo.png" alt="آقای موبایل">
+      <div><strong>آقای موبایل <b>MR</b></strong><small>فروش انواع موبایل و لوازم جانبی</small></div>
+    </a>
 
-      <div class="brand">
-        <img src="/assets/mr-mobile-logo.png" alt="لوگوی آقای موبایل">
-        <div class="brand-copy">
-          <div class="brand-title">آقای موبایل <b>MR</b></div>
-          <div class="brand-sub">فروش انواع موبایل و لوازم جانبی</div>
-        </div>
-      </div>
-
-      <div class="search-box">
-        <span>⌕</span>
-        <input id="search" type="search" placeholder="جستجوی گوشی، برند، مدل ..." oninput="filterProducts()">
-      </div>
-
-      <div class="header-actions">
-        <a class="icon-btn" href="#products" aria-label="محصولات">🛒<i id="cartCount">0</i></a>
-        <a class="icon-btn" href="#contact" aria-label="تماس">☎</a>
-      </div>
+    <div class="search-wrap">
+      <input id="searchInput" type="search" placeholder="جستجوی گوشی، برند، مدل ...">
+      <button onclick="applyFilters()">⌕</button>
     </div>
 
-    <nav id="mainNav" class="main-nav">
-      <div class="container nav-inner">
-        <a class="active" href="#home">صفحه اصلی</a>
-        <a href="#products">محصولات</a>
-        <a href="#categories">دسته‌بندی‌ها</a>
-        <a href="#about">درباره ما</a>
-        <a href="#contact">تماس با ما</a>
-      </div>
-    </nav>
-  </header>
-
-  <main id="home">
-    <section class="hero container">
-      <div class="hero-copy">
-        <span class="hero-badge"><b></b> فروش گوشی نو و کارکرده در قائمشهر</span>
-        <div class="eyebrow">MR MOBILE STORE</div>
-        <h1>گوشی خوب،<br><strong>انتخاب مطمئن.</strong></h1>
-        <p>محصولات موجود آقای موبایل را ببین، مشخصات و قیمت را بررسی کن و برای خرید یا مشاوره با ما در تماس باش.</p>
-        <div class="hero-buttons">
-          <a class="btn primary" href="#products">مشاهده محصولات <span>←</span></a>
-          <a class="btn ghost" href="#contact">تماس با فروشگاه</a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="glow"></div>
-        <div class="phone-frame">
-          <div class="phone-top">MR MOBILE</div>
-          <img id="heroProductImage" src="/assets/mr-mobile-logo.png" alt="آقای موبایل">
-          <div class="phone-caption">فروش موبایل و لوازم جانبی</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="trust container">
-      <div><span>🛡</span><b>تضمین اصالت کالا</b><small>خریدی مطمئن</small></div>
-      <div><span>🚚</span><b>ارسال سریع</b><small>به سراسر کشور</small></div>
-      <div><span>🎧</span><b>پشتیبانی ۲۴ ساعته</b><small>همیشه در کنار شما</small></div>
-      <div><span>▣</span><b>پرداخت امن</b><small>خرید با خیال راحت</small></div>
-    </section>
-
-    <section id="categories" class="container categories-section">
-      <div class="section-title">
-        <div><small>دسته‌بندی</small><h2>محصول مورد نظرت رو پیدا کن</h2></div>
-      </div>
-      <div class="categories">
-        <button onclick="quickSearch('آیفون')"><span></span><b>گوشی‌های آیفون</b></button>
-        <button onclick="quickSearch('سامسونگ')"><span>◈</span><b>گوشی‌های سامسونگ</b></button>
-        <button onclick="quickSearch('کارکرده')"><span>↻</span><b>گوشی‌های کارکرده</b></button>
-        <button onclick="quickSearch('ساعت')"><span>⌚</span><b>ساعت هوشمند</b></button>
-        <button onclick="quickSearch('تبلت')"><span>▣</span><b>تبلت</b></button>
-        <button onclick="quickSearch('لوازم')"><span>◉</span><b>لوازم جانبی</b></button>
-      </div>
-    </section>
-
-    <section id="products" class="container products-section">
-      <div class="section-head">
-        <div><small>فروشگاه</small><h2>محصولات ویژه <em>●</em></h2></div>
-        <button class="more-btn" onclick="document.getElementById('search').focus()">جستجو در محصولات ←</button>
-      </div>
-      <div id="grid" class="products-grid">
-        <div class="state">در حال دریافت محصولات...</div>
-      </div>
-    </section>
-
-    <section class="promo container">
-      <div>
-        <small>برای خرید بهتر</small>
-        <h2>قبل از خرید،<br><strong>با ما مشورت کن.</strong></h2>
-        <p>اگر بین چند مدل مردد هستی، مشخصات و بودجه‌ات را بگو تا راهنمایی‌ات کنیم.</p>
-        <a class="btn primary" href="tel:09393699909">تماس با فروشگاه ←</a>
-      </div>
-      <div class="promo-art">
-        <div class="circle c1"></div><div class="circle c2"></div>
-        <span>MR</span>
-      </div>
-    </section>
-
-    <section id="about" class="about container">
-      <div><small>آقای موبایل</small><h2>خرید ساده، مطمئن و حرفه‌ای</h2></div>
-      <p>فروش انواع گوشی نو و کارکرده، لوازم جانبی و خدمات مرتبط با موبایل در قائمشهر. برای استعلام قیمت و مشاوره با ما در تماس باشید.</p>
-    </section>
-
-    <section id="contact" class="contact container">
-      <div>
-        <small>تماس و سفارش</small>
-        <h2>برای استعلام قیمت پیام بده</h2>
-        <p>مازندران، قائمشهر، ابتدای خیابان کوچکسرا، نبش شقایق</p>
-      </div>
-      <div class="contact-actions">
-        <a class="btn primary" href="tel:09393699909">📞 ۰۹۳۹۳۶۹۹۹۰۹</a>
-        <a class="btn ghost" target="_blank" rel="noopener" href="https://instagram.com/mr.mobile.stor">Instagram: @mr.mobile.stor</a>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container footer-inner">
-      <div class="footer-brand"><img src="/assets/mr-mobile-logo.png" alt=""><b>آقای موبایل</b></div>
-      <span>© ۲۰۲۶ آقای موبایل — تمامی حقوق محفوظ است.</span>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleCart()" title="سبد خرید">♡<span id="cartCount">0</span></button>
+      <button class="cart-btn" onclick="toggleCart()">🛒 <span>سبد خرید</span><small id="cartTotal">۰ تومان</small></button>
+      <button class="user-btn" onclick="openAccount()">👤 <span id="userLabel">حساب کاربری</span></button>
     </div>
-  </footer>
+  </div>
 
-<script>
-let allProducts = [];
-let cartCount = 0;
+  <nav class="nav-bar">
+    <div class="container nav-inner">
+      <a class="active" href="#home">صفحه اصلی</a>
+      <a href="#products">محصولات</a>
+      <a href="#categories">دسته‌بندی‌ها</a>
+      <a href="#brands">برندها</a>
+      <a href="#about">درباره ما</a>
+      <a href="#contact">تماس با ما</a>
+    </div>
+  </nav>
+</header>
 
-function esc(s){
-  return String(s ?? '').replace(/[&<>"']/g, m => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[m]));
-}
-
-async function load(){
-  try{
-    const r = await fetch('/api/products');
-    if(!r.ok) throw new Error();
-    allProducts = await r.json();
-    renderProducts(allProducts);
-    const first = allProducts.find(x => x.image_url);
-    if(first) document.getElementById('heroProductImage').src = first.image_url;
-  }catch(e){
-    document.getElementById('grid').innerHTML = '<div class="state">خطا در دریافت محصولات. صفحه را دوباره باز کنید.</div>';
-  }
-}
-
-function renderProducts(products){
-  const g = document.getElementById('grid');
-  if(!products.length){
-    g.innerHTML = '<div class="state">محصولی مطابق جستجوی شما پیدا نشد.</div>';
-    return;
-  }
-  g.innerHTML = products.map((x,i) => `
-    <article class="product-card">
-      <button class="heart" aria-label="افزودن به علاقه‌مندی" onclick="addFav(this)">♡</button>
-      ${i===0 ? '<span class="tag new">جدید</span>' : i===1 ? '<span class="tag hot">پرفروش</span>' : ''}
-      <div class="product-image">
-        ${x.image_url ? `<img src="${esc(x.image_url)}" alt="${esc(x.name)}" loading="lazy">` : '<div class="image-placeholder">MR</div>'}
+<main id="home">
+  <section class="hero container">
+    <div class="hero-copy">
+      <div class="eyebrow">● فروش گوشی نو و کارکرده در قائمشهر</div>
+      <div class="store-name">MR MOBILE STORE</div>
+      <h1>گوشی خوب<br><span>انتخاب مطمئن.</span></h1>
+      <p>محصولات موجود آقای موبایل را ببین، مشخصات و قیمت را بررسی کن و برای خرید یا مشاوره با ما در تماس باش.</p>
+      <div class="hero-buttons">
+        <a href="#products" class="btn primary">مشاهده محصولات ←</a>
+        <a href="#contact" class="btn ghost">تماس با فروشگاه</a>
       </div>
-      <div class="product-info">
-        <h3>${esc(x.name)}</h3>
-        <small>${esc(x.condition || 'نو')}</small>
-        <p>${esc(x.description || 'برای اطلاع از مشخصات و قیمت با فروشگاه تماس بگیرید.')}</p>
-        <div class="price-row"><strong>${esc(x.price)}</strong><span>تومان</span></div>
-        <button class="cart-btn" onclick="addToCart()">افزودن به سبد 🛒</button>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-frame">
+        <span>MR MOBILE</span>
+        <div class="phone-screen">
+          <img src="/assets/mr-mobile-logo.png" alt="آقای موبایل">
+        </div>
+        <strong>فروش موبایل و لوازم جانبی</strong>
+        <small>خرید · تعمیر · مشاوره</small>
       </div>
-    </article>
-  `).join('');
-}
+    </div>
+  </section>
 
-function filterProducts(){
-  const q = document.getElementById('search').value.trim().toLowerCase();
-  if(!q){ renderProducts(allProducts); return; }
-  renderProducts(allProducts.filter(x =>
-    `${x.name} ${x.condition} ${x.description}`.toLowerCase().includes(q)
-  ));
-}
+  <section class="benefits container">
+    <div>🚚 <b>ارسال سریع</b><small>به سراسر کشور</small></div>
+    <div>🛡️ <b>ضمانت اصالت کالا</b><small>خریدی مطمئن</small></div>
+    <div>🎧 <b>پشتیبانی ۲۴ ساعته</b><small>همیشه در کنار شما</small></div>
+    <div>💳 <b>پرداخت امن</b><small>درگاه معتبر</small></div>
+    <div>↩️ <b>۷ روز ضمانت بازگشت</b><small>طبق شرایط فروشگاه</small></div>
+  </section>
 
-function quickSearch(q){
-  document.getElementById('search').value = q;
-  filterProducts();
-  document.getElementById('products').scrollIntoView({behavior:'smooth'});
-}
+  <section id="categories" class="section container">
+    <div class="section-head"><h2>دسته‌بندی محصولات 🛍️</h2><a href="#products">مشاهده همه ←</a></div>
+    <div class="categories">
+      <button onclick="setCategory('همه')">📱<span>همه</span></button>
+      <button onclick="setCategory('موبایل')">📱<span>گوشی موبایل</span></button>
+      <button onclick="setCategory('لوازم جانبی')">🎧<span>لوازم جانبی</span></button>
+      <button onclick="setCategory('تبلت')">▣<span>تبلت</span></button>
+      <button onclick="setCategory('ساعت هوشمند')">⌚<span>ساعت هوشمند</span></button>
+      <button onclick="setCategory('هدفون')">🎧<span>هدفون</span></button>
+      <button onclick="setCategory('اسپیکر')">🔊<span>اسپیکر</span></button>
+      <button onclick="setCategory('کابل و شارژر')">🔌<span>کابل و شارژر</span></button>
+    </div>
+  </section>
 
-function addToCart(){
-  cartCount++;
-  document.getElementById('cartCount').textContent = cartCount;
-}
+  <section id="products" class="section container">
+    <div class="section-head">
+      <h2>محصولات ویژه 🔥</h2>
+      <div class="filters">
+        <button class="filter active" data-cat="همه" onclick="setCategory('همه')">همه</button>
+        <button class="filter" data-cat="موبایل" onclick="setCategory('موبایل')">گوشی موبایل</button>
+        <button class="filter" data-cat="لوازم جانبی" onclick="setCategory('لوازم جانبی')">لوازم جانبی</button>
+        <button class="filter" data-cat="تبلت" onclick="setCategory('تبلت')">تبلت</button>
+      </div>
+    </div>
+    <div id="productsGrid" class="products-grid"><div class="loading">در حال دریافت محصولات...</div></div>
+  </section>
 
-function addFav(btn){
-  btn.classList.toggle('liked');
-  btn.textContent = btn.classList.contains('liked') ? '♥' : '♡';
-}
+  <section id="brands" class="promo-grid container">
+    <div class="promo green"><div><small>لوازم جانبی اورجینال</small><h3>شارژر، کابل، هندزفری و بیشتر...</h3><a href="#products">مشاهده محصولات ←</a></div><div class="promo-icon">🎧</div></div>
+    <div class="promo blue"><div><small>خرید گوشی کارکرده</small><h3>با تضمین سلامت و اصالت</h3><a href="#products">مشاهده ←</a></div><div class="promo-icon">📱</div></div>
+  </section>
 
-function toggleMenu(){
-  document.getElementById('mainNav').classList.toggle('open');
-}
+  <section class="newsletter container">
+    <div class="mail-icon">✉</div>
+    <div><h3>عضویت در خبرنامه</h3><p>از جدیدترین محصولات و تخفیف‌ها باخبر شوید.</p></div>
+    <input id="newsletterEmail" type="email" placeholder="ایمیل خود را وارد کنید ...">
+    <button class="btn primary" onclick="subscribe()">عضویت</button>
+  </section>
 
-load();
-</script>
+  <section id="about" class="about container">
+    <h2>درباره آقای موبایل</h2>
+    <p>فروش انواع گوشی‌های نو و کارکرده، لوازم جانبی و خدمات مرتبط با موبایل؛ با تمرکز روی قیمت مناسب و پشتیبانی مطمئن.</p>
+  </section>
+</main>
+
+<footer id="contact" class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand"><img src="/assets/mr-mobile-logo.png" alt=""><h3>آقای موبایل</h3><p>فروش انواع موبایل و لوازم جانبی</p></div>
+    <div><h4>لینک‌های سریع</h4><a href="#home">صفحه اصلی</a><a href="#products">محصولات</a><a href="#categories">دسته‌بندی‌ها</a><a href="#about">درباره ما</a></div>
+    <div><h4>خدمات مشتریان</h4><a href="#">سوالات متداول</a><a href="#">شرایط بازگشت کالا</a><a href="#">حریم خصوصی</a><a href="#">قوانین و مقررات</a></div>
+    <div><h4>اطلاعات تماس</h4><p>📍 مازندران، قائمشهر، ابتدای خیابان کوچکسرا، نبش شقایق</p><p>☎️ 09393699909</p><p>📸 @mr.mobile.stor</p></div>
+  </div>
+  <div class="copyright">تمامی حقوق محفوظ است © ۱۴۰۵ — آقای موبایل</div>
+</footer>
+
+<aside id="cartDrawer" class="drawer">
+  <div class="drawer-head"><h3>سبد خرید</h3><button onclick="toggleCart()">×</button></div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="cart-footer"><div><span>مجموع:</span><strong id="drawerTotal">۰ تومان</strong></div><button class="btn primary full" onclick="checkout()">ثبت سفارش</button><button class="btn ghost full" onclick="clearCart()">خالی کردن سبد</button></div>
+</aside>
+<div id="drawerBackdrop" class="backdrop" onclick="toggleCart()"></div>
+
+<div id="authModal" class="modal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuth()">×</button>
+    <img src="/assets/mr-mobile-logo.png" class="modal-logo" alt="">
+    <h2 id="authTitle">ورود به حساب</h2>
+    <p id="authSub">برای ادامه وارد حساب کاربری شوید.</p>
+    <div id="registerNameWrap" class="field hidden"><label>نام و نام خانوادگی</label><input id="authName"></div>
+    <div class="field"><label>شماره موبایل</label><input id="authPhone" inputmode="tel" placeholder="09xxxxxxxxx"></div>
+    <div class="field"><label>رمز عبور</label><input id="authPassword" type="password" placeholder="حداقل ۶ کاراکتر"></div>
+    <button id="authSubmit" class="btn primary full" onclick="submitAuth()">ورود</button>
+    <button class="switch-auth" onclick="switchAuth()">ثبت نام نکرده‌اید؟ ثبت نام کنید</button>
+    <div id="authError" class="form-error"></div>
+  </div>
+</div>
+
+<div id="accountModal" class="modal">
+  <div class="modal-card account-card">
+    <button class="modal-close" onclick="closeAccount()">×</button>
+    <h2>حساب کاربری</h2>
+    <div id="accountInfo"></div>
+    <div id="ordersList"></div>
+    <button class="btn ghost full" onclick="logout()">خروج از حساب</button>
+  </div>
+</div>
+
+<script src="/app.js"></script>
 </body>
 </html>
