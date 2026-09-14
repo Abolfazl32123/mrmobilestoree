@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>آقای موبایل | فروش موبایل</title>
+<link rel="stylesheet" href="/style.css"></head><body>
+<header><nav><a class="brand" href="/">MR <b>آقای موبایل</b></a><div class="navlinks"><a href="#products">محصولات</a><a href="#about">درباره ما</a><a href="#contact">تماس</a></div><a class="btn" href="#contact">ثبت سفارش</a></nav></header>
+<section class="hero"><div class="wrap"><div class="pill">فروش گوشی نو و کارکرده • لوازم جانبی • اسپیکر</div><h1>انتخاب مطمئن،<br><strong>خرید حرفه‌ای.</strong></h1><p>محصولات موجود را ببین و برای قیمت و ثبت سفارش با ما در تماس باش.</p><a class="btn" href="#products">مشاهده محصولات</a></div></section>
+<section id="products" class="wrap section"><div class="head"><div><small>محصولات</small><h2>محصولات موجود</h2></div></div><div id="grid" class="grid"><div class="loading">در حال دریافت محصولات...</div></div></section>
+<section id="about" class="dark"><div class="wrap"><small>آقای موبایل</small><h2>خرید ساده و مطمئن</h2><p>برای انتخاب گوشی و لوازم جانبی مناسب، قبل از خرید با ما مشورت کن.</p></div></section>
+<section id="contact" class="contact wrap"><div><small>تماس و سفارش</small><h2>برای استعلام قیمت پیام بده</h2><p>مازندران، قائمشهر، خ کوچکسرا، نبش شقایق</p></div><div class="actions"><a class="btn darkbtn" href="tel:09393699909">📞 ۰۹۳۹۳۶۹۹۹۰۹</a><a class="social" href="https://instagram.com/mr.mobile.stor" target="_blank">Instagram: @mr.mobile.stor</a></div></section>
+<footer><div class="wrap">© 2026 آقای موبایل</div></footer>
+<script>
+async function load(){const r=await fetch('/api/products');const p=await r.json();const g=document.querySelector('#grid');if(!p.length){g.innerHTML='<div class="empty">هنوز محصولی ثبت نشده است.</div>';return}g.innerHTML=p.map(x=>`<article class="card">${x.image_url?`<img src="${esc(x.image_url)}" alt="">`:`<div class="ph">MR</div>`}<div class="pad"><h3>${esc(x.name)}</h3><span>${esc(x.condition)}</span><p>${esc(x.description||'')}</p><strong>${esc(x.price)}</strong><a href="tel:09393699909">استعلام و سفارش ←</a></div></article>`).join('')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))} load();
+</script></body></html>
