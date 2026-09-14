@@ -51,6 +51,30 @@ export default {async fetch(request,env){
     if(path.startsWith('/api/products/')&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM products WHERE id=?').bind(id).run();return json({ok:true})}
     if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,condition,description,image_key,image_url,available) VALUES(?,?,?,?,?,?,?)').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
     if(path.startsWith('/api/products/')&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop()),b=await request.json().catch(()=>({}));await env.DB.prepare('UPDATE products SET name=?,price=?,condition=?,description=?,image_key=?,image_url=?,available=? WHERE id=?').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.available?1:0,id).run();return json({ok:true})}
+    if(path==='/api/admin/stats'&&request.method==='GET'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);
+      await ensureCustomerTables(env);
+      const p=await env.DB.prepare('SELECT COUNT(*) AS c FROM products').first();
+      const u=await env.DB.prepare('SELECT COUNT(*) AS c FROM users').first();
+      const o=await env.DB.prepare('SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total, COALESCE(AVG(total),0) AS avg FROM orders').first();
+      const n=await env.DB.prepare("SELECT COUNT(*) AS c FROM orders WHERE status='در انتظار بررسی'").first();
+      const done=await env.DB.prepare("SELECT COUNT(*) AS c FROM orders WHERE status='تکمیل شده'").first();
+      const monthly=(await env.DB.prepare("SELECT strftime('%Y-%m',created_at) AS ym, COALESCE(SUM(total),0) AS total FROM orders GROUP BY ym ORDER BY ym DESC LIMIT 6").all()).results.reverse();
+      return json({products:p?.c||0,users:u?.c||0,orders:o?.c||0,total_sales:o?.total||0,avg_order:Math.round(o?.avg||0),new_orders:n?.c||0,completed_orders:done?.c||0,monthly_sales:monthly.map(x=>({month:x.ym,total:x.total}))});
+    }
+    if(path==='/api/admin/orders'&&request.method==='GET'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
+      const rows=(await env.DB.prepare(`SELECT o.id,o.total,o.status,o.created_at,u.name AS customer_name,u.phone FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.id DESC`).all()).results;
+      for(const o of rows){const items=(await env.DB.prepare(`SELECT oi.product_id,oi.quantity,oi.price,COALESCE(p.name,'محصول حذف‌شده') AS name FROM order_items oi LEFT JOIN products p ON p.id=oi.product_id WHERE oi.order_id=?`).bind(o.id).all()).results;o.items=items;o.items_text=items.map(i=>`${i.name} ×${i.quantity}`).join('، ')}
+      return json(rows);
+    }
+    if(path.startsWith('/api/admin/orders/')&&path.endsWith('/status')&&request.method==='PUT'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const allowed=['در انتظار بررسی','تأیید شده','در حال ارسال','تکمیل شده','لغو شده'];if(!allowed.includes(b.status))return json({error:'وضعیت نامعتبر است.'},400);await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(b.status,id).run();return json({ok:true});
+    }
+    if(path==='/api/admin/users'&&request.method==='GET'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
+      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
+    }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
     return env.ASSETS.fetch(request);
   }catch(e){return json({error:'خطای سرور: '+(e?.message||'unknown')},500)}
