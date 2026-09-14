@@ -17,3 +17,10 @@
 @media(max-width:900px){.table-head.product-head{display:none}.table-row.product-row{display:grid;grid-template-columns:1fr;gap:12px}.product-row .actions{justify-content:flex-start}.form-grid{grid-template-columns:1fr}.full-field{grid-column:1/-1}}
 
 .flags{display:flex;gap:12px;flex-wrap:wrap;padding:10px 0}.flags .check{display:flex;align-items:center;gap:7px}
+/* Polished custom file picker */
+.form-grid input[type="file"][hidden]{display:none!important}
+.file-btn{min-height:42px;min-width:170px;gap:8px;box-shadow:0 8px 22px rgba(57,255,20,.12);transition:.2s}
+.file-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.file-name{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:1px solid #263b43;border-radius:10px;background:#091419;color:#8fa1a8;direction:rtl}
+.file-name:not(:empty){color:#d9e4e7}
+@media(max-width:800px){.upload-row{align-items:stretch}.file-btn{width:100%}.file-name{flex:1;justify-content:center}}
