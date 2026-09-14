@@ -19,7 +19,13 @@ async function ensureCustomerTables(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL,product_id INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL)`).run();
 }
 async function userFromReq(req,env){const d=await verifySession(req,env,'mr_user');return d?.uid||null}
-async function listProducts(env,all=false){let q='SELECT id,name,price,condition,description,image_key,image_url,available,created_at FROM products';if(!all)q+=' WHERE available=1';q+=' ORDER BY id DESC';return (await env.DB.prepare(q).all()).results}
+async function ensureProductColumns(env){
+  const cols=(await env.DB.prepare('PRAGMA table_info(products)').all()).results||[];
+  const names=new Set(cols.map(x=>x.name));
+  if(!names.has('category')) await env.DB.prepare("ALTER TABLE products ADD COLUMN category TEXT NOT NULL DEFAULT 'موبایل'").run();
+  if(!names.has('badge')) await env.DB.prepare("ALTER TABLE products ADD COLUMN badge TEXT NOT NULL DEFAULT ''").run();
+}
+async function listProducts(env,all=false){await ensureProductColumns(env);let q='SELECT id,name,price,condition,description,image_key,image_url,category,badge,available,created_at FROM products';if(!all)q+=' WHERE available=1';q+=' ORDER BY id DESC';return (await env.DB.prepare(q).all()).results}
 
 export default {async fetch(request,env){
   const url=new URL(request.url),path=url.pathname;
@@ -49,8 +55,8 @@ export default {async fetch(request,env){
     if(path==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_admin','',0)})
     if(path==='/api/products'&&request.method==='GET'){const all=url.searchParams.get('admin')==='1'&&await adminOK(request,env);return json(await listProducts(env,all))}
     if(path.startsWith('/api/products/')&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM products WHERE id=?').bind(id).run();return json({ok:true})}
-    if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,condition,description,image_key,image_url,available) VALUES(?,?,?,?,?,?,?)').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
-    if(path.startsWith('/api/products/')&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop()),b=await request.json().catch(()=>({}));if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);await env.DB.prepare('UPDATE products SET name=?,price=?,condition=?,description=?,image_key=?,image_url=?,available=? WHERE id=?').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.available?1:0,id).run();return json({ok:true})}
+    if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,condition,description,image_key,image_url,category,badge,available) VALUES(?,?,?,?,?,?,?,?,?)').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.category||'موبایل',b.badge||'',b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
+    if(path.startsWith('/api/products/')&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const id=Number(path.split('/').pop()),b=await request.json().catch(()=>({}));if(String(b.image_url||'').startsWith('data:image/')&&String(b.image_url).length>700000)return json({error:'حجم تصویر زیاد است؛ لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);await env.DB.prepare('UPDATE products SET name=?,price=?,condition=?,description=?,image_key=?,image_url=?,category=?,badge=?,available=? WHERE id=?').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.category||'موبایل',b.badge||'',b.available?1:0,id).run();return json({ok:true})}
     if(path==='/api/admin/stats'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);
       await ensureCustomerTables(env);

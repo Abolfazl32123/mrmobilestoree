@@ -11,3 +11,7 @@
 .upload-box{border:1px dashed #29414a;border-radius:16px;padding:14px;background:rgba(255,255,255,.02)}
 .upload-title{font-weight:700;margin-bottom:10px}.upload-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.file-btn{display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer;background:#21e94a!important;color:#061008!important;border:0!important;border-radius:12px;padding:10px 16px;font-weight:800}.file-name{color:#9fb0b8;font-size:13px}.small-btn{padding:9px 12px!important;font-size:12px!important}.upload-help{display:block;color:#71838b;margin-top:8px;font-size:12px}
 .preview img{max-width:220px;max-height:220px;object-fit:contain;border-radius:14px;margin-top:10px;border:1px solid #24353c;background:#fff}
+
+/* Product management enhancements */
+.form-grid label{min-width:0}.form-grid input,.form-grid select,.form-grid textarea{width:100%;box-sizing:border-box}.product-cell small{display:block;margin-top:4px;opacity:.68}.table-head.product-head,.table-row.product-row{grid-template-columns:minmax(260px,1.8fr) .8fr 1fr 1.2fr}.product-row .actions{display:flex;gap:8px;flex-wrap:wrap}.product-row .actions button{white-space:nowrap}
+@media(max-width:900px){.table-head.product-head{display:none}.table-row.product-row{display:grid;grid-template-columns:1fr;gap:12px}.product-row .actions{justify-content:flex-start}.form-grid{grid-template-columns:1fr}.full-field{grid-column:1/-1}}
