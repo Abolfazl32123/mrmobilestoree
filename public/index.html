@@ -171,6 +171,27 @@
 </div>
 
 
+<div id="addressModal" class="modal">
+  <div class="modal-card address-card">
+    <button class="modal-close" onclick="closeAddress()">×</button>
+    <div class="payment-icon">📍</div>
+    <h2>آدرس ارسال</h2>
+    <p>اطلاعات گیرنده را وارد کنید تا سفارش با همین آدرس ثبت شود.</p>
+    <div class="address-grid">
+      <div class="field"><label>نام *</label><input id="addressFirstName" placeholder="نام"></div>
+      <div class="field"><label>نام خانوادگی *</label><input id="addressLastName" placeholder="نام خانوادگی"></div>
+      <div class="field"><label>شماره موبایل *</label><input id="addressPhone" inputmode="tel" placeholder="09xxxxxxxxx"></div>
+      <div class="field"><label>استان *</label><input id="addressProvince" placeholder="مثلاً مازندران"></div>
+      <div class="field"><label>شهر *</label><input id="addressCity" placeholder="مثلاً قائمشهر"></div>
+      <div class="field full-field"><label>کد پستی ۱۰ رقمی *</label><input id="addressPostal" inputmode="numeric" maxlength="10" placeholder="۱۰ رقم"></div>
+      <div class="field full-field"><label>آدرس کامل *</label><textarea id="addressText" rows="3" placeholder="خیابان، کوچه، پلاک، واحد..."></textarea></div>
+    </div>
+    <label class="save-address"><input id="saveAddress" type="checkbox" checked> ذخیره این آدرس برای سفارش‌های بعدی</label>
+    <button id="addressSubmit" class="btn primary full" onclick="submitAddressAndOrder()">ادامه و ثبت سفارش</button>
+    <div id="addressError" class="form-error"></div>
+  </div>
+</div>
+
 <div id="paymentModal" class="modal">
   <div class="modal-card payment-card">
     <button class="modal-close" onclick="closePayment()">×</button>

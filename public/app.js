@@ -1,4 +1,4 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''}};
+const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null};
 
 const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
@@ -45,10 +45,27 @@ function toggleCart(){ $('cartDrawer').classList.toggle('open');$('drawerBackdro
 async function checkout(){
   if(!state.cart.length)return toast('سبد خرید خالی است');
   if(!state.user){toggleCart();openAuth('login');toast('برای ثبت سفارش ابتدا وارد حساب شوید');return}
-  const items=state.cart.map(x=>({product_id:x.id,quantity:x.qty,price:cartPrice(x)}));
-  const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items})});
-  const d=await r.json();if(!r.ok)return toast(d.error||'خطا در ثبت سفارش');
-  clearCart();toggleCart();toast('سفارش ثبت شد؛ حالا رسید پرداخت را ارسال کنید');openPayment(d.order_id,d.total);
+  state.pendingOrderItems=state.cart.map(x=>({product_id:x.id,quantity:x.qty,price:cartPrice(x)}));
+  await openAddress();
+}
+async function openAddress(){
+  $('addressError').textContent='';$('addressSubmit').disabled=false;
+  try{const r=await fetch('/api/account/address');const d=await r.json();const a=d.address||{};
+    $('addressFirstName').value=a.first_name||'';$('addressLastName').value=a.last_name||'';$('addressPhone').value=a.phone||state.user?.phone||'';$('addressProvince').value=a.province||'';$('addressCity').value=a.city||'';$('addressPostal').value=a.postal_code||'';$('addressText').value=a.address||'';
+  }catch(e){$('addressPhone').value=state.user?.phone||''}
+  $('addressModal').classList.add('show');
+}
+function closeAddress(){$('addressModal').classList.remove('show')}
+async function submitAddressAndOrder(){
+  const first=$('addressFirstName').value.trim(),last=$('addressLastName').value.trim(),phone=$('addressPhone').value.trim(),province=$('addressProvince').value.trim(),city=$('addressCity').value.trim(),postal=$('addressPostal').value.replace(/\D/g,''),address=$('addressText').value.trim();
+  if(first.length<2||last.length<2||!/^09\d{9}$/.test(phone)||province.length<2||city.length<2||address.length<8||postal.length!==10)return $('addressError').textContent='لطفاً همه اطلاعات آدرس را صحیح و کامل وارد کنید.';
+  $('addressSubmit').disabled=true;$('addressError').textContent='';
+  try{
+    const ar=await fetch('/api/account/address',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({first_name:first,last_name:last,phone,province,city,address,postal_code:postal})});
+    const ad=await ar.json();if(!ar.ok)throw Error(ad.error||'خطا در ذخیره آدرس');
+    const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:state.pendingOrderItems})});const d=await r.json();if(!r.ok)throw Error(d.error||'خطا در ثبت سفارش');
+    state.pendingOrderItems=null;clearCart();closeAddress();toggleCart();toast('سفارش ثبت شد؛ حالا رسید پرداخت را ارسال کنید');openPayment(d.order_id,d.total);
+  }catch(e){$('addressError').textContent=e.message;$('addressSubmit').disabled=false}
 }
 
 function openAuth(mode='login'){state.authMode=mode;$('authModal').classList.add('show');updateAuth()}

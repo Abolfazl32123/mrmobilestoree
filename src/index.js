@@ -17,6 +17,9 @@ async function ensureCustomerTables(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,phone TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,password_salt TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,total INTEGER NOT NULL DEFAULT 0,status TEXT NOT NULL DEFAULT 'در انتظار بررسی',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL,product_id INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL)`).run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS customer_addresses (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL UNIQUE,first_name TEXT NOT NULL DEFAULT '',last_name TEXT NOT NULL DEFAULT '',phone TEXT NOT NULL DEFAULT '',province TEXT NOT NULL DEFAULT '',city TEXT NOT NULL DEFAULT '',address TEXT NOT NULL DEFAULT '',postal_code TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS order_addresses (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL UNIQUE,user_id INTEGER NOT NULL,first_name TEXT NOT NULL DEFAULT '',last_name TEXT NOT NULL DEFAULT '',phone TEXT NOT NULL DEFAULT '',province TEXT NOT NULL DEFAULT '',city TEXT NOT NULL DEFAULT '',address TEXT NOT NULL DEFAULT '',postal_code TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_order_addresses_user ON order_addresses(user_id)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS payment_settings (id INTEGER PRIMARY KEY CHECK (id=1),card_number TEXT NOT NULL DEFAULT '',card_holder TEXT NOT NULL DEFAULT '',bank_name TEXT NOT NULL DEFAULT '',instructions TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS payments (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL,user_id INTEGER NOT NULL,amount INTEGER NOT NULL,tracking_code TEXT NOT NULL DEFAULT '',receipt_data TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'در انتظار بررسی',admin_note TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,reviewed_at TEXT DEFAULT NULL)`).run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)`).run();
@@ -42,6 +45,16 @@ export default {async fetch(request,env){
     if(path==='/api/auth/me'&&request.method==='GET'){await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({user:null});const u=await env.DB.prepare('SELECT id,name,phone FROM users WHERE id=?').bind(uid).first();return json({user:u||null})}
     if(path==='/api/auth/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_user','',0)})
 
+    if(path==='/api/account/address'&&request.method==='GET'){
+      await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);
+      const a=await env.DB.prepare('SELECT first_name,last_name,phone,province,city,address,postal_code FROM customer_addresses WHERE user_id=?').bind(uid).first();return json({address:a||null});
+    }
+    if(path==='/api/account/address'&&request.method==='PUT'){
+      await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);
+      const b=await request.json().catch(()=>({}));const first=String(b.first_name||'').trim().slice(0,60),last=String(b.last_name||'').trim().slice(0,60),phone=String(b.phone||'').trim().slice(0,20),province=String(b.province||'').trim().slice(0,60),city=String(b.city||'').trim().slice(0,60),address=String(b.address||'').trim().slice(0,500),postal=String(b.postal_code||'').replace(/\D/g,'').slice(0,10);
+      if(first.length<2||last.length<2||!/^09\d{9}$/.test(phone)||province.length<2||city.length<2||address.length<8||postal.length!==10)return json({error:'لطفاً همه اطلاعات آدرس را صحیح و کامل وارد کنید.'},400);
+      await env.DB.prepare(`INSERT INTO customer_addresses(user_id,first_name,last_name,phone,province,city,address,postal_code) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,phone=excluded.phone,province=excluded.province,city=excluded.city,address=excluded.address,postal_code=excluded.postal_code,updated_at=CURRENT_TIMESTAMP`).bind(uid,first,last,phone,province,city,address,postal).run();return json({ok:true});
+    }
     if(path==='/api/payment-settings'&&request.method==='GET'){
       await ensureCustomerTables(env);
       let st=await env.DB.prepare('SELECT card_number,card_holder,bank_name,instructions FROM payment_settings WHERE id=1').first();
@@ -66,7 +79,12 @@ export default {async fetch(request,env){
     if(path==='/api/orders'&&request.method==='POST'){
       await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);const b=await request.json().catch(()=>({}));const items=Array.isArray(b.items)?b.items:[];if(!items.length)return json({error:'سبد خرید خالی است.'},400);
       let total=0,clean=[];for(const it of items){const p=await env.DB.prepare('SELECT id,price,available FROM products WHERE id=?').bind(Number(it.product_id)).first();if(!p||!p.available)continue;const price=Number(String(p.price).replace(/[^\d]/g,''))||0,q=Math.max(1,Math.min(99,Number(it.quantity)||1));total+=price*q;clean.push({id:p.id,price,q})}
-      if(!clean.length)return json({error:'هیچ‌کدام از محصولات موجود نیستند.'},400);const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();for(const x of clean)await env.DB.prepare('INSERT INTO order_items(order_id,product_id,quantity,price) VALUES(?,?,?,?)').bind(r.meta.last_row_id,x.id,x.q,x.price).run();return json({ok:true,order_id:r.meta.last_row_id,total})
+      if(!clean.length)return json({error:'هیچ‌کدام از محصولات موجود نیستند.'},400);
+      const a=await env.DB.prepare('SELECT first_name,last_name,phone,province,city,address,postal_code FROM customer_addresses WHERE user_id=?').bind(uid).first();
+      if(!a)return json({error:'آدرس ارسال را وارد کنید.',code:'ADDRESS_REQUIRED'},400);
+      const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();const oid=r.meta.last_row_id;
+      const stmts=[...clean.map(x=>env.DB.prepare('INSERT INTO order_items(order_id,product_id,quantity,price) VALUES(?,?,?,?)').bind(oid,x.id,x.q,x.price)),env.DB.prepare('INSERT INTO order_addresses(order_id,user_id,first_name,last_name,phone,province,city,address,postal_code) VALUES(?,?,?,?,?,?,?,?,?)').bind(oid,uid,a.first_name,a.last_name,a.phone,a.province,a.city,a.address,a.postal_code)];
+      await env.DB.batch(stmts);return json({ok:true,order_id:oid,total})
     }
 
     if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
