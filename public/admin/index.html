@@ -24,6 +24,7 @@
       <button class="nav-item" data-section="products" onclick="showSection('products')"><span>▣</span> مدیریت محصولات</button>
       <button class="nav-item" data-section="users" onclick="showSection('users')"><span>♙</span> مدیریت کاربران</button>
       <button class="nav-item" data-section="reports" onclick="showSection('reports')"><span>▥</span> گزارش‌ها</button>
+      <button class="nav-item" data-section="payments" onclick="showSection('payments')"><span>💳</span> پرداخت‌ها <b id="navPayments">0</b></button>
       <button class="nav-item" data-section="settings" onclick="showSection('settings')"><span>⚙</span> تنظیمات</button>
     </nav>
     <div class="side-promo"><div class="promo-icon">♛</div><strong>فروش بیشتر<br>با مدیریت بهتر</strong><small>MR MOBILE</small></div>
@@ -77,6 +78,19 @@
 <div class="panel"><div class="panel-head"><h2>خلاصه عملکرد</h2></div><div id="reportSummary" class="report-summary"></div></div>
 </section>
 
+
+      <section id="payments" class="page">
+        <div class="page-head"><div><h1>پرداخت‌های کارت‌به‌کارت</h1><p>رسیدهای مشتریان را بررسی و پرداخت‌ها را تأیید یا رد کنید.</p></div><button class="primary" onclick="loadPayments()">↻ بروزرسانی</button></div>
+        <div class="payment-admin-grid">
+          <div class="panel"><div class="panel-head"><h2>اطلاعات کارت فروشگاه</h2><span class="status-on">فعال</span></div>
+            <div class="form-grid payment-settings-form"><label>شماره کارت<input id="payCardNumber" inputmode="numeric" placeholder="۶۱۰۴..."></label><label>نام صاحب کارت<input id="payCardHolder" placeholder="نام فروشگاه / صاحب حساب"></label><label>بانک<input id="payBankName" placeholder="نام بانک"></label><label class="full-field">توضیحات پرداخت<textarea id="payInstructions" placeholder="بعد از کارت‌به‌کارت شماره پیگیری و تصویر رسید را ارسال کنید."></textarea></label></div>
+            <div class="modal-actions"><button class="primary" onclick="savePaymentSettings()">ذخیره اطلاعات پرداخت</button></div><p id="paymentSettingsMsg" class="success"></p>
+          </div>
+          <div class="panel"><div class="panel-head"><h2>وضعیت پرداخت‌ها</h2></div><div id="paymentSummary" class="payment-summary"></div></div>
+        </div>
+        <div class="panel"><div class="panel-head"><h2>رسیدهای ارسالی</h2><select id="paymentStatusFilter" onchange="renderPayments()"><option value="">همه</option><option>در انتظار بررسی</option><option>تأیید شده</option><option>رد شده</option></select></div><div id="paymentsTable" class="payments-table"></div></div>
+      </section>
+
       <section id="settings" class="page"><div class="page-head"><div><h1>تنظیمات</h1><p>تنظیمات عمومی پنل مدیریت.</p></div></div><div class="panel settings-card"><div class="setting-row"><div><strong>امنیت پنل</strong><p>احراز هویت مدیریت با نشست امن Cloudflare Worker انجام می‌شود.</p></div><span class="status-on">فعال</span></div><div class="setting-row"><div><strong>پایگاه داده</strong><p>محصولات، کاربران و سفارش‌ها در Cloudflare D1 ذخیره می‌شوند.</p></div><span class="status-on">متصل</span></div><div class="setting-row"><div><strong>فروشگاه</strong><p>MR MOBILE STORE</p></div><a class="ghost link-btn" href="/" target="_blank">مشاهده فروشگاه ↗</a></div></div></section>
     </main>
   </section>
@@ -86,7 +100,7 @@
 
 <div id="toast" class="toast"></div>
 <script>
-let editing=null, products=[], orders=[], users=[], stats={};
+let editing=null, products=[], orders=[], users=[], stats={}, payments=[];
 const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -96,7 +110,7 @@ async function check(){try{const d=await api('/api/me');if(d.admin){$('login').h
 async function login(){try{await api('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:$('pass').value})});$('err').textContent='';check()}catch(e){$('err').textContent=e.message}}
 async function logout(){await api('/api/logout',{method:'POST'});location.reload()}
 function setToday(){$('todayText').textContent=new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium'}).format(new Date())}
-function showSection(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active-page',x.id===id));document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.section===id));if(id==='orders')renderOrders();if(id==='products')renderProducts();if(id==='users')renderUsers();if(id==='reports')renderReports();document.querySelector('.sidebar')?.classList.remove('open')}
+function showSection(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active-page',x.id===id));document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.section===id));if(id==='orders')renderOrders();if(id==='products')renderProducts();if(id==='users')renderUsers();if(id==='reports')renderReports();if(id==='payments')loadPayments();document.querySelector('.sidebar')?.classList.remove('open')}
 function toggleSidebar(){document.querySelector('.sidebar').classList.toggle('open')}
 async function loadAll(){try{[stats,products,orders,users]=await Promise.all([api('/api/admin/stats'),api('/api/products?admin=1'),api('/api/admin/orders'),api('/api/admin/users')]);renderStats();renderRecentOrders();renderStatusChart();renderSalesChart();renderTopProducts();renderOrders();renderProducts();renderUsers();renderReports()}catch(e){toast(e.message)}}
 async function loadOrders(){try{orders=await api('/api/admin/orders');renderOrders();renderRecentOrders();renderStatusChart();$('statNew').textContent=fa(stats.new_orders||0);$('navNew').textContent=fa(stats.new_orders||0);$('bellCount').textContent=fa(stats.new_orders||0)}catch(e){toast(e.message)}}
@@ -128,6 +142,14 @@ function closeProductForm(){$('productModal').hidden=true;editing=null}
 $('imageUrl').addEventListener('input',()=>{$('preview').innerHTML=$('imageUrl').value?`<img src="${esc($('imageUrl').value)}" onerror="this.style.display='none'">`:''})
 async function saveProduct(){const body={name:$('name').value.trim(),price:$('price').value.trim(),condition:$('condition').value,description:$('desc').value.trim(),image_url:$('imageUrl').value.trim(),available:$('available').checked};try{await api(editing?'/api/products/'+editing:'/api/products',{method:editing?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});closeProductForm();products=await api('/api/products?admin=1');renderProducts();renderStats();toast('محصول با موفقیت ذخیره شد ✓')}catch(e){$('msg').textContent=e.message}}
 async function deleteProduct(id){if(!confirm('این محصول حذف شود؟'))return;try{await api('/api/products/'+id,{method:'DELETE'});products=await api('/api/products?admin=1');renderProducts();stats.products=Math.max(0,(stats.products||1)-1);renderStats();toast('محصول حذف شد')}catch(e){toast(e.message)}}
+
+async function loadPayments(){try{[payments,paymentSettings]=await Promise.all([api('/api/admin/payments'),api('/api/admin/payment-settings')]);$('payCardNumber').value=paymentSettings.card_number||'';$('payCardHolder').value=paymentSettings.card_holder||'';$('payBankName').value=paymentSettings.bank_name||'';$('payInstructions').value=paymentSettings.instructions||'';renderPayments()}catch(e){toast(e.message)}}
+let paymentSettings={};
+function renderPayments(){const f=$('paymentStatusFilter')?.value||'';const list=payments.filter(p=>!f||p.status===f);const pending=payments.filter(p=>p.status==='در انتظار بررسی').length,approved=payments.filter(p=>p.status==='تأیید شده').length,rejected=payments.filter(p=>p.status==='رد شده').length;$('navPayments').textContent=fa(pending);$('paymentSummary').innerHTML=`<div><b>${fa(pending)}</b><span>در انتظار بررسی</span></div><div><b>${fa(approved)}</b><span>تأیید شده</span></div><div><b>${fa(rejected)}</b><span>رد شده</span></div>`;$('paymentsTable').innerHTML=list.length?list.map(paymentRow).join(''):'<div class="empty">پرداختی برای نمایش وجود ندارد.</div>'}
+function paymentRow(p){const status=p.status==='تأیید شده'?'done':p.status==='رد شده'?'cancel':'wait';return `<div class="payment-row"><div><strong>سفارش #${p.order_id}</strong><small>${esc(p.customer_name||'مشتری')} — ${esc(p.phone||'')}</small></div><div><b>${toman(p.amount)}</b><small>پیگیری: ${esc(p.tracking_code||'—')}</small></div><span class="payment-status ${status}">${esc(p.status)}</span><small>${esc(p.created_at||'')}</small><div class="payment-actions"><button class="ghost" onclick="viewReceipt(${p.id})">🧾 رسید</button>${p.status==='در انتظار بررسی'?`<button class="approve-btn" onclick="reviewPayment(${p.id},'تأیید شده')">✓ تأیید</button><button class="reject-btn" onclick="reviewPayment(${p.id},'رد شده')">× رد</button>`:''}</div></div>`}
+function viewReceipt(id){const p=payments.find(x=>x.id===id);if(!p?.receipt_data)return toast('رسیدی برای این پرداخت ثبت نشده است');const w=window.open();if(w){w.document.write(`<title>رسید پرداخت #${p.order_id}</title><body style="margin:0;background:#111;color:#fff;display:grid;place-items:center;min-height:100vh;font-family:Arial"><img src="${p.receipt_data}" style="max-width:95%;max-height:95vh;object-fit:contain"></body>`);w.document.close()}}
+async function reviewPayment(id,status){const note=status==='رد شده'?prompt('دلیل رد پرداخت (اختیاری):')||'':'پرداخت توسط مدیر تأیید شد';try{await api('/api/admin/payments/'+id+'/status',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({status,admin_note:note})});toast(status==='تأیید شده'?'پرداخت تأیید شد ✓':'پرداخت رد شد');await loadPayments();orders=await api('/api/admin/orders');renderOrders();renderRecentOrders();renderStatusChart()}catch(e){toast(e.message)}}
+async function savePaymentSettings(){try{const card=$('payCardNumber').value.replace(/\s+/g,'').trim();if(card && !/^\d{16}$/.test(card))return $('paymentSettingsMsg').textContent='شماره کارت باید ۱۶ رقم باشد.';await api('/api/admin/payment-settings',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({card_number:card,card_holder:$('payCardHolder').value.trim(),bank_name:$('payBankName').value.trim(),instructions:$('payInstructions').value.trim()})});$('paymentSettingsMsg').textContent='اطلاعات پرداخت با موفقیت ذخیره شد ✓';toast('اطلاعات کارت ذخیره شد')}catch(e){$('paymentSettingsMsg').textContent=e.message}}
 function globalFilter(){const q=$('globalSearch').value.trim();if(!q)return;showSection('orders');$('orderSearch').value=q;renderOrders()}
 check();
 </script>

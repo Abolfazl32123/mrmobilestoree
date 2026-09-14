@@ -1,4 +1,4 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null};
+const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''}};
 
 const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
@@ -48,7 +48,7 @@ async function checkout(){
   const items=state.cart.map(x=>({product_id:x.id,quantity:x.qty,price:cartPrice(x)}));
   const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items})});
   const d=await r.json();if(!r.ok)return toast(d.error||'خطا در ثبت سفارش');
-  clearCart();toggleCart();toast('سفارش شما با موفقیت ثبت شد');
+  clearCart();toggleCart();toast('سفارش ثبت شد؛ حالا رسید پرداخت را ارسال کنید');openPayment(d.order_id,d.total);
 }
 
 function openAuth(mode='login'){state.authMode=mode;$('authModal').classList.add('show');updateAuth()}
@@ -73,8 +73,21 @@ async function openAccount(){
   $('accountModal').classList.add('show');$('accountInfo').innerHTML=`<div class="account-info"><b>${esc(state.user.name||'کاربر')}</b><br><small>${esc(state.user.phone)}</small></div>`;loadOrders();
 }
 function closeAccount(){$('accountModal').classList.remove('show')}
-async function loadOrders(){const r=await fetch('/api/orders');if(!r.ok)return;$('ordersList').innerHTML='<h3>سفارش‌های من</h3>'+((await r.json()).orders||[]).map(o=>`<div class="order"><b>سفارش #${o.id}</b> — <strong>${toman(o.total)}</strong><br><small>وضعیت: ${esc(o.status)} | ${esc(o.created_at)}</small></div>`).join('')||'<p style="color:#899">هنوز سفارشی ندارید.</p>'}
+async function loadOrders(){const r=await fetch('/api/orders');if(!r.ok)return;const data=await r.json();$('ordersList').innerHTML='<h3>سفارش‌های من</h3>'+((data.orders||[]).map(o=>`<div class="order"><b>سفارش #${o.id}</b> — <strong>${toman(o.total)}</strong><br><small>وضعیت سفارش: ${esc(o.status)} | پرداخت: ${esc(o.payment_status||'پرداخت نشده')} | ${esc(o.created_at)}</small>${(!o.payment_status||o.payment_status==='رد شده')&&o.status!=='لغو شده'?`<button class="btn ghost full" onclick="openPayment(${o.id},${Number(o.total)||0})">💳 ارسال رسید پرداخت</button>`:''}</div>`).join('')||'<p style="color:#899">هنوز سفارشی ندارید.</p>')}
 async function logout(){await fetch('/api/auth/logout',{method:'POST'});state.user=null;closeAccount();updateUser();toast('از حساب خارج شدید')}
+
+async function openPayment(orderId,amount){
+  if(!state.user)return openAuth('login');
+  state.payment={orderId,amount:Number(amount)||0,receiptData:''};
+  $('paymentOrderId').textContent='#'+fa(orderId);$('paymentAmount').textContent=toman(amount);$('paymentTracking').value='';$('receiptName').textContent='هنوز فایلی انتخاب نشده';$('receiptPreview').hidden=true;$('receiptPreview').src='';$('paymentError').textContent='';$('sendPaymentBtn').disabled=false;
+  try{const st=await fetch('/api/payment-settings').then(r=>r.json());$('paymentBank').textContent=st.bank_name||'کارت فروشگاه';$('paymentCard').textContent=st.card_number||'شماره کارت هنوز تنظیم نشده';$('paymentHolder').textContent=st.card_holder?'به نام '+st.card_holder:'';$('paymentInstructions').textContent=st.instructions||'پس از کارت‌به‌کارت، شماره پیگیری و تصویر رسید را ارسال کنید.'}catch(e){$('paymentError').textContent='دریافت اطلاعات کارت انجام نشد.'}
+  $('paymentModal').classList.add('show');
+}
+function closePayment(){$('paymentModal').classList.remove('show')}
+function fa(n){return Number(n||0).toLocaleString('fa-IR')}
+async function copyPaymentCard(){const raw=($('paymentCard').textContent||'').replace(/\D/g,'');if(!raw)return toast('شماره کارت تنظیم نشده است');try{await navigator.clipboard.writeText(raw);toast('شماره کارت کپی شد ✓')}catch{toast('کپی خودکار در این مرورگر در دسترس نیست')}}
+function prepareReceipt(input){const file=input.files?.[0];if(!file)return;const ok=['image/jpeg','image/png','image/webp'].includes(file.type);if(!ok){$('paymentError').textContent='فقط JPG، PNG یا WEBP قابل قبول است.';input.value='';return}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=1100,scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',.68);if(data.length>1700000){$('paymentError').textContent='تصویر هنوز بزرگ است؛ لطفاً عکس ساده‌تری انتخاب کنید.';return}state.payment.receiptData=data;$('receiptName').textContent=file.name;$('receiptPreview').src=data;$('receiptPreview').hidden=false;$('paymentError').textContent=''};img.src=reader.result};reader.readAsDataURL(file)}
+async function submitPaymentReceipt(){const tracking=$('paymentTracking').value.trim();if(!tracking)return $('paymentError').textContent='شماره پیگیری را وارد کنید.';if(!state.payment.receiptData)return $('paymentError').textContent='تصویر رسید را انتخاب کنید.';$('sendPaymentBtn').disabled=true;try{const r=await fetch('/api/orders/'+state.payment.orderId+'/payment',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({tracking_code:tracking,receipt_data:state.payment.receiptData})});const d=await r.json();if(!r.ok)throw Error(d.error||'خطا در ارسال رسید');closePayment();toast('رسید با موفقیت برای بررسی ارسال شد ✓');if($('accountModal')?.classList.contains('show'))loadOrders()}catch(e){$('paymentError').textContent=e.message;$('sendPaymentBtn').disabled=false}}
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
 loadProducts();loadMe();renderCart();

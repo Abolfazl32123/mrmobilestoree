@@ -17,6 +17,10 @@ async function ensureCustomerTables(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,phone TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,password_salt TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,total INTEGER NOT NULL DEFAULT 0,status TEXT NOT NULL DEFAULT 'در انتظار بررسی',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL,product_id INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL)`).run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS payment_settings (id INTEGER PRIMARY KEY CHECK (id=1),card_number TEXT NOT NULL DEFAULT '',card_holder TEXT NOT NULL DEFAULT '',bank_name TEXT NOT NULL DEFAULT '',instructions TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS payments (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL,user_id INTEGER NOT NULL,amount INTEGER NOT NULL,tracking_code TEXT NOT NULL DEFAULT '',receipt_data TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'در انتظار بررسی',admin_note TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,reviewed_at TEXT DEFAULT NULL)`).run();
+  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)`).run();
+  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)`).run();
 }
 async function userFromReq(req,env){const d=await verifySession(req,env,'mr_user');return d?.uid||null}
 async function listProducts(env,all=false){let q='SELECT id,name,price,condition,description,image_key,image_url,available,created_at FROM products';if(!all)q+=' WHERE available=1';q+=' ORDER BY id DESC';return (await env.DB.prepare(q).all()).results}
@@ -38,11 +42,31 @@ export default {async fetch(request,env){
     if(path==='/api/auth/me'&&request.method==='GET'){await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({user:null});const u=await env.DB.prepare('SELECT id,name,phone FROM users WHERE id=?').bind(uid).first();return json({user:u||null})}
     if(path==='/api/auth/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_user','',0)})
 
-    if(path==='/api/orders'&&request.method==='GET'){await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);const orders=(await env.DB.prepare('SELECT id,total,status,created_at FROM orders WHERE user_id=? ORDER BY id DESC').bind(uid).all()).results;return json({orders})}
+    if(path==='/api/payment-settings'&&request.method==='GET'){
+      await ensureCustomerTables(env);
+      let st=await env.DB.prepare('SELECT card_number,card_holder,bank_name,instructions FROM payment_settings WHERE id=1').first();
+      if(!st) st={card_number:'',card_holder:'',bank_name:'',instructions:''};
+      return json(st);
+    }
+    if(path.startsWith('/api/orders/')&&path.endsWith('/payment')&&request.method==='GET'){
+      await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);
+      const id=Number(path.split('/')[3]);const order=await env.DB.prepare('SELECT id,total,status,created_at FROM orders WHERE id=? AND user_id=?').bind(id,uid).first();if(!order)return json({error:'سفارش پیدا نشد.'},404);
+      const payment=await env.DB.prepare('SELECT id,amount,tracking_code,status,admin_note,created_at,reviewed_at FROM payments WHERE order_id=? ORDER BY id DESC LIMIT 1').bind(id).first();return json({order,payment:payment||null});
+    }
+    if(path.startsWith('/api/orders/')&&path.endsWith('/payment')&&request.method==='POST'){
+      await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);
+      const id=Number(path.split('/')[3]);const order=await env.DB.prepare('SELECT id,total FROM orders WHERE id=? AND user_id=?').bind(id,uid).first();if(!order)return json({error:'سفارش پیدا نشد.'},404);
+      const b=await request.json().catch(()=>({}));const tracking=String(b.tracking_code||'').trim().slice(0,80);const receipt=String(b.receipt_data||'');
+      if(!tracking)return json({error:'شماره پیگیری را وارد کنید.'},400);if(!/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(receipt))return json({error:'تصویر رسید معتبر نیست.'},400);if(receipt.length>1800000)return json({error:'حجم تصویر رسید زیاد است. لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);
+      const old=await env.DB.prepare("SELECT id FROM payments WHERE order_id=? AND status='در انتظار بررسی' LIMIT 1").bind(id).first();if(old)return json({error:'رسید این سفارش قبلاً برای بررسی ارسال شده است.'},409);
+      await env.DB.prepare('INSERT INTO payments(order_id,user_id,amount,tracking_code,receipt_data,status) VALUES(?,?,?,?,?,?)').bind(id,uid,order.total,tracking,receipt,'در انتظار بررسی').run();
+      return json({ok:true,status:'در انتظار بررسی'});
+    }
+    if(path==='/api/orders'&&request.method==='GET'){await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);const orders=(await env.DB.prepare('SELECT o.id,o.total,o.status,o.created_at,(SELECT p.status FROM payments p WHERE p.order_id=o.id ORDER BY p.id DESC LIMIT 1) AS payment_status FROM orders o WHERE o.user_id=? ORDER BY o.id DESC').bind(uid).all()).results;return json({orders})}
     if(path==='/api/orders'&&request.method==='POST'){
       await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);const b=await request.json().catch(()=>({}));const items=Array.isArray(b.items)?b.items:[];if(!items.length)return json({error:'سبد خرید خالی است.'},400);
       let total=0,clean=[];for(const it of items){const p=await env.DB.prepare('SELECT id,price,available FROM products WHERE id=?').bind(Number(it.product_id)).first();if(!p||!p.available)continue;const price=Number(String(p.price).replace(/[^\d]/g,''))||0,q=Math.max(1,Math.min(99,Number(it.quantity)||1));total+=price*q;clean.push({id:p.id,price,q})}
-      if(!clean.length)return json({error:'هیچ‌کدام از محصولات موجود نیستند.'},400);const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();for(const x of clean)await env.DB.prepare('INSERT INTO order_items(order_id,product_id,quantity,price) VALUES(?,?,?,?)').bind(r.meta.last_row_id,x.id,x.q,x.price).run();return json({ok:true,order_id:r.meta.last_row_id})
+      if(!clean.length)return json({error:'هیچ‌کدام از محصولات موجود نیستند.'},400);const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();for(const x of clean)await env.DB.prepare('INSERT INTO order_items(order_id,product_id,quantity,price) VALUES(?,?,?,?)').bind(r.meta.last_row_id,x.id,x.q,x.price).run();return json({ok:true,order_id:r.meta.last_row_id,total})
     }
 
     if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
@@ -51,6 +75,24 @@ export default {async fetch(request,env){
     if(path.startsWith('/api/products/')&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM products WHERE id=?').bind(id).run();return json({ok:true})}
     if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,condition,description,image_key,image_url,available) VALUES(?,?,?,?,?,?,?)').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
     if(path.startsWith('/api/products/')&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop()),b=await request.json().catch(()=>({}));await env.DB.prepare('UPDATE products SET name=?,price=?,condition=?,description=?,image_key=?,image_url=?,available=? WHERE id=?').bind(b.name,b.price,b.condition||'نو',b.description||'',b.image_key||'',b.image_url||'',b.available?1:0,id).run();return json({ok:true})}
+    if(path==='/api/admin/payment-settings'&&request.method==='GET'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);let st=await env.DB.prepare('SELECT card_number,card_holder,bank_name,instructions FROM payment_settings WHERE id=1').first();return json(st||{card_number:'',card_holder:'',bank_name:'',instructions:''});
+    }
+    if(path==='/api/admin/payment-settings'&&request.method==='PUT'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const b=await request.json().catch(()=>({}));
+      const card=String(b.card_number||'').replace(/\s+/g,'').slice(0,24),holder=String(b.card_holder||'').trim().slice(0,120),bank=String(b.bank_name||'').trim().slice(0,80),instructions=String(b.instructions||'').trim().slice(0,1000);
+      await env.DB.prepare(`INSERT INTO payment_settings(id,card_number,card_holder,bank_name,instructions) VALUES(1,?,?,?,?) ON CONFLICT(id) DO UPDATE SET card_number=excluded.card_number,card_holder=excluded.card_holder,bank_name=excluded.bank_name,instructions=excluded.instructions,updated_at=CURRENT_TIMESTAMP`).bind(card,holder,bank,instructions).run();return json({ok:true});
+    }
+    if(path==='/api/admin/payments'&&request.method==='GET'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
+      const rows=(await env.DB.prepare(`SELECT p.id,p.order_id,p.user_id,p.amount,p.tracking_code,p.receipt_data,p.status,p.admin_note,p.created_at,p.reviewed_at,u.name AS customer_name,u.phone FROM payments p LEFT JOIN users u ON u.id=p.user_id ORDER BY p.id DESC`).all()).results;return json(rows);
+    }
+    if(path.startsWith('/api/admin/payments/')&&path.endsWith('/status')&&request.method==='PUT'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const status=String(b.status||'');if(!['تأیید شده','رد شده'].includes(status))return json({error:'وضعیت پرداخت نامعتبر است.'},400);
+      const p=await env.DB.prepare('SELECT order_id FROM payments WHERE id=?').bind(id).first();if(!p)return json({error:'پرداخت پیدا نشد.'},404);
+      await env.DB.prepare('UPDATE payments SET status=?,admin_note=?,reviewed_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,String(b.admin_note||'').slice(0,500),id).run();
+      await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(status==='تأیید شده'?'تأیید شده':'در انتظار بررسی',p.order_id).run();return json({ok:true});
+    }
     if(path==='/api/admin/stats'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);
       await ensureCustomerTables(env);

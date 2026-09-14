@@ -170,6 +170,31 @@
   </div>
 </div>
 
+
+<div id="paymentModal" class="modal">
+  <div class="modal-card payment-card">
+    <button class="modal-close" onclick="closePayment()">×</button>
+    <div class="payment-icon">💳</div>
+    <h2>پرداخت کارت‌به‌کارت</h2>
+    <p>سفارش <b id="paymentOrderId">#—</b> — مبلغ <strong id="paymentAmount">۰ تومان</strong></p>
+    <div class="payment-bank">
+      <small id="paymentBank">کارت فروشگاه</small>
+      <b id="paymentCard">در حال دریافت...</b>
+      <span id="paymentHolder"></span>
+      <button type="button" onclick="copyPaymentCard()">📋 کپی شماره کارت</button>
+    </div>
+    <p id="paymentInstructions" class="payment-instructions"></p>
+    <div class="field"><label>شماره پیگیری تراکنش *</label><input id="paymentTracking" inputmode="numeric" placeholder="مثلاً ۱۲۳۴۵۶۷۸۹"></div>
+    <div class="receipt-box">
+      <label class="receipt-pick"><input id="receiptFile" type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="prepareReceipt(this)"><span>📷 انتخاب تصویر رسید</span></label>
+      <small id="receiptName">هنوز فایلی انتخاب نشده</small>
+      <img id="receiptPreview" class="receipt-preview" hidden alt="پیش‌نمایش رسید">
+    </div>
+    <button id="sendPaymentBtn" class="btn primary full" onclick="submitPaymentReceipt()">ارسال رسید برای بررسی</button>
+    <button class="btn ghost full" onclick="closePayment()">بعداً ارسال می‌کنم</button>
+    <div id="paymentError" class="form-error"></div>
+  </div>
+</div>
 <script src="/app.js"></script>
 </body>
 </html>
