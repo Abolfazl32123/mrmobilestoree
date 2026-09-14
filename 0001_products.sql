@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  price TEXT NOT NULL DEFAULT '',
+  condition TEXT NOT NULL DEFAULT 'نو',
+  description TEXT NOT NULL DEFAULT '',
+  image_key TEXT NOT NULL DEFAULT '',
+  image_url TEXT NOT NULL DEFAULT '',
+  available INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_products_available ON products(available);
