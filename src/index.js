@@ -79,7 +79,17 @@ export default {async fetch(request,env){
     }
     if(path==='/api/admin/users'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
+      const rows=(await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count,COALESCE(SUM(CASE WHEN o.status!='لغو شده' THEN o.total ELSE 0 END),0) AS total_spent,MAX(o.created_at) AS last_order_at FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results;
+      return json(rows);
+    }
+    if(path.startsWith('/api/admin/users/')&&request.method==='GET'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
+      const id=Number(path.split('/').pop());
+      if(!Number.isFinite(id))return json({error:'کاربر نامعتبر است.'},400);
+      const user=await env.DB.prepare(`SELECT id,name,phone,created_at FROM users WHERE id=?`).bind(id).first();
+      if(!user)return json({error:'کاربر پیدا نشد.'},404);
+      const orders=(await env.DB.prepare(`SELECT id,total,status,created_at FROM orders WHERE user_id=? ORDER BY id DESC`).bind(id).all()).results;
+      return json({user,orders});
     }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
     return env.ASSETS.fetch(request);
