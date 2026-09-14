@@ -28,6 +28,3 @@ Database ID در `wrangler.json` قرار داده شده است.
 - `ADMIN_SECRET`
 
 R2 در این نسخه استفاده نمی‌شود.
-
-
-V9: homepage sections for featured, bestseller, sale and new products; admin controls added.

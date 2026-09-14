@@ -7,16 +7,23 @@ function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));r
 function imgUrl(p){return p.image_url||p.image_key||'/assets/mr-mobile-logo.png'}
 
 async function loadProducts(){
-  try{const r=await fetch('/api/products');state.products=await r.json();renderProducts();renderSpecialSections();}
+  try{const r=await fetch('/api/products');state.products=await r.json();renderProducts();}
   catch(e){$('productsGrid').innerHTML='<div class="loading">خطا در دریافت محصولات.</div>'}
 }
-function productCard(p){const sale=String(p.sale_price||'').trim();const price=sale||String(p.price||'');return `<article class="product-card ${p.available?'':'unavailable'}">${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}<button class="wish" onclick="toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button><div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div><div class="product-name">${esc(p.name)}</div><div class="product-meta">${esc(p.condition||'نو')} ${p.description?' | '+esc(p.description).slice(0,55):''}</div><div class="price">${sale?`<del>${esc(String(p.price))}</del> `:''}${esc(price)} <small>تومان</small></div><button class="add-btn" ${p.available?'':'disabled'} onclick="addToCart(${p.id})">${p.available?'افزودن به سبد خرید 🛒':'ناموجود'}</button></article>`}
-function renderSpecialSections(){const featured=state.products.filter(p=>p.featured).slice(0,4),best=state.products.filter(p=>p.bestseller).slice(0,4),sale=state.products.filter(p=>p.sale_price).slice(0,4),newest=state.products.filter(p=>p.new_arrival).slice(0,4);const sets=[['featuredGrid',featured],['bestsellerGrid',best],['discountGrid',sale],['newGrid',newest]];sets.forEach(([id,list])=>{const el=$(id);if(!el)return;el.innerHTML=list.length?list.map(productCard).join(''):'<div class="loading">هنوز محصولی در این بخش قرار نگرفته است.</div>'})}
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
   const list=state.products.filter(p=>(state.category==='همه'||p.category===state.category||state.category==='موبایل'&&(!p.category||p.category==='نو'))&&(!q||String(p.name).toLowerCase().includes(q)||String(p.description||'').toLowerCase().includes(q)));
   if(!list.length){$('productsGrid').innerHTML='<div class="loading">محصولی پیدا نشد.</div>';return}
-  $('productsGrid').innerHTML=list.map(productCard).join('');
+  $('productsGrid').innerHTML=list.map(p=>`
+    <article class="product-card ${p.available?'':'unavailable'}">
+      ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
+      <button class="wish" onclick="toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button>
+      <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
+      <div class="product-name">${esc(p.name)}</div>
+      <div class="product-meta">${esc(p.condition||'نو')} ${p.description?' | '+esc(p.description).slice(0,55):''}</div>
+      <div class="price">${esc(String(p.price))} <small>تومان</small></div>
+      <button class="add-btn" ${p.available?'':'disabled'} onclick="addToCart(${p.id})">${p.available?'افزودن به سبد خرید 🛒':'ناموجود'}</button>
+    </article>`).join('');
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
