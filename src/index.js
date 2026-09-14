@@ -137,7 +137,13 @@ export default {async fetch(request,env){
       const allowed=['آماده ارسال','ارسال شد','تحویل داده شد'];if(!allowed.includes(status))return json({error:'وضعیت ارسال نامعتبر است.'},400);
       const order=await env.DB.prepare('SELECT id FROM orders WHERE id=?').bind(id).first();if(!order)return json({error:'سفارش پیدا نشد.'},404);
       if(status==='ارسال شد' && !tracking)return json({error:'برای وضعیت «ارسال شد» کد رهگیری را وارد کنید.'},400);
-      await env.DB.prepare(`INSERT INTO shipments(order_id,carrier,tracking_code,status,shipped_at,delivered_at) VALUES(?,?,?,?,CASE WHEN ?='ارسال شد' THEN CURRENT_TIMESTAMP ELSE NULL END,CASE WHEN ?='تحویل داده شد' THEN CURRENT_TIMESTAMP ELSE NULL END) ON CONFLICT(order_id) DO UPDATE SET carrier=excluded.carrier,tracking_code=excluded.tracking_code,status=excluded.status,shipped_at=CASE WHEN excluded.status='ارسال شد' AND shipments.shipped_at IS NULL THEN CURRENT_TIMESTAMP WHEN excluded.status='ارسال شد' THEN shipments.shipped_at ELSE NULL END,delivered_at=CASE WHEN excluded.status='تحویل داده شد' AND shipments.delivered_at IS NULL THEN CURRENT_TIMESTAMP WHEN excluded.status='تحویل داده شد' THEN shipments.delivered_at ELSE NULL END,updated_at=CURRENT_TIMESTAMP`).bind(id,carrier,tracking,status,status,status).run();
+      // Avoid relying on an existing UNIQUE(order_id) constraint: older deployments may have created shipments differently.
+      const existing=await env.DB.prepare('SELECT id,shipped_at,delivered_at FROM shipments WHERE order_id=? ORDER BY id DESC LIMIT 1').bind(id).first();
+      if(existing){
+        await env.DB.prepare(`UPDATE shipments SET carrier=?,tracking_code=?,status=?,shipped_at=CASE WHEN ?='ارسال شد' AND shipped_at IS NULL THEN CURRENT_TIMESTAMP WHEN ?='ارسال شد' THEN shipped_at ELSE NULL END,delivered_at=CASE WHEN ?='تحویل داده شد' AND delivered_at IS NULL THEN CURRENT_TIMESTAMP WHEN ?='تحویل داده شد' THEN delivered_at ELSE NULL END,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(carrier,tracking,status,status,status,status,status,existing.id).run();
+      }else{
+        await env.DB.prepare(`INSERT INTO shipments(order_id,carrier,tracking_code,status,shipped_at,delivered_at) VALUES(?,?,?,?,CASE WHEN ?='ارسال شد' THEN CURRENT_TIMESTAMP ELSE NULL END,CASE WHEN ?='تحویل داده شد' THEN CURRENT_TIMESTAMP ELSE NULL END)`).bind(id,carrier,tracking,status,status,status).run();
+      }
       if(status==='ارسال شد')await env.DB.prepare("UPDATE orders SET status='در حال ارسال' WHERE id=? AND status NOT IN ('لغو شده','تکمیل شده')").bind(id).run();
       if(status==='تحویل داده شد')await env.DB.prepare("UPDATE orders SET status='تکمیل شده' WHERE id=? AND status!='لغو شده'").bind(id).run();
       return json({ok:true});
