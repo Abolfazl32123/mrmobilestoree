@@ -30,7 +30,7 @@ function setCategory(c){state.category=c;document.querySelectorAll('.filter').fo
 function applyFilters(){state.search=$('searchInput').value;renderProducts()}
 $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;renderProducts()});
 
-function addToCart(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;const x=state.cart.find(i=>i.id===p.id);x?x.qty++:state.cart.push({id:p.id,qty:1,name:p.name,price:p.price,image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');}
+function addToCart(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;const x=state.cart.find(i=>i.id===p.id);x?x.qty++:state.cart.push({id:p.id,qty:1,name:p.name,price:p.price,image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();}
 function cartPrice(x){return Number(String(x.price).replace(/[^\d]/g,''))||0}
 function renderCart(){
   const count=state.cart.reduce((a,x)=>a+x.qty,0), total=state.cart.reduce((a,x)=>a+cartPrice(x)*x.qty,0);
