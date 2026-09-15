@@ -1,6 +1,17 @@
 const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
 
 const $=id=>document.getElementById(id);
+function numeric(v){
+  const fa='۰۱۲۳۴۵۶۷۸۹', ar='٠١٢٣٤٥٦٧٨٩';
+  return Number(String(v??'').replace(/[۰-۹]/g,c=>fa.indexOf(c)).replace(/[٠-٩]/g,c=>ar.indexOf(c)).replace(/[^0-9.-]/g,''))||0;
+}
+function imageUrls(p){
+  const raw=String(p?.image_url||'').trim();
+  const list=raw.split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
+  if(p?.image_key && !list.length) list.push('/assets/'+String(p.image_key).replace(/^\/+/,''));
+  return list.length?list:['/assets/mr-mobile-logo.png'];
+}
+function imgUrl(p){return imageUrls(p)[0]}
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
