@@ -25,7 +25,7 @@
     </div>
 
     <div class="header-actions">
-      <button class="icon-btn" onclick="toggleCart()" title="سبد خرید">♡<span id="cartCount">0</span></button>
+      <button class="icon-btn favorite-header" onclick="openFavorites()" title="علاقه‌مندی‌ها">♡<span id="favoriteCount">0</span></button>
       <button class="cart-btn" onclick="toggleCart()">🛒 <span>سبد خرید</span><small id="cartTotal">۰ تومان</small></button>
       <button class="user-btn" onclick="openAccount()">👤 <span id="userLabel">حساب کاربری</span></button>
     </div>
@@ -202,6 +202,14 @@
     <button id="authSubmit" class="btn primary full" onclick="submitAuth()">ورود</button>
     <button id="authSwitch" class="switch-auth" onclick="switchAuth()">ثبت نام نکرده‌اید؟ ثبت نام کنید</button>
     <div id="authError" class="form-error"></div>
+  </div>
+</div>
+
+<div id="favoritesModal" class="modal">
+  <div class="modal-card favorites-card">
+    <button class="modal-close" onclick="closeFavorites()">×</button>
+    <div class="modal-heading"><span>❤️</span><div><h2>علاقه‌مندی‌های من</h2><p>محصولاتی که برای بعد ذخیره کرده‌اید</p></div></div>
+    <div id="favoritesList"></div>
   </div>
 </div>
 

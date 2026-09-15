@@ -5,13 +5,39 @@ const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
 function isFavorite(id){return state.favorites.includes(Number(id))}
-function saveFavorites(){localStorage.setItem('mr_favorites',JSON.stringify(state.favorites))}
-function toggleFavorite(id){const n=Number(id);if(isFavorite(n)){state.favorites=state.favorites.filter(x=>x!==n);toast('از علاقه‌مندی‌ها حذف شد')}else{state.favorites.push(n);toast('به علاقه‌مندی‌ها اضافه شد ❤️')}saveFavorites();updateFavoriteButtons(n)}
-function updateFavoriteButtons(id){const active=isFavorite(id);document.querySelectorAll(`[data-favorite-id="${id}"]`).forEach(b=>{b.classList.toggle('active',active);b.textContent=active?'♥':'♡';b.setAttribute('aria-pressed',active?'true':'false');b.title=active?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'})}
+function saveFavorites(){
+  state.favorites=[...new Set(state.favorites.map(Number).filter(Number.isFinite))];
+  localStorage.setItem('mr_favorites',JSON.stringify(state.favorites));
+  updateFavoriteCount();
+}
+function updateFavoriteCount(){const el=$('favoriteCount');if(el)el.textContent=String(state.favorites.length)}
+function toggleFavorite(id){
+  const n=Number(id); if(!Number.isFinite(n))return;
+  state.favorites=isFavorite(n)?state.favorites.filter(x=>Number(x)!==n):[...state.favorites,n];
+  saveFavorites(); updateFavoriteButtons(n);
+  toast(isFavorite(n)?'به علاقه‌مندی‌ها اضافه شد ❤️':'از علاقه‌مندی‌ها حذف شد');
+  if($('favoritesModal')?.classList.contains('show'))renderFavorites();
+}
+function updateFavoriteButtons(id){
+  const active=isFavorite(id);
+  document.querySelectorAll(`[data-favorite-id="${id}"]`).forEach(b=>{
+    b.classList.toggle('active',active); b.textContent=active?'♥':'♡';
+    b.setAttribute('aria-pressed',active?'true':'false');
+    b.title=active?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها';
+  });
+  const detail=$('detailFavorite');
+  if(detail && Number(state.detailProductId)===Number(id)){detail.classList.toggle('active',active);detail.textContent=active?'♥ در علاقه‌مندی':'♡ علاقه‌مندی'}
+}
+function renderFavorites(){
+  const box=$('favoritesList'); if(!box)return;
+  const favs=state.favorites.map(Number);
+  const items=state.products.filter(p=>favs.includes(Number(p.id)));
+  if(!items.length){box.innerHTML='<div class="favorites-empty"><div>♡</div><p>هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید.</p><button class="btn primary" onclick="closeFavorites();location.hash="products"">مشاهده محصولات</button></div>';return}
+  box.innerHTML='<div class="favorites-grid">'+items.map(p=>`<article class="favorite-item"><button class="favorite-remove" onclick="toggleFavorite(${Number(p.id)})">×</button><button class="favorite-open" onclick="closeFavorites();openProductDetail(${Number(p.id)})"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"><div><b>${esc(p.name)}</b><span>${toman(cartPrice(p))}</span></div></button></article>`).join('')+'</div>';
+}
+function openFavorites(){renderFavorites();$('favoritesModal')?.classList.add('show')}
+function closeFavorites(){$('favoritesModal')?.classList.remove('show')}
 
-function imageUrls(p){const raw=String(p.image_url||p.image_key||'').trim(); if(!raw)return ['/assets/mr-mobile-logo.png']; const sep=raw.startsWith('data:image/')?/\r?\n|\|/:/\r?\n|\|/; const urls=raw.split(sep).map(x=>x.trim()).filter(Boolean); return urls.length?urls:['/assets/mr-mobile-logo.png']}
-function imgUrl(p){return imageUrls(p)[0]}
-function numeric(v){return Number(String(v??'').replace(/[^\d]/g,''))||0}
 function productSpecs(p){try{return typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{return {}}}
 
 function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);return discount>0&&discount<price?discount:price}
@@ -86,7 +112,7 @@ function setAdvancedFilter(key,value){state.filters[key]=value;renderProducts()}
 function setSort(value){state.sort=value;renderProducts()}
 function clearAdvancedFilters(){state.filters={category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''};['filterCategory','filterBrand','filterCondition','filterStorage','filterAvailability','filterMinPrice','filterMaxPrice'].forEach(id=>{if($(id))$(id).value=id==='filterMinPrice'||id==='filterMaxPrice'?'': 'همه'});state.category='همه';document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat==='همه'));renderProducts()}
 function updateFilterCount(){const f=state.filters;const n=Object.entries(f).filter(([k,v])=>v&&v!=='همه').length+(state.search?1:0);$('filterCount').textContent=n.toLocaleString('fa-IR')}
-function setCategory(c){state.category=c;state.filters.category=c;const fc=$('filterCategory');if(fc)fc.value=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
+function setCategory(c){state.category=c;state.filters.category=c;const fc=$('filterCategory');if(fc)fc.value=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash="products"}
 function applyFilters(){state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()}
 $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()});
 
@@ -128,7 +154,7 @@ function closeProductDetail(){$('productDetailModal').classList.remove('show')}
 
 {$('productDetailModal').classList.remove('show');}
 
-function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
+function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash="products"}
 function applyFilters(){state.search=$('searchInput').value;renderProducts()}
 $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;renderProducts()});
 
@@ -221,7 +247,7 @@ function cleanNewsletterField(){const el=$('newsletterEmail');if(el && el.value 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',cleanNewsletterField); else cleanNewsletterField();
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
-loadProducts();loadMe();renderCart();
+loadProducts();loadMe();renderCart();updateFavoriteCount();
 
 // V31: robust product-card click handling
 document.addEventListener('click', (event)=>{
