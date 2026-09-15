@@ -115,11 +115,6 @@
   </section>
 </main>
 
-<section id="productPage" class="product-page container hidden">
-  <div class="product-breadcrumb"><a href="/">صفحه اصلی</a><span>›</span><span>محصول</span><span>›</span><b id="detailBreadcrumb">جزئیات محصول</b></div>
-  <div id="productDetail"></div>
-</section>
-
 <footer id="contact" class="footer">
   <div class="container footer-grid">
     <div class="footer-brand"><img src="/assets/mr-mobile-logo.png" alt=""><h3>آقای موبایل</h3><p>فروش انواع موبایل و لوازم جانبی</p></div>
@@ -136,6 +131,24 @@
   <div class="cart-footer"><div><span>مجموع:</span><strong id="drawerTotal">۰ تومان</strong></div><button class="btn primary full" onclick="checkout()">ثبت سفارش</button><button class="btn ghost full" onclick="clearCart()">خالی کردن سبد</button></div>
 </aside>
 <div id="drawerBackdrop" class="backdrop" onclick="toggleCart()"></div>
+
+
+<div id="productDetailModal" class="modal product-detail-modal" onclick="if(event.target===this)closeProductDetail()">
+  <div class="modal-card product-detail-card">
+    <button class="modal-close" onclick="closeProductDetail()">×</button>
+    <div class="product-detail-grid">
+      <div class="product-detail-media"><img id="detailImage" src="/assets/mr-mobile-logo.png" alt=""></div>
+      <div class="product-detail-info">
+        <span id="detailCondition" class="detail-badge">نو</span>
+        <h2 id="detailName">محصول</h2>
+        <div id="detailPrice" class="detail-price">۰ تومان</div>
+        <div class="detail-stock">● موجود در فروشگاه</div>
+        <p id="detailDesc">توضیحات محصول</p>
+        <button id="detailAdd" class="btn primary full">افزودن به سبد خرید</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="authModal" class="modal">
   <div class="modal-card">
