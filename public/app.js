@@ -4,7 +4,8 @@ const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
-function imgUrl(p){return p.image_url||p.image_key||'/assets/mr-mobile-logo.png'}
+function imageUrls(p){const raw=String(p.image_url||p.image_key||'').trim(); if(!raw)return ['/assets/mr-mobile-logo.png']; const urls=raw.split(/\s*(?:,|\n|\r\n|\|)\s*/).map(x=>x.trim()).filter(Boolean); return urls.length?urls:['/assets/mr-mobile-logo.png']}
+function imgUrl(p){return imageUrls(p)[0]}
 function numeric(v){return Number(String(v??'').replace(/[^\d]/g,''))||0}
 function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);return discount>0&&discount<price?discount:price}
 function getBrand(name=''){
@@ -83,29 +84,47 @@ function applyFilters(){state.search=$('searchInput').value;const ps=$('productS
 $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()});
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+let detailTouchX=0;
+function initDetailSwipe(){const el=$('detailImage');if(!el||el.dataset.swipeReady)return;el.dataset.swipeReady='1';el.addEventListener('touchstart',e=>{detailTouchX=e.changedTouches[0].screenX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-detailTouchX;if(Math.abs(dx)>45){dx<0?nextDetailImage():prevDetailImage()}},{passive:true});}
+initDetailSwipe();
+
 function openProductDetail(id){
   const p=state.products.find(x=>Number(x.id)===Number(id));
   if(!p)return;
   $('detailName').textContent=p.name||'محصول';
   $('detailCondition').textContent=p.condition||'نو';
+  $('detailCategory').textContent=p.category||'موبایل';
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
-  const price=Number(String(p.price||'').replace(/[^\d]/g,''))||0;
-  const discount=Number(String(p.discount_price||'').replace(/[^\d]/g,''))||0;
-  $('detailPrice').textContent=toman(discount>0&&discount<price?discount:price);
-  $('detailOldPrice').textContent=discount>0&&discount<price?toman(price):'';
-  $('detailDiscount').textContent=discount>0&&discount<price?Math.round((1-discount/price)*100)+'٪ تخفیف':'';
-  $('detailStock').textContent=p.available?'موجود در فروشگاه':'ناموجود';
+  const price=numeric(p.price), discount=numeric(p.discount_price), hasDiscount=discount>0&&discount<price;
+  $('detailPrice').textContent=toman(hasDiscount?discount:price);
+  $('detailOldPrice').textContent=hasDiscount?toman(price):'';
+  $('detailDiscount').textContent=hasDiscount?Math.round((1-discount/price)*100)+'٪ تخفیف':'';
+  $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود';
   $('detailStock').className='detail-stock '+(p.available?'in':'out');
-  const m=String((p.name||'')+' '+(p.description||'')).match(/(?:\d{2,4}\s?(?:GB|TB)|\d{2,4}\s?گیگ)/i);
-  const storage=m?m[0].replace(/GB/i,'GB').replace(/گیگ/i,' گیگ'):'—'; $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو';
-  const img=imgUrl(p);
-  $('detailImage').src=img; $('detailImage').onerror=()=>{$('detailImage').src='/assets/mr-mobile-logo.png';};
-  $('detailThumb').src=img;
+  const storage=getStorage(p); $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage;
+  $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو';
+  $('detailCategory2').textContent=p.category||'موبایل';
+  const urls=imageUrls(p); state.detailGallery={urls,index:0};
+  renderDetailGallery();
   const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود';
   btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
   $('productDetailModal').classList.add('show');
 }
-function closeProductDetail(){$('productDetailModal').classList.remove('show');}
+function renderDetailGallery(){
+  const g=state.detailGallery||{urls:['/assets/mr-mobile-logo.png'],index:0};
+  const url=g.urls[g.index]||g.urls[0];
+  const img=$('detailImage'); img.src=url; img.alt='تصویر محصول'; img.onerror=()=>{img.src='/assets/mr-mobile-logo.png'};
+  $('detailGalleryCount').textContent=`${(g.index+1).toLocaleString('fa-IR')} / ${g.urls.length.toLocaleString('fa-IR')}`;
+  const thumbs=$('detailThumbs');
+  thumbs.innerHTML=g.urls.map((u,i)=>`<button class="detail-thumb ${i===g.index?'active':''}" onclick="setDetailImage(${i})"><img src="${esc(u)}" alt="تصویر ${i+1}" onerror="this.src='/assets/mr-mobile-logo.png'"></button>`).join('');
+  $('detailPrev').style.display=g.urls.length>1?'grid':'none'; $('detailNext').style.display=g.urls.length>1?'grid':'none';
+}
+function setDetailImage(i){const g=state.detailGallery;if(!g)return;g.index=Math.max(0,Math.min(i,g.urls.length-1));renderDetailGallery()}
+function nextDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index+1)%g.urls.length;renderDetailGallery()}
+function prevDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index-1+g.urls.length)%g.urls.length;renderDetailGallery()}
+function zoomDetailImage(){const src=$('detailImage').src; if(src)window.open(src,'_blank','noopener,noreferrer')}
+function closeProductDetail(){$('productDetailModal').classList.remove('show')}
+{$('productDetailModal').classList.remove('show');}
 
 function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
 function applyFilters(){state.search=$('searchInput').value;renderProducts()}

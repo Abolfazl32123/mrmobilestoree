@@ -159,11 +159,17 @@
     <button class="modal-close" onclick="closeProductDetail()">×</button>
     <div class="product-detail-top">
       <div class="product-detail-gallery">
-        <div class="detail-main-image"><img id="detailImage" src="/assets/mr-mobile-logo.png" alt=""></div>
-        <div class="detail-thumbs"><button class="detail-thumb active"><img id="detailThumb" src="/assets/mr-mobile-logo.png" alt=""></button></div>
+        <div class="detail-main-image">
+          <span id="detailGalleryCount" class="detail-gallery-count">۱ / ۱</span>
+          <button id="detailPrev" class="detail-gallery-nav prev" onclick="prevDetailImage()">‹</button>
+          <img id="detailImage" src="/assets/mr-mobile-logo.png" alt="" ondblclick="zoomDetailImage()">
+          <button id="detailNext" class="detail-gallery-nav next" onclick="nextDetailImage()">›</button>
+          <button class="detail-zoom" onclick="zoomDetailImage()">⛶</button>
+        </div>
+        <div id="detailThumbs" class="detail-thumbs"></div>
       </div>
       <div class="product-detail-info">
-        <div class="detail-topline"><span id="detailCondition" class="detail-badge">نو</span><span class="detail-category">گوشی موبایل</span></div>
+        <div class="detail-topline"><span id="detailCondition" class="detail-badge">نو</span><span id="detailCategory" class="detail-category">گوشی موبایل</span></div>
         <h2 id="detailName">محصول</h2>
         <div class="detail-price-row"><div id="detailPrice" class="detail-price">۰ تومان</div><span id="detailDiscount" class="detail-discount"></span></div>
         <div id="detailOldPrice" class="detail-old-price"></div>
@@ -178,7 +184,7 @@
       </div>
     </div>
     <div class="detail-tabs"><button class="active">مشخصات فنی</button><button>توضیحات</button><button>نظرات مشتریان</button></div>
-    <div class="detail-bottom"><div class="detail-spec-box"><h3>مشخصات محصول</h3><div class="spec-row"><span>دسته‌بندی</span><b>گوشی موبایل</b></div><div class="spec-row"><span>وضعیت</span><b id="detailCondition3">نو</b></div><div class="spec-row"><span>حافظه داخلی</span><b id="detailStorage2">—</b></div></div><div class="detail-related-box"><h3>خرید مطمئن از MR Mobile</h3><p>اطلاعات محصول از پنل مدیریت فروشگاه نمایش داده می‌شود و قیمت و موجودی همیشه به‌روز است.</p></div></div>
+    <div class="detail-bottom"><div class="detail-spec-box"><h3>مشخصات محصول</h3><div class="spec-row"><span>دسته‌بندی</span><b id="detailCategory2">گوشی موبایل</b></div><div class="spec-row"><span>وضعیت</span><b id="detailCondition3">نو</b></div><div class="spec-row"><span>حافظه داخلی</span><b id="detailStorage2">—</b></div></div><div class="detail-related-box"><h3>خرید مطمئن از MR Mobile</h3><p>اطلاعات محصول از پنل مدیریت فروشگاه نمایش داده می‌شود و قیمت و موجودی همیشه به‌روز است.</p></div></div>
   </div>
 </div>
 
