@@ -115,6 +115,8 @@ const infoPages={
 function openInfo(key){const p=infoPages[key];if(!p)return;$('infoTitle').textContent=p.title;$('infoIcon').textContent=p.icon;$('infoContent').innerHTML=p.html;$('infoModal').classList.add('show')}
 function closeInfo(){$('infoModal').classList.remove('show')}
 
-function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
+function cleanNewsletterField(){const el=$('newsletterEmail');if(el && el.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) el.value=''}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',cleanNewsletterField); else cleanNewsletterField();
+function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
 loadProducts();loadMe();renderCart();
