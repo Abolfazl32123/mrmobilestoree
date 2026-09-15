@@ -28,7 +28,7 @@ async function ensureCustomerTables(env){
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)`).run();
 }
 async function ensureReviewTables(env){
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS product_reviews (id INTEGER PRIMARY KEY AUTOINCREMENT,product_id INTEGER NOT NULL,user_id INTEGER NOT NULL,rating INTEGER NOT NULL DEFAULT 5,comment TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'approved',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS product_reviews (id INTEGER PRIMARY KEY AUTOINCREMENT,product_id INTEGER NOT NULL,user_id INTEGER NOT NULL,rating INTEGER NOT NULL DEFAULT 5,comment TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_product_reviews_product ON product_reviews(product_id,status,created_at)`).run();
 }
 async function userFromReq(req,env){const d=await verifySession(req,env,'mr_user');return d?.uid||null}
@@ -101,6 +101,9 @@ export default {async fetch(request,env){
 
     if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
     if(path==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_admin','',0)})
+    if(path==='/api/admin/reviews'&&request.method==='GET'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const rows=(await env.DB.prepare(`SELECT r.id,r.product_id,r.user_id,r.rating,r.comment,r.status,r.created_at,p.name AS product_name,u.name AS customer_name,u.phone FROM product_reviews r LEFT JOIN products p ON p.id=r.product_id LEFT JOIN users u ON u.id=r.user_id ORDER BY r.id DESC`).all()).results;return json(rows)}
+    if(path.match(/^\/api\/admin\/reviews\/\d+\/status$/)&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const status=['pending','approved','rejected'].includes(b.status)?b.status:'pending';await env.DB.prepare('UPDATE product_reviews SET status=? WHERE id=?').bind(status,id).run();return json({ok:true})}
+    if(path.match(/^\/api\/admin\/reviews\/\d+$/)&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM product_reviews WHERE id=?').bind(id).run();return json({ok:true})}
     if(path==='/api/products'&&request.method==='GET'){const all=url.searchParams.get('admin')==='1'&&await adminOK(request,env);return json(await listProducts(env,all))}
     if(path.match(/^\/api\/products\/\d+\/reviews$/)&&request.method==='GET'){
       await ensureReviewTables(env);const id=Number(path.split('/')[3]);
@@ -109,8 +112,10 @@ export default {async fetch(request,env){
     if(path.match(/^\/api\/products\/\d+\/reviews$/)&&request.method==='POST'){
       await ensureReviewTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'برای ثبت نظر ابتدا وارد حساب کاربری شوید.'},401);
       const id=Number(path.split('/')[3]);const product=await env.DB.prepare('SELECT id FROM products WHERE id=?').bind(id).first();if(!product)return json({error:'محصول پیدا نشد.'},404);
-      const b=await request.json().catch(()=>({}));const rating=Math.max(1,Math.min(5,Number(b.rating)||5));const comment=String(b.comment||'').trim().slice(0,1000);if(comment.length<3)return json({error:'متن نظر خیلی کوتاه است.'},400);
-      await env.DB.prepare("INSERT INTO product_reviews(product_id,user_id,rating,comment,status) VALUES(?,?,?,?,?)").bind(id,uid,rating,comment,'approved').run();return json({ok:true});
+      const bought=await env.DB.prepare('SELECT 1 FROM order_items oi JOIN orders o ON o.id=oi.order_id WHERE oi.product_id=? AND o.user_id=? LIMIT 1').bind(id,uid).first();if(!bought)return json({error:'ثبت نظر فقط برای مشتریانی امکان‌پذیر است که این محصول را خریداری کرده‌اند.'},403);
+      const existing=await env.DB.prepare('SELECT id FROM product_reviews WHERE product_id=? AND user_id=? LIMIT 1').bind(id,uid).first();if(existing)return json({error:'برای این محصول قبلاً نظر ثبت کرده‌اید.'},409);
+      const b=await request.json().catch(()=>({}));const rating=Math.max(1,Math.min(5,Number(b.rating)||5));const comment=String(b.comment||'').trim().slice(0,1000);if(comment.length<3)return json({error:'متن نظر حداقل ۳ کاراکتر باشد.'},400);
+      await env.DB.prepare("INSERT INTO product_reviews(product_id,user_id,rating,comment,status) VALUES(?,?,?,?,?)").bind(id,uid,rating,comment,'pending').run();return json({ok:true,status:'pending'});
     }
     if(path.startsWith('/api/products/')&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM products WHERE id=?').bind(id).run();return json({ok:true})}
     if(path==='/api/products'&&request.method==='POST'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureProductColumns(env);const b=await request.json().catch(()=>({}));if(!b.name||!b.price)return json({error:'نام و قیمت الزامی است.'},400);const r=await env.DB.prepare('INSERT INTO products(name,price,discount_price,condition,badge,featured,bestseller,newest,category,specs,description,image_key,image_url,available) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(b.name,b.price,b.discount_price||'',b.condition||'نو',b.badge||'',b.featured?1:0,b.bestseller?1:0,b.newest?1:0,b.category||'موبایل',typeof b.specs==='string'?b.specs:JSON.stringify(b.specs||{}),b.description||'',b.image_key||'',b.image_url||'',b.available?1:0).run();return json({ok:true,id:r.meta.last_row_id})}
