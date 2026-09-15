@@ -30,11 +30,21 @@ function openProductDetail(id){
   const p=state.products.find(x=>Number(x.id)===Number(id));
   if(!p)return;
   $('detailName').textContent=p.name||'محصول';
-  $('detailPrice').textContent=toman(p.price||0);
   $('detailCondition').textContent=p.condition||'نو';
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
-  const img=imgUrl(p); $('detailImage').src=img; $('detailImage').onerror=()=>{ $('detailImage').src='/assets/mr-mobile-logo.png'; };
-  const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید':'ناموجود';
+  const price=Number(String(p.price||'').replace(/[^\d]/g,''))||0;
+  const discount=Number(String(p.discount_price||'').replace(/[^\d]/g,''))||0;
+  $('detailPrice').textContent=toman(discount>0&&discount<price?discount:price);
+  $('detailOldPrice').textContent=discount>0&&discount<price?toman(price):'';
+  $('detailDiscount').textContent=discount>0&&discount<price?Math.round((1-discount/price)*100)+'٪ تخفیف':'';
+  $('detailStock').textContent=p.available?'موجود در فروشگاه':'ناموجود';
+  $('detailStock').className='detail-stock '+(p.available?'in':'out');
+  const m=String((p.name||'')+' '+(p.description||'')).match(/(?:\d{2,4}\s?(?:GB|TB)|\d{2,4}\s?گیگ)/i);
+  const storage=m?m[0].replace(/GB/i,'GB').replace(/گیگ/i,' گیگ'):'—'; $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو';
+  const img=imgUrl(p);
+  $('detailImage').src=img; $('detailImage').onerror=()=>{$('detailImage').src='/assets/mr-mobile-logo.png';};
+  $('detailThumb').src=img;
+  const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود';
   btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
   $('productDetailModal').classList.add('show');
 }

@@ -1,4 +1,3 @@
--- Product presentation fields. Safe for existing databases when applied once.
 ALTER TABLE products ADD COLUMN discount_price TEXT NOT NULL DEFAULT '';
 ALTER TABLE products ADD COLUMN badge TEXT NOT NULL DEFAULT '';
 ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0;
