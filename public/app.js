@@ -1,9 +1,14 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
+const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
 
 const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
+function isFavorite(id){return state.favorites.includes(Number(id))}
+function saveFavorites(){localStorage.setItem('mr_favorites',JSON.stringify(state.favorites))}
+function toggleFavorite(id){const n=Number(id);if(isFavorite(n)){state.favorites=state.favorites.filter(x=>x!==n);toast('از علاقه‌مندی‌ها حذف شد')}else{state.favorites.push(n);toast('به علاقه‌مندی‌ها اضافه شد ❤️')}saveFavorites();updateFavoriteButtons(n)}
+function updateFavoriteButtons(id){const active=isFavorite(id);document.querySelectorAll(`[data-favorite-id="${id}"]`).forEach(b=>{b.classList.toggle('active',active);b.textContent=active?'♥':'♡';b.setAttribute('aria-pressed',active?'true':'false');b.title=active?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'})}
+
 function imageUrls(p){const raw=String(p.image_url||p.image_key||'').trim(); if(!raw)return ['/assets/mr-mobile-logo.png']; const sep=raw.startsWith('data:image/')?/\r?\n|\|/:/\r?\n|\|/; const urls=raw.split(sep).map(x=>x.trim()).filter(Boolean); return urls.length?urls:['/assets/mr-mobile-logo.png']}
 function imgUrl(p){return imageUrls(p)[0]}
 function numeric(v){return Number(String(v??'').replace(/[^\d]/g,''))||0}
@@ -65,7 +70,7 @@ function renderProducts(){
     const price=numeric(p.price),discount=numeric(p.discount_price),hasDiscount=discount>0&&discount<price;
     return `<article class="product-card ${p.available?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
-      <button class="wish" onclick="event.stopPropagation();toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button>
+      <button class="wish ${isFavorite(p.id)?'active':''}" data-favorite-id="${p.id}" aria-pressed="${isFavorite(p.id)?'true':'false'}" title="${isFavorite(p.id)?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'}" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button>
       <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
@@ -98,7 +103,7 @@ async function openProductDetail(id){
   const storage=getStorage(p); $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو'; $('detailCategory2').textContent=p.category||'موبایل';
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
   const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
-  state.detailProductId=Number(id); setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
+  state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
 }
 function setDetailTab(tab){state.detailTab=tab;document.querySelectorAll('.detail-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.detail-panel').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==tab))}
 async function loadReviews(productId){const box=$('detailReviews');if(!box)return;box.innerHTML='<div class="loading">در حال دریافت نظرات...</div>';try{const d=await fetch('/api/products/'+productId+'/reviews').then(r=>r.json());const rows=Array.isArray(d)?d:[];box.innerHTML=`<div class="review-summary"><strong>${rows.length.toLocaleString('fa-IR')}</strong><span>نظر ثبت شده</span></div>`+(rows.length?rows.map(r=>`<article class="review-card"><div><b>${esc(r.user_name||'مشتری')}</b><span>${'★'.repeat(Number(r.rating)||5)}${'☆'.repeat(5-(Number(r.rating)||5))}</span></div><p>${esc(r.comment||'')}</p><small>${esc(r.created_at||'')}</small></article>`).join(''):'<div class="empty">هنوز نظری برای این محصول ثبت نشده است.</div>')+`<div class="review-form"><h4>نظر شما</h4><div class="review-stars">${[1,2,3,4,5].map(n=>`<button type="button" onclick="setReviewRating(${n})" data-rating="${n}">★</button>`).join('')}</div><textarea id="reviewText" placeholder="نظر خود را درباره این محصول بنویسید..."></textarea><button class="btn primary" onclick="submitReview(${productId})">ثبت نظر</button><small id="reviewMsg"></small></div>`;setReviewRating(5)}catch(e){box.innerHTML='<div class="empty">دریافت نظرات انجام نشد.</div>'}}
@@ -118,6 +123,7 @@ function nextDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)re
 function prevDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index-1+g.urls.length)%g.urls.length;renderDetailGallery()}
 function zoomDetailImage(){const src=$('detailImage').src; if(src)window.open(src,'_blank','noopener,noreferrer')}
 function closeProductDetail(){$('productDetailModal').classList.remove('show')}
+
 {$('productDetailModal').classList.remove('show');}
 
 function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
