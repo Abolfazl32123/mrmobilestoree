@@ -1,30 +1,87 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null};
+const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
 
 const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
 function imgUrl(p){return p.image_url||p.image_key||'/assets/mr-mobile-logo.png'}
-
+function numeric(v){return Number(String(v??'').replace(/[^\d]/g,''))||0}
+function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);return discount>0&&discount<price?discount:price}
+function getBrand(name=''){
+  const n=name.toLowerCase();
+  if(/iphone|ipad|apple/.test(n))return 'Apple';
+  if(/samsung|galaxy/.test(n))return 'Samsung';
+  if(/xiaomi|redmi|poco/.test(n))return 'Xiaomi';
+  if(/honor/.test(n))return 'Honor';
+  if(/huawei/.test(n))return 'Huawei';
+  if(/oneplus/.test(n))return 'OnePlus';
+  if(/nothing/.test(n))return 'Nothing';
+  if(/google|pixel/.test(n))return 'Google';
+  if(/nokia/.test(n))return 'Nokia';
+  if(/motorola|moto/.test(n))return 'Motorola';
+  return 'سایر';
+}
+function getStorage(p){
+  const m=String((p.name||'')+' '+(p.description||'')).match(/(?:\d{2,4}\s?(?:GB|TB)|\d{2,4}\s?گیگ)/i);
+  return m?m[0].replace(/\s+/g,' ').trim().toUpperCase().replace(/گیگ/,'GB'):'—';
+}
 async function loadProducts(){
-  try{const r=await fetch('/api/products');state.products=await r.json();renderProducts();}
+  try{const r=await fetch('/api/products');state.products=await r.json();populateAdvancedFilters();renderProducts();}
   catch(e){$('productsGrid').innerHTML='<div class="loading">خطا در دریافت محصولات.</div>'}
+}
+function populateAdvancedFilters(){
+  const cats=[...new Set(state.products.map(p=>p.category||'موبایل'))].sort((a,b)=>a.localeCompare(b,'fa'));
+  const brands=[...new Set(state.products.map(p=>getBrand(p.name)))].sort();
+  const storages=[...new Set(state.products.map(getStorage).filter(x=>x!=='—'))];
+  const cat=$('filterCategory'),brand=$('filterBrand'),storage=$('filterStorage');
+  if(cat)cat.innerHTML='<option value="همه">همه دسته‌ها</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  if(brand)brand.innerHTML='<option value="همه">همه برندها</option>'+brands.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  if(storage)storage.innerHTML='<option value="همه">همه حافظه‌ها</option>'+storages.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
 }
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
-  const list=state.products.filter(p=>(state.category==='همه'||p.category===state.category||state.category==='موبایل'&&(!p.category||p.category==='نو'))&&(!q||String(p.name).toLowerCase().includes(q)||String(p.description||'').toLowerCase().includes(q)));
-  if(!list.length){$('productsGrid').innerHTML='<div class="loading">محصولی پیدا نشد.</div>';return}
-  $('productsGrid').innerHTML=list.map(p=>`
-    <article class="product-card ${p.available?'':'unavailable'}" onclick="openProductDetail(${p.id})">
+  let list=state.products.filter(p=>{
+    const cat=p.category||'موبایل';
+    const text=String((p.name||'')+' '+(p.description||'')+' '+getBrand(p.name)).toLowerCase();
+    const price=getEffectivePrice(p), min=numeric(state.filters.minPrice), max=numeric(state.filters.maxPrice);
+    return (state.category==='همه'||cat===state.category)
+      && (!q||text.includes(q))
+      && (state.filters.category==='همه'||cat===state.filters.category)
+      && (state.filters.brand==='همه'||getBrand(p.name)===state.filters.brand)
+      && (state.filters.condition==='همه'||String(p.condition||'نو')===state.filters.condition)
+      && (state.filters.storage==='همه'||getStorage(p)===state.filters.storage)
+      && (state.filters.availability==='همه'||(state.filters.availability==='available'?!!p.available:!p.available))
+      && (!min||price>=min) && (!max||price<=max);
+  });
+  if(state.sort==='priceAsc')list.sort((a,b)=>getEffectivePrice(a)-getEffectivePrice(b));
+  else if(state.sort==='priceDesc')list.sort((a,b)=>getEffectivePrice(b)-getEffectivePrice(a));
+  else if(state.sort==='name')list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'fa'));
+  else list.sort((a,b)=>Number(b.id)-Number(a.id));
+  $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
+  updateFilterCount();
+  if(!list.length){$('productsGrid').innerHTML='<div class="loading">محصولی با این فیلترها پیدا نشد.</div>';return}
+  $('productsGrid').innerHTML=list.map(p=>{
+    const price=numeric(p.price),discount=numeric(p.discount_price),hasDiscount=discount>0&&discount<price;
+    return `<article class="product-card ${p.available?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
-      <button class="wish" onclick="toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button>
+      <button class="wish" onclick="event.stopPropagation();toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button>
       <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
       <div class="product-name">${esc(p.name)}</div>
-      <div class="product-meta">${esc(p.condition||'نو')} ${p.description?' | '+esc(p.description).slice(0,55):''}</div>
-      <div class="price">${esc(String(p.price))} <small>تومان</small></div>
-      <button class="add-btn" ${p.available?'':'disabled'} onclick="addToCart(${p.id})">${p.available?'افزودن به سبد خرید 🛒':'ناموجود'}</button>
-    </article>`).join('');
+      <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
+      <div class="price">${toman(hasDiscount?discount:price)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div>
+      <button class="add-btn" ${p.available?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${p.available?'افزودن به سبد خرید 🛒':'ناموجود'}</button>
+    </article>`}).join('');
 }
+function syncProductSearch(v){state.search=v;const h=$('searchInput');if(h&&h.value!==v)h.value=v;renderProducts()}
+function toggleAdvancedFilters(){$('advancedFilters').classList.toggle('hidden')}
+function setAdvancedFilter(key,value){state.filters[key]=value;renderProducts()}
+function setSort(value){state.sort=value;renderProducts()}
+function clearAdvancedFilters(){state.filters={category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''};['filterCategory','filterBrand','filterCondition','filterStorage','filterAvailability','filterMinPrice','filterMaxPrice'].forEach(id=>{if($(id))$(id).value=id==='filterMinPrice'||id==='filterMaxPrice'?'': 'همه'});state.category='همه';document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat==='همه'));renderProducts()}
+function updateFilterCount(){const f=state.filters;const n=Object.entries(f).filter(([k,v])=>v&&v!=='همه').length+(state.search?1:0);$('filterCount').textContent=n.toLocaleString('fa-IR')}
+function setCategory(c){state.category=c;state.filters.category=c;const fc=$('filterCategory');if(fc)fc.value=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
+function applyFilters(){state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()}
+$('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()});
+
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function openProductDetail(id){
   const p=state.products.find(x=>Number(x.id)===Number(id));

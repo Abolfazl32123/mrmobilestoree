@@ -94,6 +94,27 @@
         <button class="filter" data-cat="تبلت" onclick="setCategory('تبلت')">تبلت</button>
       </div>
     </div>
+    <div class="advanced-filter-bar">
+      <div class="filter-search">🔎 <input id="productSearch" type="search" placeholder="جستجوی مدل، برند یا توضیحات..." oninput="syncProductSearch(this.value)"></div>
+      <button class="advanced-filter-toggle" type="button" onclick="toggleAdvancedFilters()">⚙️ فیلتر حرفه‌ای <span id="filterCount">۰</span></button>
+      <select id="sortProducts" class="sort-select" onchange="setSort(this.value)">
+        <option value="newest">جدیدترین</option>
+        <option value="priceAsc">ارزان‌ترین</option>
+        <option value="priceDesc">گران‌ترین</option>
+        <option value="name">نام محصول</option>
+      </select>
+    </div>
+    <div id="advancedFilters" class="advanced-filters hidden">
+      <div class="filter-field"><label>دسته‌بندی</label><select id="filterCategory" onchange="setAdvancedFilter('category',this.value)"><option value="همه">همه دسته‌ها</option></select></div>
+      <div class="filter-field"><label>برند</label><select id="filterBrand" onchange="setAdvancedFilter('brand',this.value)"><option value="همه">همه برندها</option></select></div>
+      <div class="filter-field"><label>وضعیت</label><select id="filterCondition" onchange="setAdvancedFilter('condition',this.value)"><option value="همه">همه</option><option value="نو">نو</option><option value="کارکرده">کارکرده</option></select></div>
+      <div class="filter-field"><label>حافظه</label><select id="filterStorage" onchange="setAdvancedFilter('storage',this.value)"><option value="همه">همه حافظه‌ها</option></select></div>
+      <div class="filter-field"><label>وضعیت موجودی</label><select id="filterAvailability" onchange="setAdvancedFilter('availability',this.value)"><option value="همه">همه</option><option value="available">فقط موجود</option><option value="unavailable">فقط ناموجود</option></select></div>
+      <div class="filter-field"><label>حداقل قیمت (تومان)</label><input id="filterMinPrice" inputmode="numeric" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰" oninput="setAdvancedFilter('minPrice',this.value)"></div>
+      <div class="filter-field"><label>حداکثر قیمت (تومان)</label><input id="filterMaxPrice" inputmode="numeric" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰" oninput="setAdvancedFilter('maxPrice',this.value)"></div>
+      <button class="clear-filters" type="button" onclick="clearAdvancedFilters()">پاک کردن فیلترها ↺</button>
+    </div>
+    <div id="productsResult" class="products-result"></div>
     <div id="productsGrid" class="products-grid"><div class="loading">در حال دریافت محصولات...</div></div>
   </section>
 
