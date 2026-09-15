@@ -179,12 +179,12 @@
           <div><span>حافظه داخلی</span><b id="detailStorage">—</b></div>
           <div><span>وضعیت</span><b id="detailCondition2">سالم و تست‌شده</b></div>
         </div>
-        <div class="detail-actions"><button id="detailAdd" class="btn primary full">افزودن به سبد خرید 🛒</button><button class="btn ghost" onclick="toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡ علاقه‌مندی</button></div>
+        <div class="detail-actions"><button id="detailAdd" class="btn primary full">افزودن به سبد خرید 🛒</button><button id="detailFavorite" class="btn ghost" onclick="toggleFavorite(state.detailProductId)">♡ علاقه‌مندی</button></div>
         <div class="detail-benefits"><span>↩ ۷ روز ضمانت بازگشت</span><span>🚚 ارسال سریع</span><span>🛡️ ضمانت اصالت کالا</span></div>
       </div>
     </div>
     <div class="detail-tabs"><button data-tab="specs" class="active" onclick="setDetailTab('specs')">مشخصات فنی</button><button data-tab="desc" onclick="setDetailTab('desc')">توضیحات</button><button data-tab="reviews" onclick="setDetailTab('reviews')">نظرات مشتریان</button></div>
-    <div class="detail-panel" data-panel="specs"><div class="detail-bottom"><div class="detail-spec-box"><h3>مشخصات محصول</h3><div class="spec-row"><span>دسته‌بندی</span><b id="detailCategory2">گوشی موبایل</b></div><div class="spec-row"><span>وضعیت</span><b id="detailCondition3">نو</b></div><div class="spec-row"><span>حافظه داخلی</span><b id="detailStorage2">—</b></div></div><div class="detail-related-box"><h3>خرید مطمئن از MR Mobile</h3><p>اطلاعات محصول از پنل مدیریت فروشگاه نمایش داده می‌شود و قیمت و موجودی همیشه به‌روز است.</p></div></div></div>
+    <div class="detail-panel" data-panel="specs"><div class="detail-bottom"><div class="detail-spec-box"><h3>مشخصات محصول</h3><div id="detailSpecsRows"></div></div><div class="detail-related-box"><h3>خرید مطمئن از MR Mobile</h3><p>اطلاعات محصول از پنل مدیریت فروشگاه نمایش داده می‌شود و قیمت و موجودی همیشه به‌روز است.</p></div></div></div>
     <div class="detail-panel hidden" data-panel="desc"><div class="detail-spec-box detail-description-box"><h3>توضیحات محصول</h3><p id="detailDescriptionFull">توضیحات محصول</p></div></div>
     <div class="detail-panel hidden" data-panel="reviews"><div id="detailReviews" class="detail-reviews"></div></div>
   </div>

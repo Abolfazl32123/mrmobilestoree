@@ -12,6 +12,8 @@ function updateFavoriteButtons(id){const active=isFavorite(id);document.querySel
 function imageUrls(p){const raw=String(p.image_url||p.image_key||'').trim(); if(!raw)return ['/assets/mr-mobile-logo.png']; const sep=raw.startsWith('data:image/')?/\r?\n|\|/:/\r?\n|\|/; const urls=raw.split(sep).map(x=>x.trim()).filter(Boolean); return urls.length?urls:['/assets/mr-mobile-logo.png']}
 function imgUrl(p){return imageUrls(p)[0]}
 function numeric(v){return Number(String(v??'').replace(/[^\d]/g,''))||0}
+function productSpecs(p){try{return typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{return {}}}
+
 function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);return discount>0&&discount<price?discount:price}
 function getBrand(name=''){
   const n=name.toLowerCase();
@@ -100,7 +102,7 @@ async function openProductDetail(id){
   const price=numeric(p.price),discount=numeric(p.discount_price),hasDiscount=discount>0&&discount<price;
   $('detailPrice').textContent=toman(hasDiscount?discount:price); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-discount/price)*100)+'٪ تخفیف':'';
   $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
-  const storage=getStorage(p); $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو'; $('detailCategory2').textContent=p.category||'موبایل';
+  const storage=getStorage(p),sp=productSpecs(p); $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو'; $('detailCategory2').textContent=p.category||'موبایل'; const specMap={batteryHealth:'سلامت باتری',appearance:'وضعیت ظاهری',registry:'رجیستری',simCount:'تعداد سیم‌کارت',ram:'RAM',color:'رنگ',processor:'پردازنده',accessories:'لوازم همراه',warranty:'گارانتی'}; const box=$('detailSpecsRows'); if(box){const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',p.condition||'نو'],['حافظه داخلی',storage],...Object.entries(specMap).filter(([k])=>sp[k]).map(([k,l])=>[l,sp[k]])];box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
   const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
   state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));

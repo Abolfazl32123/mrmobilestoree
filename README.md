@@ -1,2 +1,1 @@
-# MR Mobile V22 Plus — Category Fix
-این نسخه فیلد «دسته‌بندی» را به فرم افزودن/ویرایش محصول اضافه می‌کند و ستون category را برای محصولات موجود به‌صورت خودکار در D1 ایجاد می‌کند.
+MR Mobile V29 — complete product specifications, working favorites button, admin scroll, and existing gallery/reviews.
