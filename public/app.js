@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
-function imageUrls(p){const raw=String(p.image_url||p.image_key||'').trim(); if(!raw)return ['/assets/mr-mobile-logo.png']; const urls=raw.split(/\s*(?:,|\n|\r\n|\|)\s*/).map(x=>x.trim()).filter(Boolean); return urls.length?urls:['/assets/mr-mobile-logo.png']}
+function imageUrls(p){const raw=String(p.image_url||p.image_key||'').trim(); if(!raw)return ['/assets/mr-mobile-logo.png']; const sep=raw.startsWith('data:image/')?/\r?\n|\|/:/\r?\n|\|/; const urls=raw.split(sep).map(x=>x.trim()).filter(Boolean); return urls.length?urls:['/assets/mr-mobile-logo.png']}
 function imgUrl(p){return imageUrls(p)[0]}
 function numeric(v){return Number(String(v??'').replace(/[^\d]/g,''))||0}
 function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);return discount>0&&discount<price?discount:price}
@@ -88,28 +88,22 @@ let detailTouchX=0;
 function initDetailSwipe(){const el=$('detailImage');if(!el||el.dataset.swipeReady)return;el.dataset.swipeReady='1';el.addEventListener('touchstart',e=>{detailTouchX=e.changedTouches[0].screenX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-detailTouchX;if(Math.abs(dx)>45){dx<0?nextDetailImage():prevDetailImage()}},{passive:true});}
 initDetailSwipe();
 
-function openProductDetail(id){
-  const p=state.products.find(x=>Number(x.id)===Number(id));
-  if(!p)return;
-  $('detailName').textContent=p.name||'محصول';
-  $('detailCondition').textContent=p.condition||'نو';
-  $('detailCategory').textContent=p.category||'موبایل';
-  $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
-  const price=numeric(p.price), discount=numeric(p.discount_price), hasDiscount=discount>0&&discount<price;
-  $('detailPrice').textContent=toman(hasDiscount?discount:price);
-  $('detailOldPrice').textContent=hasDiscount?toman(price):'';
-  $('detailDiscount').textContent=hasDiscount?Math.round((1-discount/price)*100)+'٪ تخفیف':'';
-  $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود';
-  $('detailStock').className='detail-stock '+(p.available?'in':'out');
-  const storage=getStorage(p); $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage;
-  $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو';
-  $('detailCategory2').textContent=p.category||'موبایل';
-  const urls=imageUrls(p); state.detailGallery={urls,index:0};
-  renderDetailGallery();
-  const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود';
-  btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
-  $('productDetailModal').classList.add('show');
+async function openProductDetail(id){
+  const p=state.products.find(x=>Number(x.id)===Number(id)); if(!p)return;
+  $('detailName').textContent=p.name||'محصول'; $('detailCondition').textContent=p.condition||'نو'; $('detailCategory').textContent=p.category||'موبایل';
+  $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
+  const price=numeric(p.price),discount=numeric(p.discount_price),hasDiscount=discount>0&&discount<price;
+  $('detailPrice').textContent=toman(hasDiscount?discount:price); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-discount/price)*100)+'٪ تخفیف':'';
+  $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
+  const storage=getStorage(p); $('detailStorage').textContent=storage; $('detailStorage2').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; $('detailCondition3').textContent=p.condition||'نو'; $('detailCategory2').textContent=p.category||'موبایل';
+  const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
+  const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
+  state.detailProductId=Number(id); setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
 }
+function setDetailTab(tab){state.detailTab=tab;document.querySelectorAll('.detail-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.detail-panel').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==tab))}
+async function loadReviews(productId){const box=$('detailReviews');if(!box)return;box.innerHTML='<div class="loading">در حال دریافت نظرات...</div>';try{const d=await fetch('/api/products/'+productId+'/reviews').then(r=>r.json());const rows=Array.isArray(d)?d:[];box.innerHTML=`<div class="review-summary"><strong>${rows.length.toLocaleString('fa-IR')}</strong><span>نظر ثبت شده</span></div>`+(rows.length?rows.map(r=>`<article class="review-card"><div><b>${esc(r.user_name||'مشتری')}</b><span>${'★'.repeat(Number(r.rating)||5)}${'☆'.repeat(5-(Number(r.rating)||5))}</span></div><p>${esc(r.comment||'')}</p><small>${esc(r.created_at||'')}</small></article>`).join(''):'<div class="empty">هنوز نظری برای این محصول ثبت نشده است.</div>')+`<div class="review-form"><h4>نظر شما</h4><div class="review-stars">${[1,2,3,4,5].map(n=>`<button type="button" onclick="setReviewRating(${n})" data-rating="${n}">★</button>`).join('')}</div><textarea id="reviewText" placeholder="نظر خود را درباره این محصول بنویسید..."></textarea><button class="btn primary" onclick="submitReview(${productId})">ثبت نظر</button><small id="reviewMsg"></small></div>`;setReviewRating(5)}catch(e){box.innerHTML='<div class="empty">دریافت نظرات انجام نشد.</div>'}}
+let reviewRating=5;function setReviewRating(n){reviewRating=n;document.querySelectorAll('.review-stars button').forEach(b=>b.classList.toggle('selected',Number(b.dataset.rating)<=n))}
+async function submitReview(productId){const text=$('reviewText')?.value.trim();if(!text)return $('reviewMsg').textContent='متن نظر را وارد کنید.';try{const r=await fetch('/api/products/'+productId+'/reviews',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rating:reviewRating,comment:text})});const d=await r.json();if(!r.ok)throw Error(d.error||'خطا');await loadReviews(productId);toast('نظر شما ثبت شد ✓')}catch(e){$('reviewMsg').textContent=e.message}}
 function renderDetailGallery(){
   const g=state.detailGallery||{urls:['/assets/mr-mobile-logo.png'],index:0};
   const url=g.urls[g.index]||g.urls[0];
