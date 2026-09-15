@@ -122,7 +122,7 @@
   <div class="container footer-grid">
     <div class="footer-brand"><img src="/assets/mr-mobile-logo.png" alt=""><h3>آقای موبایل</h3><p>فروش انواع موبایل و لوازم جانبی</p></div>
     <div><h4>لینک‌های سریع</h4><a href="#home">صفحه اصلی</a><a href="#products">محصولات</a><a href="#categories">دسته‌بندی‌ها</a><a href="#about">درباره ما</a></div>
-    <div><h4>خدمات مشتریان</h4><a href="#">سوالات متداول</a><a href="#">شرایط بازگشت کالا</a><a href="#">حریم خصوصی</a><a href="#">قوانین و مقررات</a></div>
+    <div><h4>خدمات مشتریان</h4><a href="javascript:void(0)" onclick="openInfo('faq')">سوالات متداول</a><a href="javascript:void(0)" onclick="openInfo('returns')">شرایط بازگشت کالا</a><a href="javascript:void(0)" onclick="openInfo('privacy')">حریم خصوصی</a><a href="javascript:void(0)" onclick="openInfo('terms')">قوانین و مقررات</a></div>
     <div><h4>اطلاعات تماس</h4><p>📍 مازندران، قائمشهر، ابتدای خیابان کوچکسرا، نبش شقایق یک، فروشگاه آقای موبایل</p><p>☎️ 09393699909</p><p>📸 @mr.mobile.stor</p></div>
   </div>
   <div class="copyright">تمامی حقوق محفوظ است © ۱۴۰۵ — آقای موبایل</div>
@@ -204,6 +204,15 @@
     <button id="sendPaymentBtn" class="btn primary full" onclick="submitPaymentReceipt()">ارسال رسید برای بررسی</button>
     <button class="btn ghost full" onclick="closePayment()">بعداً ارسال می‌کنم</button>
     <div id="paymentError" class="form-error"></div>
+  </div>
+</div>
+
+<div id="infoModal" class="modal">
+  <div class="modal-card info-card">
+    <button class="modal-close" onclick="closeInfo()">×</button>
+    <div class="payment-icon" id="infoIcon">ℹ️</div>
+    <h2 id="infoTitle">اطلاعات</h2>
+    <div id="infoContent" class="info-content"></div>
   </div>
 </div>
 <script src="/app.js"></script>
