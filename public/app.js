@@ -95,7 +95,7 @@ let detailTouchX=0;
 function initDetailSwipe(){const el=$('detailImage');if(!el||el.dataset.swipeReady)return;el.dataset.swipeReady='1';el.addEventListener('touchstart',e=>{detailTouchX=e.changedTouches[0].screenX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-detailTouchX;if(Math.abs(dx)>45){dx<0?nextDetailImage():prevDetailImage()}},{passive:true});}
 initDetailSwipe();
 
-async function openProductDetail(id){
+window.openProductDetail=async function openProductDetail(id){
   const p=state.products.find(x=>Number(x.id)===Number(id)); if(!p)return;
   $('detailName').textContent=p.name||'محصول'; $('detailCondition').textContent=p.condition||'نو'; $('detailCategory').textContent=p.category||'موبایل';
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
@@ -222,3 +222,12 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
 loadProducts();loadMe();renderCart();
+
+// V31: robust product-card click handling
+document.addEventListener('click', (event)=>{
+  const card=event.target.closest('.product-card');
+  if(card && !event.target.closest('button')){
+    const m=card.getAttribute('onclick')?.match(/openProductDetail\((\d+)\)/);
+    if(m) window.openProductDetail(Number(m[1]));
+  }
+});
