@@ -60,8 +60,18 @@ function getStorage(p){
   return m?m[0].replace(/\s+/g,' ').trim().toUpperCase().replace(/گیگ/,'GB'):'—';
 }
 async function loadProducts(){
-  try{const r=await fetch('/api/products');state.products=await r.json();populateAdvancedFilters();renderProducts();}
-  catch(e){$('productsGrid').innerHTML='<div class="loading">خطا در دریافت محصولات.</div>'}
+  try{
+    const r=await fetch('/api/products',{cache:'no-store'});
+    const raw=await r.text();
+    if(!r.ok) throw new Error('HTTP '+r.status+' '+raw.slice(0,180));
+    const data=JSON.parse(raw);
+    if(!Array.isArray(data)) throw new Error('پاسخ محصولات معتبر نیست');
+    state.products=data;populateAdvancedFilters();renderProducts();
+  }catch(e){
+    console.error('loadProducts failed',e);
+    const grid=$('productsGrid');
+    if(grid) grid.innerHTML='<div class="loading">خطا در دریافت محصولات. لطفاً صفحه را یک‌بار تازه‌سازی کنید.</div>';
+  }
 }
 function populateAdvancedFilters(){
   const cats=[...new Set(state.products.map(p=>p.category||'موبایل'))].sort((a,b)=>a.localeCompare(b,'fa'));

@@ -38,7 +38,20 @@ async function ensureProductColumns(env){
   const adds={discount_price:"ALTER TABLE products ADD COLUMN discount_price TEXT NOT NULL DEFAULT ''",badge:"ALTER TABLE products ADD COLUMN badge TEXT NOT NULL DEFAULT ''",featured:"ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0",bestseller:"ALTER TABLE products ADD COLUMN bestseller INTEGER NOT NULL DEFAULT 0",newest:"ALTER TABLE products ADD COLUMN newest INTEGER NOT NULL DEFAULT 0",category:"ALTER TABLE products ADD COLUMN category TEXT NOT NULL DEFAULT 'موبایل'",specs:"ALTER TABLE products ADD COLUMN specs TEXT NOT NULL DEFAULT '{}'"};
   for(const [name,sql] of Object.entries(adds)) if(!names.has(name)) await env.DB.prepare(sql).run();
 }
-async function listProducts(env,all=false){await ensureProductColumns(env);let q='SELECT id,name,price,discount_price,condition,badge,featured,bestseller,newest,category,specs,description,image_key,image_url,available,created_at FROM products';if(!all)q+=' WHERE available=1';q+=' ORDER BY id DESC';return (await env.DB.prepare(q).all()).results}
+async function listProducts(env,all=false){
+  const info=await env.DB.prepare('PRAGMA table_info(products)').all();
+  const names=new Set((info.results||[]).map(x=>x.name));
+  const base=['id','name','price','condition','description','image_key','image_url','available','created_at'];
+  const optional=['discount_price','badge','featured','bestseller','newest','category','specs'];
+  const cols=base.concat(optional.filter(c=>names.has(c)));
+  let q='SELECT '+cols.join(',')+' FROM products';
+  if(!all)q+=' WHERE available=1';
+  q+=' ORDER BY id DESC';
+  const rows=(await env.DB.prepare(q).all()).results||[];
+  return rows.map(p=>({
+    discount_price:p.discount_price??'',badge:p.badge??'',featured:Number(p.featured||0),bestseller:Number(p.bestseller||0),newest:Number(p.newest||0),category:p.category||'موبایل',specs:p.specs||'{}',...p
+  }));
+}
 
 export default {async fetch(request,env){
   const url=new URL(request.url),path=url.pathname;
