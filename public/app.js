@@ -13,18 +13,78 @@ async function loadProducts(){
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
   const list=state.products.filter(p=>(state.category==='همه'||p.category===state.category||state.category==='موبایل'&&(!p.category||p.category==='نو'))&&(!q||String(p.name).toLowerCase().includes(q)||String(p.description||'').toLowerCase().includes(q)));
+  if(!$('productsGrid'))return;
   if(!list.length){$('productsGrid').innerHTML='<div class="loading">محصولی پیدا نشد.</div>';return}
   $('productsGrid').innerHTML=list.map(p=>`
-    <article class="product-card ${p.available?'':'unavailable'}">
+    <article class="product-card ${p.available?'':'unavailable'}" onclick="openProduct(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
-      <button class="wish" onclick="toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button>
+      <button class="wish" onclick="event.stopPropagation();toast('قابلیت علاقه‌مندی به‌زودی اضافه می‌شود')">♡</button>
       <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-meta">${esc(p.condition||'نو')} ${p.description?' | '+esc(p.description).slice(0,55):''}</div>
       <div class="price">${esc(String(p.price))} <small>تومان</small></div>
-      <button class="add-btn" ${p.available?'':'disabled'} onclick="addToCart(${p.id})">${p.available?'افزودن به سبد خرید 🛒':'ناموجود'}</button>
+      <button class="add-btn" ${p.available?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${p.available?'افزودن به سبد خرید 🛒':'ناموجود'}</button>
+      <div class="view-product">مشاهده جزئیات ←</div>
     </article>`).join('');
 }
+function openProduct(id){
+  const p=state.products.find(x=>Number(x.id)===Number(id));
+  if(!p)return toast('محصول پیدا نشد');
+  history.pushState({product:id},'',`?product=${encodeURIComponent(id)}`);
+  renderProductPage(p);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeProduct(){history.pushState({},'',location.pathname);showHome();window.scrollTo({top:0,behavior:'smooth'})}
+function showHome(){
+  $('productPage')?.classList.add('hidden');
+  $('home')?.classList.remove('hidden');
+}
+function renderProductPage(p){
+  $('home')?.classList.add('hidden');
+  const page=$('productPage'); if(!page)return; page.classList.remove('hidden');
+  $('detailBreadcrumb').textContent=p.name||'جزئیات محصول';
+  const image=esc(imgUrl(p));
+  const price=Number(String(p.price).replace(/[^0-9]/g,''))||0;
+  $('productDetail').innerHTML=`
+    <button class="back-products" onclick="closeProduct()">← بازگشت به محصولات</button>
+    <div class="product-detail-card">
+      <div class="detail-media">
+        <div class="detail-glow"></div>
+        <div class="detail-image-wrap"><img id="detailMainImage" src="${image}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
+        <div class="detail-media-label"><span>MR MOBILE</span><b>${p.available?'موجود':'ناموجود'}</b></div>
+      </div>
+      <div class="detail-info">
+        <div class="detail-topline"><span class="detail-condition">${esc(p.condition||'نو')}</span><span>کد محصول: #${fa(p.id)}</span></div>
+        <h1>${esc(p.name)}</h1>
+        <div class="detail-rating"><span>★★★★★</span><small>کیفیت و اصالت کالا</small></div>
+        <div class="detail-price"><strong>${esc(String(p.price))}</strong><span>تومان</span></div>
+        <div class="detail-stock ${p.available?'':'out'}"><i></i>${p.available?'موجود در فروشگاه':'فعلاً ناموجود'}</div>
+        <div class="detail-divider"></div>
+        <div class="detail-block"><h3>توضیحات محصول</h3><p>${esc(p.description||'برای دریافت اطلاعات بیشتر درباره این محصول با فروشگاه آقای موبایل تماس بگیرید.')}</p></div>
+        <div class="detail-features"><div><b>✓</b><span>بررسی و تست قبل از خرید</span></div><div><b>✓</b><span>ارسال به سراسر کشور</span></div><div><b>✓</b><span>پشتیبانی آقای موبایل</span></div></div>
+        <div class="detail-actions">
+          <div class="detail-qty"><button onclick="detailQty(-1)">−</button><b id="detailQty">1</b><button onclick="detailQty(1)">+</button></div>
+          <button class="detail-cart" ${p.available?'':'disabled'} onclick="addDetailToCart(${p.id})">🛒 افزودن به سبد خرید</button>
+        </div>
+        <button class="detail-consult" onclick="location.hash='contact';toast('برای مشاوره با فروشگاه تماس بگیرید')">💬 برای مشاوره درباره این محصول با ما تماس بگیرید</button>
+      </div>
+    </div>
+    <div class="detail-lower">
+      <div class="detail-tabs"><button class="active">توضیحات</button><button>مشخصات محصول</button><button>خدمات و شرایط خرید</button></div>
+      <div class="detail-lower-grid">
+        <div><h2>جزئیات ${esc(p.name)}</h2><p>${esc(p.description||'اطلاعات تکمیلی این محصول در فروشگاه قابل ارائه است. برای اطلاع از موجودی، رنگ، حافظه و شرایط خرید با ما در تماس باشید.')}</p></div>
+        <div class="detail-trust"><div>🛡️<b>خرید مطمئن</b><small>پشتیبانی فروشگاه</small></div><div>🚚<b>ارسال سریع</b><small>به سراسر کشور</small></div><div>↩️<b>۷ روز بازگشت</b><small>طبق شرایط فروشگاه</small></div></div>
+      </div>
+    </div>`;
+}
+function detailQty(d){const el=$('detailQty');if(!el)return;let n=Math.max(1,Math.min(99,Number(el.textContent.replace(/[^0-9]/g,''))||1+d));el.textContent=n.toLocaleString('fa-IR')}
+function addDetailToCart(id){
+  const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;
+  const qty=Math.max(1,Number(($('detailQty')?.textContent||'1').replace(/[^0-9]/g,''))||1);
+  const x=state.cart.find(i=>i.id===p.id);x?x.qty+=qty:state.cart.push({id:p.id,qty,name:p.name,price:p.price,image:imgUrl(p)});
+  saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();
+}
+
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash='products'}
 function applyFilters(){state.search=$('searchInput').value;renderProducts()}
@@ -120,3 +180,8 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
 loadProducts();loadMe();renderCart();
+
+
+window.addEventListener('popstate',()=>{const id=new URLSearchParams(location.search).get('product');if(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(p)renderProductPage(p);else loadProducts().then(()=>{const q=state.products.find(x=>Number(x.id)===Number(id));q?renderProductPage(q):showHome()})}else showHome()});
+const initialProduct=new URLSearchParams(location.search).get('product');
+if(initialProduct){loadProducts().then(()=>{const p=state.products.find(x=>Number(x.id)===Number(initialProduct));p?renderProductPage(p):showHome()})}else{showHome()}
