@@ -73,7 +73,7 @@ function closeAuth(){$('authModal').classList.remove('show')}
 function switchAuth(){state.authMode=state.authMode==='login'?'register':'login';updateAuth()}
 function updateAuth(){
   const reg=state.authMode==='register';$('authTitle').textContent=reg?'ساخت حساب کاربری':'ورود به حساب';$('authSub').textContent=reg?'برای ثبت سفارش یک حساب بسازید.':'برای ادامه وارد حساب کاربری شوید.';
-  $('registerNameWrap').classList.toggle('hidden',!reg);$('authSubmit').textContent=reg?'ثبت نام':'ورود';$('authError').textContent='';
+  $('registerNameWrap').classList.toggle('hidden',!reg);$('authSubmit').textContent=reg?'ثبت نام':'ورود';$('authSwitch').textContent=reg?'حساب دارید؟ وارد شوید':'ثبت نام نکرده‌اید؟ ثبت نام کنید';$('authError').textContent='';
 }
 async function submitAuth(){
   const phone=$('authPhone').value.trim(),password=$('authPassword').value;
