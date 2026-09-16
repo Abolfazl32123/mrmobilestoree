@@ -1,4 +1,4 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
+const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},coupon:{code:'',discount:0},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
 
 const $=id=>document.getElementById(id);
 function numeric(v){
@@ -202,7 +202,7 @@ function closeCompare(){
 function addToCart(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;const x=state.cart.find(i=>i.id===p.id);x?x.qty++:state.cart.push({id:p.id,qty:1,name:p.name,price:p.price,image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();}
 function cartPrice(x){return Number(String(x.price).replace(/[^\d]/g,''))||0}
 function renderCart(){
-  const count=state.cart.reduce((a,x)=>a+x.qty,0), total=state.cart.reduce((a,x)=>a+cartPrice(x)*x.qty,0);
+  const count=state.cart.reduce((a,x)=>a+x.qty,0), subtotal=state.cart.reduce((a,x)=>a+cartPrice(x)*x.qty,0), total=Math.max(0,subtotal-(state.coupon.discount||0));
   const cc=$('cartCount');if(cc)cc.textContent=count.toLocaleString('fa-IR');const ct=$('cartTotal');if(ct)ct.textContent=toman(total);const dt=$('drawerTotal');if(dt)dt.textContent=toman(total);
   $('cartItems').innerHTML=state.cart.length?state.cart.map(x=>`
   <div class="cart-row"><img src="${esc(x.image)}" onerror="this.src='/assets/mr-mobile-logo.png'"><div><h4>${esc(x.name)}</h4><small>${toman(cartPrice(x))}</small><div class="qty"><button onclick="changeQty(${x.id},-1)">−</button><b>${x.qty}</b><button onclick="changeQty(${x.id},1)">+</button></div></div><button class="remove" onclick="removeCart(${x.id})">حذف</button></div>`).join(''):'<div class="loading">سبد خرید شما خالی است.</div>';
@@ -211,6 +211,7 @@ function changeQty(id,d){const x=state.cart.find(i=>i.id===id);if(!x)return;x.qt
 function removeCart(id){state.cart=state.cart.filter(i=>i.id!==id);saveCart()}
 function clearCart(){state.cart=[];saveCart()}
 function toggleCart(){ $('cartDrawer').classList.toggle('open');$('drawerBackdrop').classList.toggle('show')}
+async function applyCoupon(){const input=$('couponCode');const msg=$('couponMsg');if(!input)return;const code=input.value.trim();if(!code){state.coupon={code:'',discount:0};msg.textContent='';renderCart();return}const subtotal=state.cart.reduce((a,x)=>a+cartPrice(x)*x.qty,0);try{const r=await fetch('/api/coupons/validate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code,total:subtotal})});const d=await r.json();if(!r.ok)throw Error(d.error||'کد تخفیف نامعتبر است');state.coupon={code:code.toUpperCase(),discount:Number(d.discount)||0};msg.textContent=`تخفیف ${toman(state.coupon.discount)} اعمال شد ✓`;renderCart()}catch(e){state.coupon={code:'',discount:0};msg.textContent=e.message;renderCart()}}
 async function checkout(){
   if(!state.cart.length)return toast('سبد خرید خالی است');
   if(!state.user){toggleCart();openAuth('login');toast('برای ثبت سفارش ابتدا وارد حساب شوید');return}
@@ -232,8 +233,8 @@ async function submitAddressAndOrder(){
   try{
     const ar=await fetch('/api/account/address',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({first_name:first,last_name:last,phone,province,city,address,postal_code:postal})});
     const ad=await ar.json();if(!ar.ok)throw Error(ad.error||'خطا در ذخیره آدرس');
-    const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:state.pendingOrderItems})});const d=await r.json();if(!r.ok)throw Error(d.error||'خطا در ثبت سفارش');
-    state.pendingOrderItems=null;clearCart();closeAddress();toggleCart();toast('سفارش ثبت شد؛ حالا رسید پرداخت را ارسال کنید');openPayment(d.order_id,d.total);
+    const r=await fetch('/api/orders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:state.pendingOrderItems,coupon_code:state.coupon.code||''})});const d=await r.json();if(!r.ok)throw Error(d.error||'خطا در ثبت سفارش');
+    state.pendingOrderItems=null;state.coupon={code:'',discount:0};clearCart();closeAddress();toggleCart();toast('سفارش ثبت شد؛ حالا رسید پرداخت را ارسال کنید');openPayment(d.order_id,d.total);
   }catch(e){$('addressError').textContent=e.message;$('addressSubmit').disabled=false}
 }
 

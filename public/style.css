@@ -77,3 +77,5 @@
 
 /* V44: comprehensive scrolling */
 html{overflow-y:auto;overflow-x:hidden}body{overflow-x:hidden;overflow-y:auto;min-height:100vh}.account-card{max-height:90vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}.account-card #ordersList{max-height:58vh;overflow-y:auto;padding-left:4px;padding-right:4px;scrollbar-width:thin}.account-card #ordersList::-webkit-scrollbar{width:7px}.account-card #ordersList::-webkit-scrollbar-thumb{background:#334346;border-radius:10px}.payment-state.approved{color:#59ff7d}.payment-state.rejected{color:#ff7373}.rejected-shipping{border-color:#743131!important;color:#ff7373!important}
+
+.coupon-box{margin:10px 0}.coupon-row{display:flex;gap:8px}.coupon-row input{flex:1;min-width:0;padding:10px 12px;border:1px solid #27332d;border-radius:12px;background:#0d1210;color:#fff}.coupon-box small{display:block;min-height:18px;margin-top:5px;color:#75d69a;font-size:12px}

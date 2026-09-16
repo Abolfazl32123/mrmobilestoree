@@ -149,7 +149,7 @@
 <aside id="cartDrawer" class="drawer">
   <div class="drawer-head"><h3>سبد خرید</h3><button onclick="toggleCart()">×</button></div>
   <div id="cartItems" class="cart-items"></div>
-  <div class="cart-footer"><div><span>مجموع:</span><strong id="drawerTotal">۰ تومان</strong></div><button class="btn primary full" onclick="checkout()">ثبت سفارش</button><button class="btn ghost full" onclick="clearCart()">خالی کردن سبد</button></div>
+  <div class="coupon-box"><div class="coupon-row"><input id="couponCode" placeholder="کد تخفیف" autocomplete="off"><button class="btn ghost" onclick="applyCoupon()">اعمال</button></div><small id="couponMsg"></small></div><div class="cart-footer"><div><span>مجموع:</span><strong id="drawerTotal">۰ تومان</strong></div><button class="btn primary full" onclick="checkout()">ثبت سفارش</button><button class="btn ghost full" onclick="clearCart()">خالی کردن سبد</button></div>
 </aside>
 <div id="drawerBackdrop" class="backdrop" onclick="toggleCart()"></div>
 
