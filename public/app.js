@@ -71,6 +71,7 @@ function getStorage(p){
   const m=String((p.name||'')+' '+(p.description||'')).match(/(?:\d{2,4}\s?(?:GB|TB)|\d{2,4}\s?گیگ)/i);
   return m?m[0].replace(/\s+/g,' ').trim().toUpperCase().replace(/گیگ/,'GB'):'—';
 }
+async function loadHomepageBanners(){try{const r=await fetch('/api/homepage-banners',{cache:'no-store'});if(!r.ok)return;const list=await r.json();const b=list[0];if(!b)return;if($('heroTitle'))$('heroTitle').textContent=b.title||'فراتر از یک موبایل‌فروشی.';if($('heroSubtitle'))$('heroSubtitle').textContent=b.subtitle||'تکنولوژی برای سبک زندگی تو.';if($('heroButton')){$('heroButton').textContent=b.button_text||'مشاهده محصولات';$('heroButton').href=b.button_link||'#products'}}catch(e){}}
 async function loadProducts(){
   try{
     const r=await fetch('/api/products',{cache:'no-store'});
