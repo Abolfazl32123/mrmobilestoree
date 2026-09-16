@@ -13,7 +13,7 @@ function imageUrls(p){
 }
 function imgUrl(p){return imageUrls(p)[0]}
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
-const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
+const toast=(m)=>{};
 function saveCart(){localStorage.setItem('mr_cart',JSON.stringify(state.cart));renderCart();}
 function isFavorite(id){return state.favorites.includes(Number(id))}
 function saveFavorites(){
@@ -252,7 +252,7 @@ async function submitAuth(){
   state.user=d.user;closeAuth();updateUser();toast(state.authMode==='register'?'حساب با موفقیت ساخته شد':'خوش آمدید');
 }
 async function loadMe(){const r=await fetch('/api/auth/me');const d=await r.json();state.user=d.user||null;updateUser()}
-function updateUser(){$('userLabel').textContent=state.user?state.user.name||'حساب من':'حساب کاربری'}
+function updateUser(){const el=$('userLabel');if(!el)return;el.textContent=state.user?`حساب کاربری / ${state.user.name||'کاربر'}`:'ثبت نام / ورود'}
 async function openAccount(){
   if(!state.user)return openAuth('login');
   $('accountModal').classList.add('show');$('accountInfo').innerHTML=`<div class="account-info"><b>${esc(state.user.name||'کاربر')}</b><br><small>${esc(state.user.phone)}</small></div>`;loadOrders();
