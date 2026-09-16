@@ -74,3 +74,6 @@
 
 /* V43: hide any legacy customer notification/toast bars */
 #toast,#toastContainer,.toast,.toast-container,.notification-toast,.site-toast,.customer-toast{display:none !important;visibility:hidden !important;pointer-events:none !important;}
+
+/* V44: comprehensive scrolling */
+html{overflow-y:auto;overflow-x:hidden}body{overflow-x:hidden;overflow-y:auto;min-height:100vh}.account-card{max-height:90vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}.account-card #ordersList{max-height:58vh;overflow-y:auto;padding-left:4px;padding-right:4px;scrollbar-width:thin}.account-card #ordersList::-webkit-scrollbar{width:7px}.account-card #ordersList::-webkit-scrollbar-thumb{background:#334346;border-radius:10px}.payment-state.approved{color:#59ff7d}.payment-state.rejected{color:#ff7373}.rejected-shipping{border-color:#743131!important;color:#ff7373!important}

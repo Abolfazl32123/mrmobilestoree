@@ -102,6 +102,7 @@ export default {async fetch(request,env){
       if(!tracking)return json({error:'شماره پیگیری را وارد کنید.'},400);if(!/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(receipt))return json({error:'تصویر رسید معتبر نیست.'},400);if(receipt.length>1800000)return json({error:'حجم تصویر رسید زیاد است. لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);
       const old=await env.DB.prepare("SELECT id FROM payments WHERE order_id=? AND status='در انتظار بررسی' LIMIT 1").bind(id).first();if(old)return json({error:'رسید این سفارش قبلاً برای بررسی ارسال شده است.'},409);
       await env.DB.prepare('INSERT INTO payments(order_id,user_id,amount,tracking_code,receipt_data,status) VALUES(?,?,?,?,?,?)').bind(id,uid,order.total,tracking,receipt,'در انتظار بررسی').run();
+      await env.DB.prepare("UPDATE orders SET status='در انتظار بررسی' WHERE id=? AND status NOT IN ('تکمیل شده','در حال ارسال')").bind(id).run();
       const customer=await env.DB.prepare('SELECT name FROM users WHERE id=?').bind(uid).first();
       await addAdminNotification(env,'payment','رسید پرداخت جدید',`رسید سفارش #${id} از ${customer?.name||'مشتری'} ارسال شد.`,`/admin/?section=payments`);
       return json({ok:true,status:'در انتظار بررسی'});
@@ -157,7 +158,9 @@ export default {async fetch(request,env){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const status=String(b.status||'');if(!['تأیید شده','رد شده'].includes(status))return json({error:'وضعیت پرداخت نامعتبر است.'},400);
       const p=await env.DB.prepare('SELECT order_id FROM payments WHERE id=?').bind(id).first();if(!p)return json({error:'پرداخت پیدا نشد.'},404);
       await env.DB.prepare('UPDATE payments SET status=?,admin_note=?,reviewed_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,String(b.admin_note||'').slice(0,500),id).run();
-      await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(status==='تأیید شده'?'تأیید شده':'در انتظار بررسی',p.order_id).run();return json({ok:true});
+      if(status==='تأیید شده') await env.DB.prepare("UPDATE orders SET status='تأیید شده' WHERE id=? AND status NOT IN ('در حال ارسال','تکمیل شده','لغو شده')").bind(p.order_id).run();
+      if(status==='رد شده') await env.DB.prepare("UPDATE orders SET status='لغو شده' WHERE id=? AND status NOT IN ('در حال ارسال','تکمیل شده')").bind(p.order_id).run();
+      return json({ok:true});
     }
     if(path==='/api/admin/notifications'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
@@ -183,7 +186,7 @@ export default {async fetch(request,env){
     }
     if(path==='/api/admin/orders'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      const rows=(await env.DB.prepare(`SELECT o.id,o.total,o.status,o.created_at,u.name AS customer_name,u.phone,s.carrier,s.tracking_code,s.status AS shipping_status,s.shipped_at,s.delivered_at FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN shipments s ON s.order_id=o.id ORDER BY o.id DESC`).all()).results;
+      const rows=(await env.DB.prepare(`SELECT o.id,o.total,o.status,o.created_at,u.name AS customer_name,u.phone,(SELECT p.status FROM payments p WHERE p.order_id=o.id ORDER BY p.id DESC LIMIT 1) AS payment_status,s.carrier,s.tracking_code,s.status AS shipping_status,s.shipped_at,s.delivered_at FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN shipments s ON s.order_id=o.id ORDER BY o.id DESC`).all()).results;
       for(const o of rows){const items=(await env.DB.prepare(`SELECT oi.product_id,oi.quantity,oi.price,COALESCE(p.name,'محصول حذف‌شده') AS name FROM order_items oi LEFT JOIN products p ON p.id=oi.product_id WHERE oi.order_id=?`).bind(o.id).all()).results;o.items=items;o.items_text=items.map(i=>`${i.name} ×${i.quantity}`).join('، ')}
       return json(rows);
     }

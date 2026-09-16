@@ -1,4 +1,10 @@
-V35 - Robust product loading fix.
-- Product GET endpoint now dynamically selects only columns that exist in D1, preventing schema mismatch from breaking /api/products.
-- Client validates HTTP/JSON response and disables browser caching for product loads.
-- No products, orders, users, or D1 data are deleted.
+# MR Mobile V44
+
+Changes:
+- Payment receipt approval/rejection is synchronized with order status.
+- Rejected payment -> order cancelled; customer sees shipping stopped because payment was rejected.
+- Approved payment -> order confirmed unless it is already shipping/completed/cancelled.
+- Resubmitting a rejected receipt moves eligible orders back to payment review.
+- Admin order cards show current payment status.
+- Added vertical/horizontal scrolling to long customer/admin lists and order/payment panels.
+- Existing admin notifications remain enabled.
