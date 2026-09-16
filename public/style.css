@@ -71,3 +71,6 @@
 #compareModal .compare-table-wrap::-webkit-scrollbar-thumb{background:#334346;border-radius:10px}
 .compare-open-note{margin-top:12px;padding:10px 12px;border:1px solid #263638;border-radius:12px;background:#0a1113;color:#8e9b99;font-size:11px;text-align:center}
 @media(max-width:650px){#compareModal{padding:10px}#compareModal .compare-card{max-height:calc(100vh - 20px);padding:18px}#compareModal .compare-table-wrap{max-height:calc(100vh - 180px)}}
+
+/* V43: hide any legacy customer notification/toast bars */
+#toast,#toastContainer,.toast,.toast-container,.notification-toast,.site-toast,.customer-toast{display:none !important;visibility:hidden !important;pointer-events:none !important;}
