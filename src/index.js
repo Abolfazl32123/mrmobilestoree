@@ -27,6 +27,13 @@ async function ensureCustomerTables(env){
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)`).run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)`).run();
 }
+async function ensureNotificationTables(env){
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS admin_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT,type TEXT NOT NULL DEFAULT 'system',title TEXT NOT NULL DEFAULT '',message TEXT NOT NULL DEFAULT '',target TEXT NOT NULL DEFAULT 'dashboard',target_id INTEGER DEFAULT NULL,read_at TEXT DEFAULT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_notifications_read ON admin_notifications(read_at,created_at)`).run();
+}
+async function addAdminNotification(env,type,title,message,target='dashboard',targetId=null){
+  await ensureNotificationTables(env);await env.DB.prepare('INSERT INTO admin_notifications(type,title,message,target,target_id) VALUES(?,?,?,?,?)').bind(type,title,message,target,targetId).run();
+}
 async function ensureReviewTables(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS product_reviews (id INTEGER PRIMARY KEY AUTOINCREMENT,product_id INTEGER NOT NULL,user_id INTEGER NOT NULL,rating INTEGER NOT NULL DEFAULT 5,comment TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_product_reviews_product ON product_reviews(product_id,status,created_at)`).run();
@@ -97,7 +104,7 @@ export default {async fetch(request,env){
       const b=await request.json().catch(()=>({}));const tracking=String(b.tracking_code||'').trim().slice(0,80);const receipt=String(b.receipt_data||'');
       if(!tracking)return json({error:'شماره پیگیری را وارد کنید.'},400);if(!/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(receipt))return json({error:'تصویر رسید معتبر نیست.'},400);if(receipt.length>1800000)return json({error:'حجم تصویر رسید زیاد است. لطفاً تصویر کوچک‌تری انتخاب کنید.'},400);
       const old=await env.DB.prepare("SELECT id FROM payments WHERE order_id=? AND status='در انتظار بررسی' LIMIT 1").bind(id).first();if(old)return json({error:'رسید این سفارش قبلاً برای بررسی ارسال شده است.'},409);
-      await env.DB.prepare('INSERT INTO payments(order_id,user_id,amount,tracking_code,receipt_data,status) VALUES(?,?,?,?,?,?)').bind(id,uid,order.total,tracking,receipt,'در انتظار بررسی').run();
+      await env.DB.prepare('INSERT INTO payments(order_id,user_id,amount,tracking_code,receipt_data,status) VALUES(?,?,?,?,?,?)').bind(id,uid,order.total,tracking,receipt,'در انتظار بررسی').run();await addAdminNotification(env,'payment','رسید پرداخت جدید','رسید پرداخت سفارش #'+id+' برای بررسی ارسال شد.','payments',id);
       return json({ok:true,status:'در انتظار بررسی'});
     }
     if(path==='/api/orders'&&request.method==='GET'){await ensureCustomerTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);const orders=(await env.DB.prepare(`SELECT o.id,o.total,o.status,o.created_at,(SELECT p.status FROM payments p WHERE p.order_id=o.id ORDER BY p.id DESC LIMIT 1) AS payment_status,s.carrier,s.tracking_code,s.status AS shipping_status,s.shipped_at,s.delivered_at FROM orders o LEFT JOIN shipments s ON s.order_id=o.id WHERE o.user_id=? ORDER BY o.id DESC`).bind(uid).all()).results;return json({orders})}
@@ -107,7 +114,7 @@ export default {async fetch(request,env){
       if(!clean.length)return json({error:'هیچ‌کدام از محصولات موجود نیستند.'},400);
       const a=await env.DB.prepare('SELECT first_name,last_name,phone,province,city,address,postal_code FROM customer_addresses WHERE user_id=?').bind(uid).first();
       if(!a)return json({error:'آدرس ارسال را وارد کنید.',code:'ADDRESS_REQUIRED'},400);
-      const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();const oid=r.meta.last_row_id;
+      const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();const oid=r.meta.last_row_id;await addAdminNotification(env,'order','سفارش جدید','یک سفارش جدید ثبت شد. سفارش #'+oid,'orders',oid);
       const stmts=[...clean.map(x=>env.DB.prepare('INSERT INTO order_items(order_id,product_id,quantity,price) VALUES(?,?,?,?)').bind(oid,x.id,x.q,x.price)),env.DB.prepare('INSERT INTO order_addresses(order_id,user_id,first_name,last_name,phone,province,city,address,postal_code) VALUES(?,?,?,?,?,?,?,?,?)').bind(oid,uid,a.first_name,a.last_name,a.phone,a.province,a.city,a.address,a.postal_code)];
       await env.DB.batch(stmts);return json({ok:true,order_id:oid,total})
     }
@@ -151,6 +158,9 @@ export default {async fetch(request,env){
       await env.DB.prepare('UPDATE payments SET status=?,admin_note=?,reviewed_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,String(b.admin_note||'').slice(0,500),id).run();
       await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(status==='تأیید شده'?'تأیید شده':'در انتظار بررسی',p.order_id).run();return json({ok:true});
     }
+    if(path==='/api/admin/notifications'&&request.method==='GET'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureNotificationTables(env);const rows=(await env.DB.prepare(`SELECT id,type,title,message,target,target_id,read_at,created_at FROM admin_notifications ORDER BY id DESC LIMIT 50`).all()).results;const unread=(await env.DB.prepare('SELECT COUNT(*) AS c FROM admin_notifications WHERE read_at IS NULL').first()).c||0;return json({notifications:rows,unread:Number(unread)});}
+    if(path.match(/^\/api\/admin\/notifications\/\d+\/read$/)&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureNotificationTables(env);const id=Number(path.split('/')[4]);await env.DB.prepare('UPDATE admin_notifications SET read_at=CURRENT_TIMESTAMP WHERE id=?').bind(id).run();return json({ok:true});}
+    if(path==='/api/admin/notifications/read-all'&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureNotificationTables(env);await env.DB.prepare('UPDATE admin_notifications SET read_at=CURRENT_TIMESTAMP WHERE read_at IS NULL').run();return json({ok:true});}
     if(path==='/api/admin/stats'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);
       await ensureCustomerTables(env);
