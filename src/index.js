@@ -202,8 +202,11 @@ export default {async fetch(request,env){
       const o=await env.DB.prepare('SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total, COALESCE(AVG(total),0) AS avg FROM orders').first();
       const n=await env.DB.prepare("SELECT COUNT(*) AS c FROM orders WHERE status='در انتظار بررسی'").first();
       const done=await env.DB.prepare("SELECT COUNT(*) AS c FROM orders WHERE status='تکمیل شده'").first();
+      const today=await env.DB.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total FROM orders WHERE date(created_at)=date('now','localtime')").first();
+      const week=await env.DB.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total FROM orders WHERE datetime(created_at)>=datetime('now','localtime','-6 days')").first();
+      const month=await env.DB.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total FROM orders WHERE strftime('%Y-%m',created_at)=strftime('%Y-%m','now','localtime')").first();
       const monthly=(await env.DB.prepare("SELECT strftime('%Y-%m',created_at) AS ym, COALESCE(SUM(total),0) AS total FROM orders GROUP BY ym ORDER BY ym DESC LIMIT 6").all()).results.reverse();
-      return json({products:p?.c||0,users:u?.c||0,orders:o?.c||0,total_sales:o?.total||0,avg_order:Math.round(o?.avg||0),new_orders:n?.c||0,completed_orders:done?.c||0,monthly_sales:monthly.map(x=>({month:x.ym,total:x.total}))});
+      return json({products:p?.c||0,users:u?.c||0,orders:o?.c||0,total_sales:o?.total||0,avg_order:Math.round(o?.avg||0),new_orders:n?.c||0,completed_orders:done?.c||0,periods:{today:{orders:today?.c||0,total:today?.total||0},week:{orders:week?.c||0,total:week?.total||0},month:{orders:month?.c||0,total:month?.total||0}},monthly_sales:monthly.map(x=>({month:x.ym,total:x.total}))});
     }
     if(path==='/api/admin/orders'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
