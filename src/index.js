@@ -1,12 +1,13 @@
 const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extra}});
 const cookie=(name,value,maxAge=0)=>`${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAge}`;
-const getCookie=(req,name)=>req.headers.get('Cookie')?.match(new RegExp(`(?:^|; )${name}=([^;]*)`))?.[1] ? decodeURIComponent(req.headers.get('Cookie').match(new RegExp(`(?:^|; )${name}=([^;]*)`))[1]) : null;
+const getCookie=(req,name)=>{const h=req.headers.get('Cookie')||'';const m=h.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));return m?.[1]?decodeURIComponent(m[1]):null};
+const getBearer=(req)=>{const h=req.headers.get('Authorization')||'';return h.startsWith('Bearer ')?h.slice(7).trim():null};
 const b64u=b=>{let s='';for(const x of b)s+=String.fromCharCode(x);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const fromB64u=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Uint8Array.from(atob(s),c=>c.charCodeAt(0))};
 async function hmac(secret,text){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',k,new TextEncoder().encode(text)))}
 async function signSession(secret,prefix,payload){const body=b64u(new TextEncoder().encode(JSON.stringify(payload)));return `${prefix}.${body}.${b64u(await hmac(secret,prefix+'.'+body))}`}
 async function verifySession(req,env,prefix){
-  const token=getCookie(req,prefix);if(!token||!env.ADMIN_SECRET)return null;const [p,body,sig]=token.split('.');if(p!==prefix||!body||!sig)return null;
+  const token=getCookie(req,prefix)||getBearer(req);if(!token||!env.ADMIN_SECRET)return null;const [p,body,sig]=token.split('.');if(p!==prefix||!body||!sig)return null;
   const exp=await hmac(env.ADMIN_SECRET,p+'.'+body),act=fromB64u(sig);if(act.length!==exp.length)return null;let diff=0;for(let i=0;i<act.length;i++)diff|=act[i]^exp[i];
   if(diff)return null;try{const data=JSON.parse(new TextDecoder().decode(fromB64u(body)));return data.exp>Date.now()?data:null}catch{return null}
 }
@@ -230,7 +231,7 @@ export default {async fetch(request,env){
       await env.DB.batch(stmts);await env.DB.batch(clean.map(x=>env.DB.prepare("UPDATE products SET stock_qty=MAX(0,stock_qty-?),available=CASE WHEN MAX(0,stock_qty-?)>0 THEN 1 ELSE 0 END WHERE id=?").bind(x.q,x.q,x.id)));return json({ok:true,order_id:oid,total,subtotal,discount,coupon:cr.coupon?.code||''})
     }
 
-    if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
+    if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true,token},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
     if(path==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_admin','',0)})
     if(path==='/api/admin/reviews'&&request.method==='GET'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const rows=(await env.DB.prepare(`SELECT r.id,r.product_id,r.user_id,r.rating,r.comment,r.status,r.created_at,p.name AS product_name,u.name AS customer_name,u.phone FROM product_reviews r LEFT JOIN products p ON p.id=r.product_id LEFT JOIN users u ON u.id=r.user_id ORDER BY r.id DESC`).all()).results;return json(rows)}
     if(path.match(/^\/api\/admin\/reviews\/\d+\/status$/)&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const status=['pending','approved','rejected'].includes(b.status)?b.status:'pending';await env.DB.prepare('UPDATE product_reviews SET status=? WHERE id=?').bind(status,id).run();return json({ok:true})}
