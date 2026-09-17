@@ -246,7 +246,7 @@ export default {async fetch(request,env){
     }
     if(path==='/api/admin/users'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
+      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY datetime(u.created_at) DESC, u.id DESC`).all()).results);
     }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
     return env.ASSETS.fetch(request);

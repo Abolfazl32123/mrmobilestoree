@@ -79,3 +79,56 @@
 html{overflow-y:auto;overflow-x:hidden}body{overflow-x:hidden;overflow-y:auto;min-height:100vh}.account-card{max-height:90vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}.account-card #ordersList{max-height:58vh;overflow-y:auto;padding-left:4px;padding-right:4px;scrollbar-width:thin}.account-card #ordersList::-webkit-scrollbar{width:7px}.account-card #ordersList::-webkit-scrollbar-thumb{background:#334346;border-radius:10px}.payment-state.approved{color:#59ff7d}.payment-state.rejected{color:#ff7373}.rejected-shipping{border-color:#743131!important;color:#ff7373!important}
 
 .coupon-box{margin:10px 0}.coupon-row{display:flex;gap:8px}.coupon-row input{flex:1;min-width:0;padding:10px 12px;border:1px solid #27332d;border-radius:12px;background:#0d1210;color:#fff}.coupon-box small{display:block;min-height:18px;margin-top:5px;color:#75d69a;font-size:12px}
+
+/* V55: customer scrolling polish — dark MR Mobile theme */
+html,body{scrollbar-width:thin;scrollbar-color:#3d574b #080d0f}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:10px;height:10px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:#080d0f}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#5fff32,#263d32);border:2px solid #080d0f;border-radius:999px}
+html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{background:#70ff46}
+
+/* Every customer modal can scroll naturally on desktop and mobile */
+.modal{overflow-y:auto;overflow-x:hidden;align-items:flex-start;justify-content:center;padding:20px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#3d574b #080d0f}
+.modal::-webkit-scrollbar{width:9px}
+.modal::-webkit-scrollbar-track{background:#080d0f;border-radius:999px}
+.modal::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#5fff32,#263d32);border:2px solid #080d0f;border-radius:999px}
+.modal::-webkit-scrollbar-thumb:hover{background:#70ff46}
+.modal-card{max-height:92vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#3d574b #0a1012}
+.modal-card::-webkit-scrollbar{width:8px;height:8px}
+.modal-card::-webkit-scrollbar-track{background:#0a1012;border-radius:999px}
+.modal-card::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#59ff7d,#294638);border:2px solid #0a1012;border-radius:999px}
+.modal-card::-webkit-scrollbar-thumb:hover{background:#70ff8d}
+
+/* Keep modal header/close control visually stable while content scrolls */
+.modal-card>.modal-close{position:sticky;top:0;float:right;z-index:20;width:36px;height:36px;border-radius:12px;background:rgba(13,20,22,.88);backdrop-filter:blur(8px);border:1px solid #26383a;display:grid;place-items:center;line-height:1;margin:-2px -2px 0 0}
+.modal-card>.modal-close:hover{color:#59ff7d;border-color:#3f634e;background:#101b18}
+
+/* Customer account/orders */
+.account-card{max-height:92vh}
+.account-card #ordersList{scrollbar-color:#3d574b #0a1012}
+.account-card #ordersList::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#59ff7d,#294638);border:2px solid #0a1012}
+
+/* Favorites, comparison, info and forms */
+.favorites-card,.compare-card,.address-card,.payment-card,.info-card{max-height:92vh}
+.favorites-card #favoritesList,.info-card .info-content{scrollbar-width:thin}
+
+/* Product detail: whole customer detail view remains reachable with one smooth scroll */
+.product-detail-modal{overflow-y:auto;overscroll-behavior:contain}
+.product-detail-card{max-height:92vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.product-detail-card::-webkit-scrollbar{width:9px}
+.product-detail-card::-webkit-scrollbar-track{background:#081012;border-radius:999px}
+.product-detail-card::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#59ff7d,#294638);border:2px solid #081012;border-radius:999px}
+.product-detail-card::-webkit-scrollbar-thumb:hover{background:#70ff8d}
+
+/* Horizontal scrolling areas get the same visual language */
+.nav-inner,.detail-thumbs,.compare-table-wrap{scrollbar-width:thin;scrollbar-color:#3d574b #0a1012}
+.nav-inner::-webkit-scrollbar,.detail-thumbs::-webkit-scrollbar,.compare-table-wrap::-webkit-scrollbar{height:8px;width:8px}
+.nav-inner::-webkit-scrollbar-track,.detail-thumbs::-webkit-scrollbar-track,.compare-table-wrap::-webkit-scrollbar-track{background:#0a1012;border-radius:999px}
+.nav-inner::-webkit-scrollbar-thumb,.detail-thumbs::-webkit-scrollbar-thumb,.compare-table-wrap::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#59ff7d,#294638);border-radius:999px}
+
+@media(max-width:650px){
+  .modal{padding:10px}
+  .modal-card{max-height:calc(100vh - 20px);border-radius:20px}
+  .product-detail-card{max-height:calc(100vh - 20px)}
+  .modal-card>.modal-close{width:34px;height:34px}
+}
