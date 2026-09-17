@@ -1,0 +1,2 @@
+ALTER TABLE products ADD COLUMN sale_start_at TEXT DEFAULT NULL;
+ALTER TABLE products ADD COLUMN sale_end_at TEXT DEFAULT NULL;

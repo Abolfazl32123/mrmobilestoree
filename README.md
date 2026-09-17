@@ -1,6 +1,11 @@
-MR MOBILE STORE - V51/V52
+MR MOBILE STORE — V57
 
-V51: inventory management with stock quantity, low-stock threshold, automatic stock reduction on new orders, and admin low-stock alerts.
-V52: homepage banner management from admin panel with title, subtitle, image URL, button text/link, order and active state.
+V57 adds timed product discounts and special offers.
+- Admin product form: discount price + start/end time.
+- Customer storefront: only active timed discounts are applied.
+- Countdown shown on sale cards and product detail.
+- Special Offers section appears automatically when timed sales are active.
+- Server calculates the effective sale price when an order is created.
+- Existing inventory, coupons, banners, users, notifications and payment features are preserved.
 
-Built on existing V50 base.
+Deploy the full project as usual. The Worker also auto-adds the new product columns if the migration has not been applied manually.
