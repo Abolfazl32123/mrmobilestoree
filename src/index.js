@@ -77,7 +77,7 @@ export default {async fetch(request,env){
       await ensureCustomerTables(env);const b=await request.json().catch(()=>({}));const name=String(b.name||'').trim(),phone=String(b.phone||'').trim(),password=String(b.password||'');
       if(name.length<2||!/^09\d{9}$/.test(phone)||password.length<6)return json({error:'نام، شماره موبایل معتبر و رمز حداقل ۶ کاراکتری لازم است.'},400);
       const salt=rand(16),ph=await hashPassword(password,salt);
-      try{const r=await env.DB.prepare('INSERT INTO users(name,phone,password_hash,password_salt) VALUES(?,?,?,?)').bind(name,phone,ph,b64u(salt)).run();const exp=Date.now()+30*86400000;const token=await signSession(env.ADMIN_SECRET||'fallback','mr_user',{uid:r.meta.last_row_id,exp});return json({ok:true,user:{id:r.meta.last_row_id,name,phone} },200,{'Set-Cookie':cookie('mr_user',token,30*86400)})}catch(e){return json({error:'این شماره موبایل قبلاً ثبت نام کرده است.'},409)}
+      try{const r=await env.DB.prepare('INSERT INTO users(name,phone,password_hash,password_salt) VALUES(?,?,?,?)').bind(name,phone,ph,b64u(salt)).run();const exp=Date.now()+30*86400000;const token=await signSession(env.ADMIN_SECRET||'fallback','mr_user',{uid:r.meta.last_row_id,exp});await addAdminNotification(env,'user','ثبت‌نام کاربر جدید',`کاربر «${name}» با شماره ${phone} ثبت‌نام کرد.`,`/admin/?section=users`);return json({ok:true,user:{id:r.meta.last_row_id,name,phone} },200,{'Set-Cookie':cookie('mr_user',token,30*86400)})}catch(e){return json({error:'این شماره موبایل قبلاً ثبت نام کرده است.'},409)}
     }
     if(path==='/api/auth/login'&&request.method==='POST'){
       await ensureCustomerTables(env);const b=await request.json().catch(()=>({})),phone=String(b.phone||'').trim(),password=String(b.password||'');const u=(await env.DB.prepare('SELECT * FROM users WHERE phone=?').bind(phone).first());
@@ -246,7 +246,7 @@ export default {async fetch(request,env){
     }
     if(path==='/api/admin/users'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY datetime(u.created_at) DESC, u.id DESC`).all()).results);
+      return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
     }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
     return env.ASSETS.fetch(request);
