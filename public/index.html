@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0a0d0e">
   <title>آقای موبایل | فروشگاه موبایل و لوازم جانبی</title>
-  <link rel="icon" type="image/png" href="/assets/mr-mobile-logo.png">
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" type="image/png" href="/assets/mr-mobile-logo.png">
   <link rel="apple-touch-icon" href="/assets/mr-mobile-logo.png">
   <link rel="stylesheet" href="/style.css?v=43">
 </head>
@@ -138,6 +138,8 @@
     <h2>فقط یک فروشگاه نیستیم.</h2>
     <p>اینجا جاییه برای کشف تکنولوژی‌های جدید و پیدا کردن چیزهایی که به سبک زندگی تو می‌خوره.</p>
   </section>
+<div id="supportFab" class="support-fab" onclick="openSupportCenter()">💬 پشتیبانی</div>
+<div id="supportModal" class="modal"><div class="modal-card support-card"><button class="modal-close" onclick="closeSupportCenter()">×</button><h2>مرکز پشتیبانی</h2><div class="support-tabs"><button onclick="supportTab('tickets')">تیکت‌ها</button><button onclick="supportTab('chat')">چت</button><button onclick="supportTab('account')">باشگاه مشتریان</button></div><div id="supportContent"></div></div></div>
 </main>
 
 <footer id="contact" class="footer">
@@ -293,5 +295,5 @@
   </div>
 </div>
 <script src="/app.js?v=51"></script>
-</body>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});</script></body>
 </html>
