@@ -48,3 +48,18 @@ html{overflow-y:auto;overflow-x:hidden}body{overflow-x:hidden;overflow-y:auto}.w
 
 /* V51/V52 inventory + banners */
 .inventory-table,.banners-list{display:grid;gap:10px}.inventory-row,.banner-row{display:grid;grid-template-columns:1.5fr 1.2fr auto auto;gap:14px;align-items:center;padding:14px;border:1px solid #26373c;border-radius:14px;background:#0b171b}.inventory-row small,.banner-row small{display:block;color:#829399;font-size:9px;margin-top:5px}.inventory-row label{display:inline-flex;flex-direction:column;gap:5px;margin-left:8px;color:#84959a;font-size:9px}.inventory-row input{width:90px;background:#091317;border:1px solid #293d43;color:#fff;border-radius:8px;padding:7px}.inventory-status{padding:7px 10px;border-radius:9px;font-size:9px;white-space:nowrap}.inventory-status.ok{color:#65df91;background:#0b2518}.inventory-status.low{color:#f4c65b;background:#2b210d}.inventory-status.out{color:#ff7f7f;background:#2b1114}.banner-preview{display:flex;align-items:center;gap:12px;min-width:0}.banner-preview img{width:100px;height:55px;object-fit:cover;border-radius:9px;background:#132126}.banner-form-panel{margin-bottom:16px}@media(max-width:800px){.inventory-row,.banner-row{grid-template-columns:1fr}.inventory-row .primary{width:100%}.banner-preview img{width:80px}.inventory-row input{width:100%}}
+
+/* V53: consistent scrolling across the whole admin panel */
+html{scrollbar-width:thin;scrollbar-color:#2f4a42 #071116}
+body{scrollbar-width:thin;scrollbar-color:#2f4a42 #071116}
+html::-webkit-scrollbar,body::-webkit-scrollbar,.sidebar::-webkit-scrollbar,.page::-webkit-scrollbar,.table-wrap::-webkit-scrollbar{width:9px;height:9px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,.sidebar::-webkit-scrollbar-track,.page::-webkit-scrollbar-track,.table-wrap::-webkit-scrollbar-track{background:#071116;border-radius:12px}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,.sidebar::-webkit-scrollbar-thumb,.page::-webkit-scrollbar-thumb,.table-wrap::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#315347,#1d332b);border:2px solid #071116;border-radius:12px}
+html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover,.sidebar::-webkit-scrollbar-thumb:hover,.page::-webkit-scrollbar-thumb:hover,.table-wrap::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#3e6c58,#27503e)}
+.sidebar{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#2f4a42 #071116}
+.content{min-height:calc(100vh - 82px)}
+.page.active-page{max-height:calc(100vh - 82px);overflow-y:auto;overflow-x:hidden;padding-left:2px;padding-right:2px;scrollbar-width:thin;scrollbar-color:#2f4a42 transparent}
+.page.active-page::-webkit-scrollbar{width:8px}
+.page.active-page::-webkit-scrollbar-track{background:transparent}
+.page.active-page::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#315347,#1d332b);border-radius:12px}
+@media(max-width:800px){.page.active-page{max-height:calc(100vh - 70px)}}
