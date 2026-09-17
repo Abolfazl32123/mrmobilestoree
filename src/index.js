@@ -56,6 +56,47 @@ async function ensureProductColumns(env){
   for(const [name,sql] of Object.entries(adds)) if(!names.has(name)) await env.DB.prepare(sql).run();
 }
 
+
+async function ensureGatewayTables(env){
+  await ensureCustomerTables(env);
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS gateway_transactions (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL UNIQUE,user_id INTEGER NOT NULL,provider TEXT NOT NULL,amount INTEGER NOT NULL,authority TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'initiated',ref_id TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_gateway_tx_status ON gateway_transactions(status,created_at)`).run();
+}
+function gatewayMerchant(env,provider){
+  const key=provider==='zarinpal'?'ZARINPAL_MERCHANT_ID':provider==='zibal'?'ZIBAL_MERCHANT_ID':provider==='idpay'?'IDPAY_API_KEY':provider==='nextpay'?'NEXTPAY_API_KEY':'';
+  return key?String(env[key]||'').trim():'';
+}
+async function createGatewayPayment(env,provider,merchant,amount,callbackUrl,description){
+  if(provider==='zarinpal'){
+    const r=await fetch('https://payment.zarinpal.com/pg/v4/payment/request.json',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({merchant_id:merchant,amount:Math.round(amount*10),currency:'IRR',description,callback_url:callbackUrl})});
+    const d=await r.json().catch(()=>({})); const code=d?.data?.code;
+    if(code!==100)throw Error(d?.errors?.message||`خطا در درخواست زرین‌پال (${code??'نامشخص'})`);
+    return {authority:d.data.authority,url:`https://www.zarinpal.com/pg/StartPay/${d.data.authority}`};
+  }
+  if(provider==='zibal'){
+    const r=await fetch('https://gateway.zibal.ir/v1/request',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({merchant,amount:Math.round(amount*10),callbackUrl,description})});
+    const d=await r.json().catch(()=>({}));
+    if(Number(d?.result)!==100)throw Error(d?.message||`خطا در درخواست زیبال (${d?.result??'نامشخص'})`);
+    return {authority:String(d.trackId),url:`https://gateway.zibal.ir/start/${d.trackId}`};
+  }
+  throw Error('این درگاه هنوز به حساب فروشگاه متصل نشده است. فعلاً زرین‌پال یا زیبال را انتخاب کنید.');
+}
+async function verifyGatewayPayment(env,provider,merchant,amount,token){
+  if(provider==='zarinpal'){
+    const r=await fetch('https://payment.zarinpal.com/pg/v4/payment/verify.json',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({merchant_id:merchant,amount:Math.round(amount*10),authority:token})});
+    const d=await r.json().catch(()=>({})); const code=d?.data?.code;
+    if(code===100||code===101)return {ok:true,ref:String(d.data.ref_id||'')};
+    return {ok:false,error:d?.errors?.message||`تأیید زرین‌پال ناموفق بود (${code??'نامشخص'})`};
+  }
+  if(provider==='zibal'){
+    const r=await fetch('https://gateway.zibal.ir/v1/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({merchant,trackId:Number(token)})});
+    const d=await r.json().catch(()=>({}));
+    if(Number(d?.result)===100)return {ok:true,ref:String(d.refNumber||d.trackId||token)};
+    return {ok:false,error:d?.message||`تأیید زیبال ناموفق بود (${d?.result??'نامشخص'})`};
+  }
+  return {ok:false,error:'درگاه انتخاب‌شده پشتیبانی نشده است.'};
+}
+
 function effectiveProductPrice(p){
   const price=Number(String(p?.price??'').replace(/[^0-9.-]/g,''))||0;
   const discount=Number(String(p?.discount_price??'').replace(/[^0-9.-]/g,''))||0;
@@ -107,10 +148,35 @@ export default {async fetch(request,env){
       if(first.length<2||last.length<2||!/^09\d{9}$/.test(phone)||province.length<2||city.length<2||address.length<8||postal.length!==10)return json({error:'لطفاً همه اطلاعات آدرس را صحیح و کامل وارد کنید.'},400);
       await env.DB.prepare(`INSERT INTO customer_addresses(user_id,first_name,last_name,phone,province,city,address,postal_code) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,phone=excluded.phone,province=excluded.province,city=excluded.city,address=excluded.address,postal_code=excluded.postal_code,updated_at=CURRENT_TIMESTAMP`).bind(uid,first,last,phone,province,city,address,postal).run();return json({ok:true});
     }
+    if(path==='/api/gateway/create'&&request.method==='POST'){
+      await ensureGatewayTables(env);const uid=await userFromReq(request,env);if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);
+      const st=await env.DB.prepare('SELECT gateway_enabled,gateway_provider,gateway_merchant_id FROM payment_settings WHERE id=1').first();
+      if(!st?.gateway_enabled)return json({error:'پرداخت آنلاین فعلاً فعال نیست.'},400);
+      const provider=String(st.gateway_provider||'').trim();const merchant=gatewayMerchant(env,provider)||String(st.gateway_merchant_id||'').trim();
+      if(!merchant)return json({error:'اطلاعات محرمانه درگاه در Cloudflare تنظیم نشده است.'},503);
+      const b=await request.json().catch(()=>({}));const id=Number(b.order_id);const order=await env.DB.prepare('SELECT id,total FROM orders WHERE id=? AND user_id=?').bind(id,uid).first();if(!order)return json({error:'سفارش پیدا نشد.'},404);
+      const existing=await env.DB.prepare("SELECT * FROM gateway_transactions WHERE order_id=? AND status IN ('initiated','pending') LIMIT 1").bind(id).first();if(existing?.authority)return json({ok:true,url:existing.url||'',authority:existing.authority});
+      const callbackUrl=new URL('/api/gateway/callback',new URL(request.url).origin).toString();
+      const pay=await createGatewayPayment(env,provider,merchant,Number(order.total),callbackUrl,`پرداخت سفارش #${id} آقای موبایل`);
+      await env.DB.prepare(`INSERT INTO gateway_transactions(order_id,user_id,provider,amount,authority,status) VALUES(?,?,?,?,?,'pending') ON CONFLICT(order_id) DO UPDATE SET provider=excluded.provider,amount=excluded.amount,authority=excluded.authority,status='pending',updated_at=CURRENT_TIMESTAMP`).bind(id,uid,provider,Number(order.total),pay.authority).run();
+      return json({ok:true,url:pay.url,authority:pay.authority});
+    }
+    if(path==='/api/gateway/callback'&&request.method==='GET'){
+      await ensureGatewayTables(env);const q=new URL(request.url).searchParams;const authority=q.get('Authority')||q.get('authority')||'';const status=q.get('Status')||q.get('status')||'';const track=q.get('trackId')||q.get('trackid')||'';const token=authority||track;
+      if(!token)return Response.redirect(new URL('/?payment=failed&reason=missing_token',request.url),302);
+      const tx=await env.DB.prepare('SELECT * FROM gateway_transactions WHERE authority=? ORDER BY id DESC LIMIT 1').bind(token).first();if(!tx)return Response.redirect(new URL('/?payment=failed&reason=not_found',request.url),302);
+      if(tx.status==='paid')return Response.redirect(new URL(`/?payment=success&order_id=${tx.order_id}&ref=${encodeURIComponent(tx.ref_id||'')}`,request.url),302);
+      if(tx.provider==='zarinpal' && status!=='OK') {await env.DB.prepare("UPDATE gateway_transactions SET status='cancelled',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(tx.id).run();return Response.redirect(new URL(`/?payment=cancelled&order_id=${tx.order_id}`,request.url),302)}
+      if(tx.provider==='zibal' && ['1','true','success','ok'].indexOf(String(status).toLowerCase())<0 && status!=='') {await env.DB.prepare("UPDATE gateway_transactions SET status='cancelled',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(tx.id).run();return Response.redirect(new URL(`/?payment=cancelled&order_id=${tx.order_id}`,request.url),302)}
+      const merchant=gatewayMerchant(env,tx.provider);if(!merchant)return Response.redirect(new URL('/?payment=failed&reason=merchant_missing',request.url),302);
+      const v=await verifyGatewayPayment(env,tx.provider,merchant,Number(tx.amount),token);
+      if(v.ok){await env.DB.prepare("UPDATE gateway_transactions SET status='paid',ref_id=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(v.ref||'',tx.id).run();await env.DB.prepare("UPDATE orders SET status='تأیید شده' WHERE id=? AND status NOT IN ('تکمیل شده','لغو شده')").bind(tx.order_id).run();await addAdminNotification(env,'payment','پرداخت آنلاین موفق',`سفارش #${tx.order_id} با پرداخت آنلاین تأیید شد.`,`/admin/?section=payments`);return Response.redirect(new URL(`/?payment=success&order_id=${tx.order_id}&ref=${encodeURIComponent(v.ref||'')}`,request.url),302)}
+      await env.DB.prepare("UPDATE gateway_transactions SET status='failed',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(tx.id).run();return Response.redirect(new URL(`/?payment=failed&order_id=${tx.order_id}`,request.url),302);
+    }
     if(path==='/api/payment-settings'&&request.method==='GET'){
       await ensureCustomerTables(env);
-      let st=await env.DB.prepare('SELECT card_number,card_holder,bank_name,instructions,gateway_enabled,gateway_provider,gateway_merchant_id FROM payment_settings WHERE id=1').first();
-      if(!st) st={card_number:'',card_holder:'',bank_name:'',instructions:'',gateway_enabled:0,gateway_provider:'',gateway_merchant_id:''};
+      let st=await env.DB.prepare('SELECT card_number,card_holder,bank_name,instructions,gateway_enabled,gateway_provider FROM payment_settings WHERE id=1').first();
+      if(!st) st={card_number:'',card_holder:'',bank_name:'',instructions:'',gateway_enabled:0,gateway_provider:''};
       return json(st);
     }
     if(path.startsWith('/api/orders/')&&path.endsWith('/payment')&&request.method==='GET'){
