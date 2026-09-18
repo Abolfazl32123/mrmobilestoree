@@ -385,3 +385,74 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
 .auth-options{margin:2px 0 18px;font-size:11px}.auth-options button{font-size:11px}.auth-submit{height:56px;border-radius:16px;font-size:14px;font-weight:900}.auth-divider{margin:22px 0 13px}.social-login{gap:10px}.social{height:52px;border-radius:15px;font-size:13px}.auth-security{margin:18px 0 2px}.auth-footer-brand{text-align:center;color:#526360;font-size:9px;letter-spacing:3px;margin-top:18px;padding-top:15px;border-top:1px solid rgba(255,255,255,.06)}
 @media(max-width:700px){.auth-modal{padding:10px}.auth-shell.auth-single{width:min(620px,96vw);max-height:calc(100vh - 20px);border-radius:24px}.auth-shell.auth-single .auth-panel{max-height:calc(100vh - 20px);padding:34px 22px 24px}.auth-logo{width:62px;height:62px}.auth-welcome{font-size:25px}.auth-panel-head h2{font-size:22px}.auth-close{top:10px!important;left:10px!important;width:40px!important;height:40px!important}}
 @media(max-width:430px){.auth-shell.auth-single .auth-panel{padding:34px 16px 20px}.auth-tabs button{font-size:11px}.social{font-size:11px}.auth-submit{height:54px}}
+
+
+/* V99 — final premium single-panel login layout */
+.auth-modal{
+  position:fixed!important;
+  inset:0!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:20px!important;
+  overflow:hidden!important;
+}
+.auth-modal.show{display:flex!important}
+.auth-shell.auth-single{
+  width:min(900px,94vw)!important;
+  height:min(860px,calc(100vh - 40px))!important;
+  max-height:calc(100vh - 40px)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  display:block!important;
+  border-radius:28px!important;
+}
+.auth-shell.auth-single .auth-panel{
+  width:100%!important;
+  height:100%!important;
+  max-height:none!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:42px 58px 30px!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:#42e96a #081113!important;
+}
+.auth-shell.auth-single .auth-panel::-webkit-scrollbar{width:9px!important}
+.auth-shell.auth-single .auth-panel::-webkit-scrollbar-track{background:#081113!important;border-radius:99px!important}
+.auth-shell.auth-single .auth-panel::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,#59ff7d,#15963a)!important;
+  border:2px solid #081113!important;
+  border-radius:99px!important;
+}
+.auth-logo-wrap{margin:2px 0 18px!important}
+.auth-logo{width:66px!important;height:66px!important}
+.auth-welcome{font-size:28px!important}
+.auth-panel-head h2{font-size:25px!important;margin:4px 0 5px!important}
+.auth-panel-head p{margin-bottom:16px!important}
+.auth-tabs{margin:4px 0 17px!important}
+.auth-panel .field{margin-bottom:12px!important}
+.auth-panel .field input{height:52px!important}
+.auth-options{margin:1px 0 16px!important}
+.auth-submit{height:55px!important}
+.auth-divider{margin:19px 0 12px!important}
+.social{height:50px!important}
+.auth-security{margin:16px 0 0!important}
+.auth-footer-brand{margin-top:14px!important;padding-top:12px!important}
+
+@media(max-width:700px){
+  .auth-modal{padding:10px!important}
+  .auth-shell.auth-single{
+    width:min(620px,96vw)!important;
+    height:calc(100vh - 20px)!important;
+    max-height:calc(100vh - 20px)!important;
+    border-radius:22px!important;
+  }
+  .auth-shell.auth-single .auth-panel{
+    padding:38px 22px 24px!important;
+  }
+}
+@media(max-width:430px){
+  .auth-shell.auth-single .auth-panel{padding:36px 16px 20px!important}
+}
