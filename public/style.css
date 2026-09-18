@@ -408,3 +408,164 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
  .auth-single-panel{padding:30px 14px 20px!important}
  .auth-single-panel .auth-tabs button,.auth-single-panel .social{font-size:11px!important}
 }
+
+
+/* V101 — approved single-panel login, compact + true internal scroll */
+.auth-modal{
+  padding:12px!important;
+  display:none!important;
+  place-items:center!important;
+  overflow:hidden!important;
+}
+.auth-modal.show{display:grid!important}
+
+.auth-shell{
+  width:min(900px,94vw)!important;
+  height:min(760px,calc(100vh - 24px))!important;
+  max-height:calc(100vh - 24px)!important;
+  min-height:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  border-radius:26px!important;
+}
+
+.auth-single-panel{
+  width:100%!important;
+  height:100%!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  direction:ltr!important;
+  padding:28px 54px 24px!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:transparent transparent!important;
+}
+.auth-single-panel:hover{
+  scrollbar-color:rgba(72,255,103,.45) transparent!important;
+}
+.auth-single-panel::-webkit-scrollbar{width:6px!important}
+.auth-single-panel::-webkit-scrollbar-track{background:transparent!important}
+.auth-single-panel::-webkit-scrollbar-thumb{
+  background:transparent!important;
+  border-radius:99px!important;
+}
+.auth-single-panel:hover::-webkit-scrollbar-thumb{
+  background:rgba(72,255,103,.45)!important;
+}
+
+/* keep all content RTL while scrollbar remains on the right */
+.auth-single-panel > *{
+  direction:rtl!important;
+}
+.auth-single-panel .auth-panel-head{
+  direction:rtl!important;
+  margin-bottom:8px!important;
+}
+.auth-single-panel .auth-panel-head:before{
+  width:60px!important;
+  height:60px!important;
+  margin:0 auto 7px!important;
+  border-radius:16px!important;
+}
+.auth-single-panel .auth-welcome{
+  font-size:27px!important;
+  line-height:1.25!important;
+}
+.auth-single-panel .auth-panel-head h2{
+  font-size:24px!important;
+  margin:2px 0 3px!important;
+}
+.auth-single-panel .auth-panel-head p{
+  font-size:10px!important;
+  margin:0!important;
+  line-height:1.7!important;
+}
+
+.auth-single-panel .auth-tabs{
+  margin:13px 0 12px!important;
+  gap:8px!important;
+}
+.auth-single-panel .auth-tabs button{
+  height:46px!important;
+  border-radius:13px!important;
+  font-size:12px!important;
+}
+
+.auth-single-panel .field{
+  margin:9px 0!important;
+}
+.auth-single-panel .field label{
+  margin-bottom:5px!important;
+  font-size:10px!important;
+}
+.auth-single-panel .field input{
+  height:48px!important;
+  border-radius:13px!important;
+}
+.auth-single-panel .password-wrap button{
+  top:8px!important;
+}
+
+.auth-single-panel .auth-options{
+  margin:3px 0 12px!important;
+  font-size:10px!important;
+}
+.auth-single-panel .auth-submit{
+  height:52px!important;
+  min-height:52px!important;
+  border-radius:14px!important;
+  font-size:13px!important;
+}
+.auth-single-panel .auth-divider{
+  margin:14px 0 9px!important;
+}
+.auth-single-panel .social-login{
+  gap:9px!important;
+}
+.auth-single-panel .social{
+  height:47px!important;
+  border-radius:13px!important;
+  font-size:12px!important;
+}
+.auth-single-panel .auth-security{
+  margin:12px 0 0!important;
+}
+.auth-single-panel .switch-auth{
+  margin-top:7px!important;
+}
+
+.auth-single-panel .form-error{
+  min-height:16px!important;
+}
+
+@media(max-height:700px) and (min-width:601px){
+  .auth-shell{
+    height:calc(100vh - 20px)!important;
+    max-height:calc(100vh - 20px)!important;
+  }
+  .auth-single-panel{padding-top:20px!important;padding-bottom:18px!important}
+  .auth-single-panel .auth-panel-head:before{width:52px!important;height:52px!important}
+  .auth-single-panel .auth-welcome{font-size:24px!important}
+  .auth-single-panel .auth-panel-head h2{font-size:21px!important}
+  .auth-single-panel .auth-tabs{margin:9px 0 9px!important}
+  .auth-single-panel .field{margin:7px 0!important}
+  .auth-single-panel .field input{height:44px!important}
+  .auth-single-panel .auth-submit{height:48px!important;min-height:48px!important}
+  .auth-single-panel .auth-divider{margin:10px 0 7px!important}
+  .auth-single-panel .social{height:43px!important}
+}
+
+@media(max-width:600px){
+  .auth-modal{padding:7px!important}
+  .auth-shell{
+    width:96vw!important;
+    height:calc(100vh - 14px)!important;
+    max-height:calc(100vh - 14px)!important;
+    border-radius:22px!important;
+  }
+  .auth-single-panel{padding:28px 18px 20px!important}
+  .auth-close{top:11px!important;left:11px!important}
+}
+@media(max-width:430px){
+  .auth-single-panel{padding:27px 14px 18px!important}
+}
