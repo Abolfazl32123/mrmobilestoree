@@ -174,3 +174,149 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
 .auth-divider{display:flex;align-items:center;gap:10px;color:#65716f;font-size:10px;margin:22px 0 12px}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#263335;flex:1}.social-login{display:grid;grid-template-columns:1fr 1fr;gap:10px}.social{height:48px;border:1px solid #2d3c3e;border-radius:13px;background:#0a1113;color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-weight:800}.social b{font-size:20px}.social.google b{color:#fff}.social.apple b{font-size:13px}.social:hover{border-color:#647170;transform:translateY(-1px)}.auth-security{display:flex;justify-content:center;align-items:center;gap:10px;margin:20px 0 3px;color:#7f8c89}.auth-security>span{width:31px;height:31px;border:1px solid rgba(73,255,99,.35);border-radius:50%;display:grid;place-items:center;color:var(--green)}.auth-security b,.auth-security small{display:block;font-size:10px}.auth-security small{color:#65716f;margin-top:3px}.auth-panel .switch-auth{margin-top:8px}.auth-panel .form-error{min-height:20px}
 @media(max-width:800px){.auth-shell{grid-template-columns:1fr;min-height:auto;max-height:94vh;overflow:auto}.auth-visual{display:none}.auth-panel{padding:52px 24px 30px}.auth-close{left:14px;top:14px}.auth-panel-head h2{font-size:22px}.auth-welcome{font-size:24px}}
 @media(max-width:430px){.auth-panel{padding-left:16px;padding-right:16px}.auth-tabs button{font-size:11px}.social{font-size:11px}}
+
+
+/* ===== V95 AUTH LOGIN UI REFINEMENT =====
+   Keeps the existing authentication logic and OAuth buttons intact.
+   Only refines layout/visual presentation to match the premium reference.
+*/
+.auth-modal{
+  padding:24px;
+  align-items:center;
+  justify-items:center;
+  overflow:auto;
+}
+.auth-shell{
+  width:min(1120px,96vw);
+  min-height:680px;
+  max-height:calc(100vh - 48px);
+  grid-template-columns:minmax(0,1.08fr) minmax(390px,.92fr);
+  direction:ltr;
+  isolation:isolate;
+}
+.auth-shell > .auth-visual,
+.auth-shell > .auth-panel{
+  direction:rtl;
+  min-width:0;
+}
+.auth-visual{
+  padding:58px 54px 44px;
+  justify-content:center;
+  text-align:right;
+  border-left:1px solid rgba(255,255,255,.07);
+  border-right:0;
+}
+.auth-brand{
+  align-self:flex-start;
+  margin-bottom:8px;
+}
+.auth-brand img{
+  width:68px;
+  height:68px;
+  border-radius:19px;
+  box-shadow:0 0 32px rgba(97,255,34,.16);
+}
+.auth-brand b{font-size:18px;letter-spacing:5px}
+.auth-visual-copy{
+  margin-top:70px;
+}
+.auth-visual-copy h2{
+  font-size:36px;
+  line-height:1.45;
+  margin:10px 0 8px;
+}
+.auth-visual-copy p{
+  max-width:500px;
+  font-size:13px;
+  line-height:2.15;
+}
+.auth-benefits{
+  max-width:520px;
+  margin-top:34px;
+  gap:12px;
+}
+.auth-benefits div{
+  min-height:62px;
+  padding:14px 15px;
+  border-radius:17px;
+  font-size:12px;
+  background:rgba(255,255,255,.035);
+  backdrop-filter:blur(8px);
+}
+.auth-benefits i{
+  width:34px;
+  height:34px;
+  border-radius:11px;
+}
+.auth-panel{
+  padding:58px 48px 42px;
+  justify-content:center;
+  background:rgba(5,10,11,.30);
+  border-radius:0 30px 30px 0;
+}
+.auth-panel-head{
+  margin-bottom:4px;
+}
+.auth-welcome{
+  font-size:30px;
+}
+.auth-panel-head h2{
+  font-size:26px;
+  margin-top:7px;
+}
+.auth-panel-head p{
+  font-size:11px;
+  line-height:1.9;
+  margin-bottom:18px;
+}
+.auth-tabs{
+  margin:8px 0 17px;
+}
+.auth-tabs button{
+  height:49px;
+}
+.auth-panel .field{
+  margin:13px 0;
+}
+.auth-panel .field label{
+  margin-bottom:7px;
+}
+.auth-panel .field input{
+  height:48px;
+}
+.auth-submit{
+  min-height:54px;
+  border-radius:14px;
+}
+.auth-divider{
+  margin:20px 0 12px;
+}
+.social{
+  height:49px;
+  border-radius:14px;
+}
+.auth-security{
+  margin:17px 0 2px;
+}
+.auth-panel .switch-auth{
+  margin-top:9px;
+}
+@media(max-width:900px){
+  .auth-shell{
+    width:min(720px,96vw);
+    grid-template-columns:1fr;
+    min-height:auto;
+    max-height:94vh;
+    overflow:auto;
+  }
+  .auth-visual{display:none}
+  .auth-panel{
+    border-radius:30px;
+    padding:52px 32px 32px;
+  }
+}
+@media(max-width:430px){
+  .auth-modal{padding:12px}
+  .auth-shell{width:100%;max-height:96vh}
+  .auth-panel{padding:48px 18px 28px}
+}
