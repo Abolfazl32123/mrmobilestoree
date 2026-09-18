@@ -492,3 +492,195 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
  .auth-single-panel{padding:28px 14px 18px!important}
  .auth-single-panel .auth-tabs button,.auth-single-panel .social{font-size:11px!important}
 }
+
+
+/* V103 FINAL — clean centered login. Overrides all previous auth experiments. */
+html,body{max-width:100%;overflow-x:hidden}
+
+.auth-modal{
+  position:fixed!important;
+  inset:0!important;
+  z-index:99999!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:20px!important;
+  overflow:hidden!important;
+  background:rgba(0,0,0,.84)!important;
+  backdrop-filter:blur(14px)!important;
+}
+.auth-modal.show{display:flex!important}
+
+.auth-shell{
+  position:relative!important;
+  width:min(560px,calc(100vw - 32px))!important;
+  height:min(760px,calc(100vh - 40px))!important;
+  max-height:calc(100vh - 40px)!important;
+  min-height:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  border-radius:28px!important;
+  direction:rtl!important;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(70,255,100,.12),transparent 35%),
+    linear-gradient(145deg,#07100f,#0a1513 52%,#07100f)!important;
+  border:1px solid rgba(86,255,111,.42)!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.9),0 0 70px rgba(50,255,80,.10)!important;
+}
+
+.auth-shell:before,.auth-shell:after{pointer-events:none!important}
+
+.auth-panel.auth-single-panel{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:34px 42px 28px!important;
+  background:transparent!important;
+  border-radius:28px!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:rgba(92,255,117,.55) transparent!important;
+}
+
+.auth-panel.auth-single-panel::-webkit-scrollbar{width:0!important}
+.auth-panel.auth-single-panel:hover::-webkit-scrollbar{width:5px!important}
+.auth-panel.auth-single-panel::-webkit-scrollbar-track{background:transparent!important}
+.auth-panel.auth-single-panel::-webkit-scrollbar-thumb{
+  background:rgba(92,255,117,.55)!important;
+  border-radius:20px!important;
+}
+
+.auth-close{
+  position:absolute!important;
+  top:14px!important;
+  left:14px!important;
+  z-index:5!important;
+  width:36px!important;
+  height:36px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:12px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(4,10,9,.72)!important;
+  color:#fff!important;
+  font-size:24px!important;
+}
+
+.auth-panel-head{
+  flex:0 0 auto!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0 auto 12px!important;
+  text-align:center!important;
+}
+.auth-panel-head:before{
+  width:56px!important;
+  height:56px!important;
+  margin:0 auto 8px!important;
+  border-radius:16px!important;
+}
+.auth-panel-head h2{
+  font-size:23px!important;
+  line-height:1.35!important;
+  margin:2px 0 4px!important;
+}
+.auth-panel-head p{
+  font-size:10.5px!important;
+  line-height:1.8!important;
+  margin:0!important;
+}
+
+.auth-tabs{
+  flex:0 0 auto!important;
+  margin:7px 0 13px!important;
+  gap:8px!important;
+}
+.auth-tabs button{
+  height:46px!important;
+  border-radius:13px!important;
+  font-size:11px!important;
+}
+
+.auth-panel.auth-single-panel .field{
+  flex:0 0 auto!important;
+  margin:9px 0!important;
+}
+.auth-panel.auth-single-panel .field label{
+  display:block!important;
+  margin-bottom:6px!important;
+  font-size:11px!important;
+}
+.auth-panel.auth-single-panel .field input{
+  height:48px!important;
+  min-height:48px!important;
+  border-radius:13px!important;
+}
+
+.auth-options{
+  flex:0 0 auto!important;
+  margin:5px 0 13px!important;
+  font-size:10px!important;
+}
+.auth-submit{
+  flex:0 0 auto!important;
+  height:50px!important;
+  min-height:50px!important;
+  border-radius:14px!important;
+}
+
+.auth-divider{
+  flex:0 0 auto!important;
+  margin:15px 0 10px!important;
+}
+.social-login{
+  flex:0 0 auto!important;
+  gap:8px!important;
+}
+.social{
+  height:46px!important;
+  min-height:46px!important;
+  border-radius:13px!important;
+}
+.auth-security{
+  flex:0 0 auto!important;
+  margin:11px 0 0!important;
+}
+.switch-auth{
+  flex:0 0 auto!important;
+  margin-top:8px!important;
+}
+.form-error{flex:0 0 auto!important}
+
+@media(max-width:600px){
+  .auth-modal{padding:10px!important}
+  .auth-shell{
+    width:min(520px,calc(100vw - 20px))!important;
+    height:min(760px,calc(100vh - 20px))!important;
+    max-height:calc(100vh - 20px)!important;
+    border-radius:22px!important;
+  }
+  .auth-panel.auth-single-panel{
+    padding:34px 20px 22px!important;
+    border-radius:22px!important;
+  }
+}
+@media(max-height:720px){
+  .auth-shell{
+    height:calc(100vh - 20px)!important;
+    max-height:calc(100vh - 20px)!important;
+  }
+  .auth-panel.auth-single-panel{padding-top:27px!important}
+  .auth-panel-head:before{width:48px!important;height:48px!important}
+  .auth-panel-head h2{font-size:21px!important}
+  .auth-tabs button{height:42px!important}
+  .auth-panel.auth-single-panel .field{margin:7px 0!important}
+  .auth-panel.auth-single-panel .field input{height:44px!important;min-height:44px!important}
+  .auth-submit{height:47px!important;min-height:47px!important}
+  .social{height:43px!important;min-height:43px!important}
+}
