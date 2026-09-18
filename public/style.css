@@ -370,97 +370,30 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
   .auth-panel{padding:46px 17px 26px;}
 }
 
-
-/* ===== V97: LOGIN REFERENCE MATCH =====
-   Desktop: fixed two-column layout, no page/modal scrollbar.
-   Left panel uses the supplied visual reference; right panel remains functional.
-*/
-.auth-modal.show{
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  padding:18px;
+/* V97 — final reference-matched authentication layout */
+.auth-modal{padding:18px;overflow:hidden;background:rgba(0,0,0,.84);backdrop-filter:blur(14px);}
+.auth-shell{width:min(1120px,94vw);height:min(760px,90vh);max-height:90vh;min-height:0;display:grid;grid-template-columns:43% 57%;grid-template-rows:1fr;direction:ltr;overflow:hidden;border:1px solid rgba(73,255,99,.42);border-radius:30px;background:#071011;box-shadow:0 35px 100px #000,0 0 70px rgba(55,255,79,.09);}
+.auth-shell:before{display:none}
+.auth-shell>.auth-visual,.auth-shell>.auth-panel{direction:rtl;min-width:0;min-height:0;}
+.auth-visual{position:relative;padding:0!important;overflow:hidden!important;border:0!important;background:#06100f url('/assets/auth-left-panel.jpg') center top/cover no-repeat!important;}
+.auth-visual>*{position:relative;z-index:1}
+.auth-visual .auth-brand,.auth-visual .auth-visual-copy,.auth-visual .auth-benefits{display:none}
+.auth-panel{padding:46px 42px 34px!important;overflow-y:auto!important;overflow-x:hidden!important;justify-content:flex-start!important;background:linear-gradient(145deg,rgba(8,17,18,.96),rgba(5,13,14,.98));scrollbar-width:thin;scrollbar-color:#315c43 #081011;}
+.auth-panel::-webkit-scrollbar{width:8px}.auth-panel::-webkit-scrollbar-track{background:#081011}.auth-panel::-webkit-scrollbar-thumb{background:#315c43;border-radius:99px}
+.auth-panel-head{padding-top:0;margin-bottom:10px;text-align:right}.auth-welcome{font-size:29px}.auth-panel-head h2{font-size:27px;margin:6px 0}.auth-panel-head p{font-size:11px;line-height:1.9;margin-bottom:18px}
+.auth-tabs{gap:10px;margin:8px 0 18px}.auth-tabs button{height:54px;font-size:14px;border-radius:15px}
+.auth-panel .field{margin:14px 0}.auth-panel .field label{font-size:12px;margin-bottom:8px}.auth-panel .field input{height:54px;border-radius:15px;font-size:13px}.password-wrap button{top:8px;width:38px;height:38px;border-radius:10px}
+.auth-options{font-size:11px;margin:6px 0 18px}.auth-submit{min-height:58px;border-radius:15px;font-size:15px}
+.auth-divider{margin:22px 0 13px;font-size:10px}.social{height:54px;border-radius:15px;font-size:13px}.auth-security{margin:18px 0 4px}.auth-security b,.auth-security small{font-size:10px}.auth-panel .switch-auth{margin-top:8px}
+.auth-close{position:absolute!important;left:14px!important;top:14px!important;width:46px!important;height:46px!important;border:1px solid rgba(96,255,126,.35)!important;border-radius:15px!important;background:rgba(5,17,18,.88)!important;z-index:20!important;font-size:26px!important;}
+@media(max-width:900px){
+  .auth-modal{padding:10px;overflow:auto}
+  .auth-shell{width:min(700px,96vw);height:min(820px,94vh);max-height:94vh;grid-template-columns:1fr;grid-template-rows:auto 1fr;border-radius:24px;overflow:hidden}
+  .auth-visual{display:none}
+  .auth-panel{padding:48px 28px 28px!important;overflow-y:auto!important}
 }
-.auth-shell{
-  width:min(1040px,94vw);
-  height:min(820px,92vh);
-  max-height:92vh;
-  min-height:0;
-  display:grid;
-  grid-template-columns:400px minmax(0,1fr);
-  grid-template-rows:1fr;
-  gap:0;
-  overflow:hidden;
-  direction:ltr;
-  border:1px solid rgba(91,255,133,.42);
-  border-radius:30px;
-  background:rgba(4,11,12,.96);
-  box-shadow:0 30px 90px rgba(0,0,0,.72),0 0 70px rgba(45,255,77,.08);
-}
-.auth-reference-visual{
-  position:relative;
-  min-width:0;
-  min-height:0;
-  padding:0!important;
-  overflow:hidden;
-  border:0!important;
-  background:#061011;
-}
-.auth-reference-image{
-  position:absolute;
-  inset:0;
-  background-image:url('/assets/auth-left-reference.jpg');
-  background-position:center;
-  background-repeat:no-repeat;
-  background-size:100% 100%;
-}
-.auth-panel{
-  min-width:0;
-  min-height:0;
-  overflow:hidden!important;
-  padding:44px 38px 30px!important;
-  justify-content:flex-start!important;
-  border-radius:0!important;
-  background:linear-gradient(180deg,rgba(8,18,19,.98),rgba(5,13,14,.98));
-  border-left:1px solid rgba(255,255,255,.06);
-}
-.auth-panel-head{margin-top:8px;margin-bottom:4px}
-.auth-welcome{font-size:28px}
-.auth-panel-head h2{font-size:25px;margin:5px 0}
-.auth-panel-head p{margin-bottom:16px}
-.auth-tabs{margin:8px 0 14px}
-.auth-tabs button{height:48px}
-.auth-panel .field{margin:10px 0}
-.auth-panel .field label{margin-bottom:6px}
-.auth-panel .field input{height:47px}
-.auth-options{margin:3px 0 14px}
-.auth-submit{min-height:52px}
-.auth-divider{margin:17px 0 10px}
-.social{height:48px}
-.auth-security{margin:14px 0 0}
-.auth-panel .switch-auth{margin-top:6px}
-.auth-close{top:18px!important;left:18px!important}
-
-/* On desktop, absolutely no auth scrollbars. On smaller screens, switch to a
-   single-column scrollable panel so the form remains usable. */
-@media (max-width:900px){
-  .auth-modal.show{overflow:auto;padding:10px}
-  .auth-shell{
-    width:min(680px,96vw);
-    height:auto;
-    max-height:94vh;
-    grid-template-columns:1fr;
-    grid-template-rows:auto;
-    overflow:auto;
-  }
-  .auth-reference-visual{display:none}
-  .auth-panel{
-    overflow:visible!important;
-    padding:48px 28px 30px!important;
-    border-left:0;
-  }
-}
-@media (max-width:430px){
-  .auth-shell{width:100%;max-height:96vh}
-  .auth-panel{padding:46px 17px 26px!important}
+@media(max-width:430px){
+  .auth-shell{width:100%;height:96vh;max-height:96vh}
+  .auth-panel{padding:48px 17px 24px!important}
+  .auth-tabs button{font-size:11px}
 }
