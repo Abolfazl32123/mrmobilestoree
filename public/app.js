@@ -244,13 +244,14 @@ async function submitAddressAndOrder(){
   }catch(e){$('addressError').textContent=e.message;$('addressSubmit').disabled=false}
 }
 
-function openAuth(mode='login'){state.authMode=mode;$('authModal').classList.add('show');updateAuth()}
+function openAuth(mode='login'){$('authModal').classList.add('show');setAuthMode(mode)}
 function closeAuth(){$('authModal').classList.remove('show')}
-function switchAuth(){state.authMode=state.authMode==='login'?'register':'login';updateAuth()}
-function updateAuth(){
-  const reg=state.authMode==='register';$('authTitle').textContent=reg?'ساخت حساب کاربری':'ورود به حساب';$('authSub').textContent=reg?'برای ثبت سفارش یک حساب بسازید.':'برای ادامه وارد حساب کاربری شوید.';
-  $('registerNameWrap').classList.toggle('hidden',!reg);$('authSubmit').textContent=reg?'ثبت نام':'ورود';$('authSwitch').textContent=reg?'حساب دارید؟ وارد شوید':'ثبت نام نکرده‌اید؟ ثبت نام کنید';$('authError').textContent='';
-}
+function setAuthMode(mode){state.authMode=mode;updateAuth()}
+function switchAuth(){setAuthMode(state.authMode==='login'?'register':'login')}
+function updateAuth(){const reg=state.authMode==='register';$('authTitle').textContent=reg?'ساخت حساب کاربری':'ورود به حساب';$('authSub').textContent=reg?'برای ثبت سفارش یک حساب بسازید.':'برای ادامه وارد حساب کاربری خود شوید.';$('registerNameWrap').classList.toggle('hidden',!reg);$('authSubmit').textContent=reg?'ساخت حساب کاربری →':'ورود به حساب کاربری →';$('authSwitch').textContent=reg?'حساب دارید؟ وارد شوید':'ثبت نام نکرده‌اید؟ ثبت نام کنید';$('authLoginTab')?.classList.toggle('active',!reg);$('authRegisterTab')?.classList.toggle('active',reg);$('authError').textContent=''}
+function toggleAuthPassword(){const x=$('authPassword');x.type=x.type==='password'?'text':'password'}
+function authRecovery(){$('authError').textContent='برای بازیابی رمز عبور، فعلاً با پشتیبانی تماس بگیرید.'}
+function socialLogin(provider){$('authError').textContent='در حال اتصال امن...';location.href='/api/auth/'+provider+'/start'}
 async function submitAuth(){
   const phone=$('authPhone').value.trim(),password=$('authPassword').value;
   if(!phone||!password)return $('authError').textContent='شماره موبایل و رمز عبور را وارد کنید.';
@@ -299,6 +300,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
 loadProducts();loadMe();renderCart();updateFavoriteCount();updateCompareUI();
+(()=>{const q=new URLSearchParams(location.search),err=q.get('auth_error');if(err){openAuth('login');$('authError').textContent=err;history.replaceState({},'',location.pathname)}})();
 
 // V31: robust product-card click handling
 document.addEventListener('click', (event)=>{

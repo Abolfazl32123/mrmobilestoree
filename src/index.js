@@ -14,8 +14,43 @@ async function verifySession(req,env,prefix){
 async function adminOK(req,env){return !!(await verifySession(req,env,'mr_admin'))}
 async function hashPassword(password,saltBytes){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:saltBytes,iterations:100000,hash:'SHA-256'},key,256);return b64u(new Uint8Array(bits))}
 function rand(n=16){const a=new Uint8Array(n);crypto.getRandomValues(a);return a}
+
+function decodeJwtPart(s){try{return JSON.parse(new TextDecoder().decode(fromB64u(s)))}catch{return null}}
+function redirectAuthError(request,msg){const u=new URL('/',request.url);u.searchParams.set('auth_error',msg);return Response.redirect(u.toString(),302)}
+async function oauthState(env,provider){
+  if(!env.ADMIN_SECRET)throw new Error('ADMIN_SECRET تنظیم نشده است.');
+  const nonce=b64u(rand(18));
+  const token=await signSession(env.ADMIN_SECRET,'oauth_state',{provider,nonce,exp:Date.now()+10*60*1000});
+  return {token,nonce};
+}
+async function validOAuthState(request,env,provider,state){
+  const d=await verifySession(request,env,'oauth_state');
+  return !!d && d.provider===provider && d.exp>Date.now() && state===getCookie(request,'oauth_state');
+}
+function pemToBytes(pem){const clean=String(pem||'').replace(/-----BEGIN [^-]+-----/g,'').replace(/-----END [^-]+-----/g,'').replace(/\s+/g,'');return fromB64u(clean.replace(/\+/g,'-').replace(/\//g,'_'))}
+async function appleClientSecret(env){
+  if(!env.APPLE_TEAM_ID||!env.APPLE_KEY_ID||!env.APPLE_PRIVATE_KEY||!env.APPLE_CLIENT_ID)throw new Error('تنظیمات Apple OAuth کامل نیست.');
+  const now=Math.floor(Date.now()/1000);const header={alg:'ES256',kid:env.APPLE_KEY_ID};const payload={iss:env.APPLE_TEAM_ID,iat:now,exp:now+86400*180,aud:'https://appleid.apple.com',sub:env.APPLE_CLIENT_ID};
+  const enc=o=>b64u(new TextEncoder().encode(JSON.stringify(o)));const input=enc(header)+'.'+enc(payload);
+  const key=await crypto.subtle.importKey('pkcs8',pemToBytes(env.APPLE_PRIVATE_KEY),{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+  const sig=new Uint8Array(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},key,new TextEncoder().encode(input)));
+  return input+'.'+b64u(sig);
+}
+async function findOrCreateSocialUser(env,provider,providerId,profile){
+  await ensureCustomerTables(env);
+  const pid=String(providerId||'').slice(0,255);if(!pid)throw new Error('شناسه حساب اجتماعی دریافت نشد.');
+  const found=await env.DB.prepare('SELECT u.id,u.name,u.phone FROM social_accounts s JOIN users u ON u.id=s.user_id WHERE s.provider=? AND s.provider_id=? LIMIT 1').bind(provider,pid).first();
+  if(found)return found;
+  const email=String(profile.email||'').trim().toLowerCase().slice(0,254);let u=null;
+  if(email)u=await env.DB.prepare('SELECT id,name,phone FROM users WHERE email=? LIMIT 1').bind(email).first();
+  if(!u){const name=String(profile.name||profile.email?.split('@')[0]||'کاربر جدید').trim().slice(0,120)||'کاربر جدید';const salt=rand(16),ph=await hashPassword(b64u(rand(24)),salt);const phone='social:'+provider+':'+pid;const r=await env.DB.prepare('INSERT INTO users(name,phone,password_hash,password_salt,email) VALUES(?,?,?,?,?)').bind(name,phone,ph,b64u(salt),email).run();u={id:r.meta.last_row_id,name,phone};await addAdminNotification(env,'user','ورود اجتماعی جدید',`کاربر «${name}» با ${provider} وارد شد.`,`/admin/?section=users`)}
+  await env.DB.prepare('INSERT INTO social_accounts(provider,provider_id,user_id,email) VALUES(?,?,?,?)').bind(provider,pid,u.id,email).run();return u;
+}
+
 async function ensureCustomerTables(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,phone TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,password_salt TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  const userCols=await env.DB.prepare('PRAGMA table_info(users)').all();const userNames=new Set((userCols.results||[]).map(x=>x.name));if(!userNames.has('email'))await env.DB.prepare("ALTER TABLE users ADD COLUMN email TEXT NOT NULL DEFAULT ''").run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS social_accounts (id INTEGER PRIMARY KEY AUTOINCREMENT,provider TEXT NOT NULL,provider_id TEXT NOT NULL,user_id INTEGER NOT NULL,email TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE(provider,provider_id))`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,total INTEGER NOT NULL DEFAULT 0,status TEXT NOT NULL DEFAULT 'در انتظار بررسی',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT,order_id INTEGER NOT NULL,product_id INTEGER NOT NULL,quantity INTEGER NOT NULL,price INTEGER NOT NULL)`).run();
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS customer_addresses (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL UNIQUE,first_name TEXT NOT NULL DEFAULT '',last_name TEXT NOT NULL DEFAULT '',phone TEXT NOT NULL DEFAULT '',province TEXT NOT NULL DEFAULT '',city TEXT NOT NULL DEFAULT '',address TEXT NOT NULL DEFAULT '',postal_code TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
@@ -143,6 +178,22 @@ async function listProducts(env,all=false){
 export default {async fetch(request,env){
   const url=new URL(request.url),path=url.pathname;
   try{
+    if(path==='/api/auth/google/start'&&request.method==='GET'){
+      if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)return redirectAuthError(request,'ورود با Google هنوز تنظیم نشده است.');
+      const st=await oauthState(env,'google');const redirectUri=new URL('/api/auth/google/callback',request.url).toString();const q=new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,redirect_uri:redirectUri,response_type:'code',scope:'openid email profile',state:st.token,prompt:'select_account'});return new Response(null,{status:302,headers:{'Location':'https://accounts.google.com/o/oauth2/v2/auth?'+q.toString(),'Set-Cookie':cookie('oauth_state',st.token,600)}});
+    }
+    if(path==='/api/auth/google/callback'&&request.method==='GET'){
+      const state=url.searchParams.get('state')||'';if(!await validOAuthState(request,env,'google',state))return redirectAuthError(request,'نشست ورود Google منقضی یا نامعتبر است.');const code=url.searchParams.get('code')||'';if(!code)return redirectAuthError(request,'ورود با Google لغو شد.');
+      const redirectUri=new URL('/api/auth/google/callback',request.url).toString();const form=new URLSearchParams({code,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:redirectUri,grant_type:'authorization_code'});const tr=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:form});const td=await tr.json().catch(()=>({}));if(!tr.ok||!td.access_token)return redirectAuthError(request,'دریافت دسترسی از Google انجام نشد.');const ur=await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:'Bearer '+td.access_token}});const profile=await ur.json().catch(()=>({}));if(!ur.ok||!profile.sub)return redirectAuthError(request,'اطلاعات حساب Google دریافت نشد.');const u=await findOrCreateSocialUser(env,'google',profile.sub,{email:profile.email,name:profile.name});const token=await signSession(env.ADMIN_SECRET||'fallback','mr_user',{uid:u.id,exp:Date.now()+30*86400000});const dest=new URL('/',request.url);dest.searchParams.set('auth','success');return new Response(null,{status:302,headers:{'Location':dest.toString(),'Set-Cookie':cookie('mr_user',token,30*86400)}});
+    }
+    if(path==='/api/auth/apple/start'&&request.method==='GET'){
+      if(!env.APPLE_CLIENT_ID||!env.APPLE_TEAM_ID||!env.APPLE_KEY_ID||!env.APPLE_PRIVATE_KEY)return redirectAuthError(request,'ورود با Apple هنوز تنظیم نشده است.');
+      const st=await oauthState(env,'apple');const redirectUri=new URL('/api/auth/apple/callback',request.url).toString();const q=new URLSearchParams({client_id:env.APPLE_CLIENT_ID,redirect_uri:redirectUri,response_type:'code',response_mode:'form_post',scope:'name email',state:st.token});return new Response(null,{status:302,headers:{'Location':'https://appleid.apple.com/auth/authorize?'+q.toString(),'Set-Cookie':cookie('oauth_state',st.token,600)}});
+    }
+    if(path==='/api/auth/apple/callback'&&request.method==='POST'){
+      const form=await request.formData().catch(()=>new FormData());const state=String(form.get('state')||'');if(!await validOAuthState(request,env,'apple',state))return redirectAuthError(request,'نشست ورود Apple منقضی یا نامعتبر است.');const code=String(form.get('code')||'');if(!code)return redirectAuthError(request,'ورود با Apple لغو شد.');
+      const redirectUri=new URL('/api/auth/apple/callback',request.url).toString();const clientSecret=await appleClientSecret(env);const body=new URLSearchParams({client_id:env.APPLE_CLIENT_ID,client_secret:clientSecret,code,grant_type:'authorization_code',redirect_uri:redirectUri});const tr=await fetch('https://appleid.apple.com/auth/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body});const td=await tr.json().catch(()=>({}));if(!tr.ok||!td.id_token)return redirectAuthError(request,'دریافت حساب Apple انجام نشد.');const parts=String(td.id_token).split('.');const claims=parts.length===3?decodeJwtPart(parts[1]):null;if(!claims?.sub)return redirectAuthError(request,'توکن Apple معتبر نیست.');const userRaw=form.get('user');let appleName='';try{const parsed=JSON.parse(String(userRaw||'{}'));appleName=[parsed.name?.firstName,parsed.name?.lastName].filter(Boolean).join(' ')}catch{}const u=await findOrCreateSocialUser(env,'apple',claims.sub,{email:claims.email,name:appleName||claims.email?.split('@')[0]});const token=await signSession(env.ADMIN_SECRET||'fallback','mr_user',{uid:u.id,exp:Date.now()+30*86400000});const dest=new URL('/',request.url);dest.searchParams.set('auth','success');return new Response(null,{status:303,headers:{'Location':dest.toString(),'Set-Cookie':cookie('mr_user',token,30*86400)}});
+    }
     if(path==='/api/auth/register'&&request.method==='POST'){
       await ensureCustomerTables(env);const b=await request.json().catch(()=>({}));const name=String(b.name||'').trim(),phone=String(b.phone||'').trim(),password=String(b.password||'');
       if(name.length<2||!/^09\d{9}$/.test(phone)||password.length<6)return json({error:'نام، شماره موبایل معتبر و رمز حداقل ۶ کاراکتری لازم است.'},400);

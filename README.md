@@ -1,7 +1,21 @@
-# MR Mobile Store — V60 to V90 Feature Pack
+# MR Mobile V94 – Premium Customer Login
 
-Base: V58 payment-gateway-ready.
+این نسخه ظاهر صفحه ورود مشتری را حرفه‌ای‌تر می‌کند و زیرساخت واقعی ورود با Google و Apple را اضافه می‌کند.
 
-This release consolidates the V60–V90 roadmap into one compatible package: support tickets, customer chat, editable site content, customer wallet/loyalty/referral foundation, customer/admin notifications, audit logs, admin advanced center, CSV order export, and PWA install/offline shell.
+## Google OAuth Secrets در Cloudflare
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
 
-External providers such as SMS, payment gateways and carrier APIs remain configuration-dependent; no secrets are hard-coded.
+Redirect URI:
+`https://mrmobilestoree.mrstore.workers.dev/api/auth/google/callback`
+
+## Apple Sign in Secrets در Cloudflare
+- APPLE_CLIENT_ID (Services ID)
+- APPLE_TEAM_ID
+- APPLE_KEY_ID
+- APPLE_PRIVATE_KEY (کلید خصوصی .p8، به‌صورت Secret)
+
+Redirect URI:
+`https://mrmobilestoree.mrstore.workers.dev/api/auth/apple/callback`
+
+تا وقتی این Secretها تنظیم نشوند، دکمه‌های Google/Apple عمداً پیام «هنوز تنظیم نشده است» می‌دهند و هیچ اطلاعات جعلی یا ورود ساختگی انجام نمی‌شود.
