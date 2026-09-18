@@ -206,14 +206,25 @@
 </div>
 
 <div id="authModal" class="modal auth-modal">
-  <div class="auth-shell">
+  <div class="auth-shell auth-single">
     <button class="modal-close auth-close" onclick="closeAuth()">×</button>
-    <section class="auth-visual" aria-label="معرفی آقای موبایل"></section>
     <section class="auth-panel">
-      <div class="auth-panel-head"><span class="auth-welcome">سلام! 👋</span><h2 id="authTitle">ورود به حساب</h2><p id="authSub">برای ادامه وارد حساب کاربری خود شوید.</p></div>
-      <div class="auth-tabs"><button id="authLoginTab" class="active" onclick="setAuthMode('login')">ورود به حساب</button><button id="authRegisterTab" onclick="setAuthMode('register')">ساخت حساب کاربری</button></div>
+      <div class="auth-logo-wrap">
+        <img src="/assets/mr-mobile-logo.png" alt="آقای موبایل" class="auth-logo">
+        <b>MR MOBILE</b>
+        <span>در تکنولوژی سفر کنید</span>
+      </div>
+      <div class="auth-panel-head">
+        <span class="auth-welcome">سلام! 👋</span>
+        <h2 id="authTitle">ورود به حساب کاربری</h2>
+        <p id="authSub">برای ادامه، شماره موبایل یا ایمیل خود را وارد کنید.</p>
+      </div>
+      <div class="auth-tabs">
+        <button id="authLoginTab" class="active" onclick="setAuthMode('login')">ورود به حساب</button>
+        <button id="authRegisterTab" onclick="setAuthMode('register')">ساخت حساب کاربری</button>
+      </div>
       <div id="registerNameWrap" class="field hidden"><label>نام و نام خانوادگی</label><input id="authName" autocomplete="name" placeholder="مثلاً ابوالفضل رجبی"></div>
-      <div class="field"><label>شماره موبایل</label><input id="authPhone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx"></div>
+      <div class="field"><label>شماره موبایل یا ایمیل</label><input id="authPhone" inputmode="email" autocomplete="username" placeholder="0912 345 6789 یا example@gmail.com"></div>
       <div class="field"><label>رمز عبور</label><div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید"><button type="button" onclick="toggleAuthPassword()" aria-label="نمایش رمز">◉</button></div></div>
       <div class="auth-options"><label><input id="authRemember" type="checkbox" checked> مرا به خاطر بسپار</label><button type="button" onclick="authRecovery()">فراموشی رمز عبور؟</button></div>
       <button id="authSubmit" class="btn primary full auth-submit" onclick="submitAuth()">ورود به حساب کاربری →</button>
@@ -222,9 +233,10 @@
       <div class="auth-security"><span>✓</span><div><b>ورود امن و رمزگذاری‌شده</b><small>اطلاعات حساب شما نزد ما محفوظ است.</small></div></div>
       <button id="authSwitch" class="switch-auth" onclick="switchAuth()">ثبت نام نکرده‌اید؟ ثبت نام کنید</button>
       <div id="authError" class="form-error"></div>
+      <div class="auth-footer-brand">MR MOBILE&nbsp;&nbsp; • &nbsp;&nbsp;در تکنولوژی سفر کنید</div>
     </section>
   </div>
-</div>
+</div>>
 
 <div id="favoritesModal" class="modal">
   <div class="modal-card favorites-card">
