@@ -320,3 +320,52 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
   .auth-shell{width:100%;max-height:96vh}
   .auth-panel{padding:48px 18px 28px}
 }
+
+/* V96: auth desktop two-column + guaranteed vertical scrolling */
+.auth-modal{
+  display:none;
+  place-items:center;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:18px;
+}
+.auth-modal.show{display:grid;}
+.auth-shell{
+  width:min(1120px,96vw);
+  height:min(700px,calc(100vh - 36px));
+  min-height:0;
+  max-height:calc(100vh - 36px);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(390px,1fr);
+  grid-template-rows:minmax(0,1fr);
+  overflow-y:auto;
+  overflow-x:hidden;
+  align-items:stretch;
+  direction:ltr;
+}
+.auth-shell > .auth-visual,
+.auth-shell > .auth-panel{min-height:0;}
+.auth-visual,
+.auth-panel{overflow:visible;}
+.auth-visual{padding:44px 48px 34px;}
+.auth-panel{padding:44px 46px 34px;justify-content:flex-start;}
+.auth-visual-copy{margin-top:46px;}
+.auth-visual-copy h2{font-size:32px;}
+.auth-benefits{margin-top:24px;}
+@media(max-width:900px){
+  .auth-modal{padding:10px;place-items:center;}
+  .auth-shell{
+    width:min(680px,96vw);
+    height:auto;
+    max-height:calc(100vh - 20px);
+    grid-template-columns:1fr;
+    grid-template-rows:auto;
+    overflow-y:auto;
+  }
+  .auth-visual{display:none;}
+  .auth-panel{padding:48px 28px 30px;}
+}
+@media(max-width:430px){
+  .auth-shell{width:100%;}
+  .auth-panel{padding:46px 17px 26px;}
+}

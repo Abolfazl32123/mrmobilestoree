@@ -21,7 +21,7 @@ Redirect URI:
 تا وقتی این Secretها تنظیم نشوند، دکمه‌های Google/Apple عمداً پیام «هنوز تنظیم نشده است» می‌دهند و هیچ اطلاعات جعلی یا ورود ساختگی انجام نمی‌شود.
 
 
-## V95 — Customer Login UI Refinement
+## V96 — Customer Login UI Refinement
 - Refined customer login modal layout to match the premium reference design.
 - Fixed desktop column sizing/alignment and RTL/LTR grid interaction.
 - Preserved existing phone/password authentication and Google/Apple button handlers.
