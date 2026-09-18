@@ -26,3 +26,6 @@ Redirect URI:
 - Fixed desktop column sizing/alignment and RTL/LTR grid interaction.
 - Preserved existing phone/password authentication and Google/Apple button handlers.
 - Improved responsive behavior for tablet/mobile.
+
+
+V97: login layout rebuilt to match supplied reference image; desktop two-column fixed layout with no auth scrollbar, functional right-side form, responsive mobile fallback.
