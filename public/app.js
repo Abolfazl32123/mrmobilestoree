@@ -308,12 +308,95 @@ document.addEventListener('click', (event)=>{
     if(m) window.openProductDetail(Number(m[1]));
   }
 });
-// V60-V90 customer advanced center
+// V93: Premium customer support center (tickets / live chat / loyalty club)
 let supportTicketId=null;
-async function openSupportCenter(){if(!state.user)return openAuth('login');$('supportModal').classList.add('show');supportTab('tickets')}
+let supportActiveTab='tickets';
+async function openSupportCenter(){
+  if(!state.user)return openAuth('login');
+  $('supportModal').classList.add('show');
+  supportTab('tickets');
+}
 function closeSupportCenter(){$('supportModal').classList.remove('show')}
-async function supportTab(tab){const box=$('supportContent');if(!box)return;box.innerHTML='<div class="loading">در حال بارگذاری...</div>';try{if(tab==='tickets'){const rows=await fetch('/api/tickets').then(r=>r.json());box.innerHTML=`<div class="advanced-card"><b>تیکت جدید</b><input id="ticketSubject" placeholder="موضوع"><select id="ticketPriority"><option value="normal">عادی</option><option value="high">مهم</option></select><textarea id="ticketMessage" placeholder="شرح درخواست"></textarea><button class="btn primary" onclick="createTicket()">ارسال تیکت</button></div>`+(Array.isArray(rows)?rows.map(t=>`<div class="ticket-row" onclick="openTicket(${t.id})"><b>#${t.id} — ${esc(t.subject)}</b><div class="ticket-meta">${esc(t.status)} · ${esc(t.created_at)}</div></div>`).join(''):'')}else if(tab==='chat'){const rows=await fetch('/api/account/chat').then(r=>r.json());box.innerHTML=`<div>${(rows||[]).map(x=>`<div class="chat-row"><b>${x.sender_type==='admin'?'پشتیبانی':'شما'}</b><p>${esc(x.message)}</p><small>${esc(x.created_at)}</small></div>`).join('')}</div><div class="support-compose"><textarea id="chatMessage" placeholder="پیام شما..."></textarea><button class="btn primary" onclick="sendChatMessage()">ارسال</button></div>`}else{const d=await fetch('/api/account/advanced').then(r=>r.json());box.innerHTML=`<div class="wallet-grid"><div class="advanced-card"><small>موجودی کیف پول</small><strong>${fa(d.wallet||0)} تومان</strong></div><div class="advanced-card"><small>امتیاز باشگاه</small><strong>${fa(d.points||0)}</strong></div><div class="advanced-card"><small>کد دعوت شما</small><strong>${esc(d.referral_code||'—')}</strong></div></div><div class="advanced-card"><b>نسخه V90</b><p>باشگاه مشتریان، کیف پول، کد دعوت و مرکز ارتباط با پشتیبانی در حساب شما فعال است.</p></div>`}}catch(e){box.innerHTML='<div class="empty">دریافت اطلاعات انجام نشد.</div>'}}
-async function createTicket(){const subject=$('ticketSubject')?.value.trim(),message=$('ticketMessage')?.value.trim();if(!subject||!message)return toast('موضوع و متن تیکت را وارد کنید');const r=await fetch('/api/tickets',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({subject,message,priority:$('ticketPriority').value})});const d=await r.json();if(!r.ok)return toast(d.error||'خطا');toast('تیکت ثبت شد ✓');supportTab('tickets')}
-async function openTicket(id){supportTicketId=id;const box=$('supportContent');const rows=await fetch('/api/tickets/'+id+'/messages').then(r=>r.json());box.innerHTML=`<button class="btn ghost" onclick="supportTab('tickets')">← بازگشت</button><h3>تیکت #${id}</h3>`+(rows||[]).map(x=>`<div class="chat-row"><b>${x.sender_type==='admin'?'پشتیبانی':'شما'}</b><p>${esc(x.message)}</p></div>`).join('')+`<div class="support-compose"><textarea id="ticketReply" placeholder="پاسخ شما..."></textarea><button class="btn primary" onclick="replyTicket()">ارسال</button></div>`}
-async function replyTicket(){const m=$('ticketReply')?.value.trim();if(!m)return;await fetch('/api/tickets/'+supportTicketId+'/messages',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:m})});openTicket(supportTicketId);toast('پیام ارسال شد ✓')}
-async function sendChatMessage(){const m=$('chatMessage')?.value.trim();if(!m)return;const r=await fetch('/api/account/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:m})});if(r.ok){toast('پیام ارسال شد ✓');supportTab('chat')}}
+function supportTab(tab){
+  supportActiveTab=tab;
+  document.querySelectorAll('#supportModal .support-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  const box=$('supportContent');
+  if(!box)return;
+  box.innerHTML='<div class="support-loading"><span></span><b>در حال بارگذاری...</b></div>';
+  if(tab==='tickets') return renderSupportTickets();
+  if(tab==='chat') return renderSupportChat();
+  return renderLoyaltyClub();
+}
+function supportHeader(title,subtitle,icon){
+  return `<div class="support-title-row"><div class="support-title-icon">${icon}</div><div><h3>${title}</h3><p>${subtitle}</p></div></div>`;
+}
+async function renderSupportTickets(){
+  const box=$('supportContent');
+  try{
+    const rows=await fetch('/api/tickets').then(r=>r.json());
+    const list=Array.isArray(rows)?rows:[];
+    box.innerHTML=`
+      ${supportHeader('تیکت‌های پشتیبانی','درخواستت را ثبت کن؛ سریع پیگیری می‌کنیم.','🎫')}
+      <div class="support-new-ticket">
+        <div class="support-section-head"><div><b>ثبت تیکت جدید</b><small>موضوع و درخواستت را کامل بنویس.</small></div><span>＋</span></div>
+        <div class="support-form-grid">
+          <label><span>موضوع تیکت</span><input id="ticketSubject" maxlength="160" placeholder="مثلاً پیگیری سفارش، مشکل محصول ..."></label>
+          <label><span>اولویت</span><select id="ticketPriority"><option value="normal">عادی</option><option value="high">مهم</option></select></label>
+        </div>
+        <label class="support-field-wide"><span>شرح درخواست</span><textarea id="ticketMessage" maxlength="4000" placeholder="توضیحات کامل درخواست خود را بنویسید ..."></textarea></label>
+        <button class="support-primary-btn" onclick="createTicket()"><span>ارسال تیکت</span><b>➤</b></button>
+      </div>
+      <div class="support-list-head"><b>تیکت‌های من</b><span>${fa(list.length)} مورد</span></div>
+      <div class="support-ticket-list">${list.length?list.map(t=>`<button class="support-ticket-item" onclick="openTicket(${t.id})"><span class="ticket-icon">🎫</span><span class="ticket-main"><b>#${t.id} — ${esc(t.subject)}</b><small>${esc(t.created_at||'')} · ${t.priority==='high'?'مهم':'عادی'}</small></span><span class="ticket-status ${t.status==='closed'?'closed':''}">${t.status==='closed'?'بسته شده':'باز'}</span><span class="ticket-arrow">‹</span></button>`).join(''):`<div class="support-empty"><div>🎫</div><b>هنوز تیکتی ثبت نکرده‌اید</b><small>اگر سوال یا مشکلی دارید، اولین تیکت خود را ثبت کنید.</small></div>`}</div>`;
+  }catch(e){box.innerHTML='<div class="support-empty"><div>⚠️</div><b>دریافت تیکت‌ها انجام نشد</b><small>لطفاً دوباره تلاش کنید.</small></div>'}
+}
+async function createTicket(){
+  const subject=$('ticketSubject')?.value.trim(),message=$('ticketMessage')?.value.trim();
+  if(!subject||!message)return toast('موضوع و متن تیکت را وارد کنید');
+  const btn=document.querySelector('.support-primary-btn');if(btn)btn.disabled=true;
+  try{
+    const r=await fetch('/api/tickets',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({subject,message,priority:$('ticketPriority')?.value||'normal'})});
+    const d=await r.json();if(!r.ok)throw Error(d.error||'خطا در ثبت تیکت');
+    toast('تیکت با موفقیت ثبت شد ✓');supportTab('tickets');
+  }catch(e){toast(e.message||'خطا در ثبت تیکت');if(btn)btn.disabled=false}
+}
+async function openTicket(id){
+  supportTicketId=id;const box=$('supportContent');
+  box.innerHTML='<div class="support-loading"><span></span><b>در حال دریافت گفتگو...</b></div>';
+  try{
+    const rows=await fetch('/api/tickets/'+id+'/messages').then(r=>r.json());
+    const list=Array.isArray(rows)?rows:[];
+    box.innerHTML=`<button class="support-back" onclick="supportTab('tickets')">→ بازگشت به تیکت‌ها</button>${supportHeader('تیکت #'+id,'گفتگو با تیم پشتیبانی','🎧')}<div class="support-thread">${list.map(x=>`<div class="support-message ${x.sender_type==='admin'?'from-admin':'from-user'}"><div class="support-message-label">${x.sender_type==='admin'?'پشتیبانی':'شما'} <small>${esc(x.created_at||'')}</small></div><p>${esc(x.message)}</p></div>`).join('')}</div><div class="support-reply"><textarea id="ticketReply" maxlength="4000" placeholder="پاسخ خود را بنویسید ..."></textarea><button class="support-send-btn" onclick="replyTicket()">➤</button></div>`;
+  }catch(e){box.innerHTML='<div class="support-empty"><div>⚠️</div><b>تیکت پیدا نشد</b></div>'}
+}
+async function replyTicket(){
+  const m=$('ticketReply')?.value.trim();if(!m)return;
+  const r=await fetch('/api/tickets/'+supportTicketId+'/messages',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:m})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)return toast(d.error||'خطا');await openTicket(supportTicketId);toast('پیام ارسال شد ✓');
+}
+async function renderSupportChat(){
+  const box=$('supportContent');
+  try{
+    const rows=await fetch('/api/account/chat').then(r=>r.json());
+    const list=Array.isArray(rows)?rows:[];
+    box.innerHTML=`${supportHeader('چت آنلاین','مستقیم با پشتیبانی در ارتباط باشید.','💬')}<div class="chat-online-pill"><span></span>پشتیبانی آنلاین است · پاسخ‌گویی در ساعات کاری</div><div class="support-chat-window">${list.length?list.map(x=>`<div class="support-message ${x.sender_type==='admin'?'from-admin':'from-user'}"><div class="support-message-label">${x.sender_type==='admin'?'پشتیبانی':'شما'} <small>${esc(x.created_at||'')}</small></div><p>${esc(x.message)}</p></div>`).join(''):`<div class="chat-welcome"><div class="chat-avatar">🎧</div><b>سلام! 👋</b><p>پیامتان را بنویسید؛ تیم پشتیبانی در اولین فرصت پاسخ می‌دهد.</p></div>`}</div><div class="support-reply"><textarea id="chatMessage" maxlength="3000" placeholder="پیام خود را بنویسید ..."></textarea><button class="support-send-btn" onclick="sendChatMessage()">➤</button></div>`;
+  }catch(e){box.innerHTML='<div class="support-empty"><div>⚠️</div><b>چت در دسترس نیست</b><small>لطفاً دوباره تلاش کنید.</small></div>'}
+}
+async function sendChatMessage(){
+  const m=$('chatMessage')?.value.trim();if(!m)return;
+  const r=await fetch('/api/account/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:m})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)return toast(d.error||'خطا در ارسال پیام');
+  await renderSupportChat();toast('پیام ارسال شد ✓');
+}
+async function renderLoyaltyClub(){
+  const box=$('supportContent');
+  try{
+    const d=await fetch('/api/account/advanced').then(r=>r.json());
+    if(d.error)throw Error(d.error);
+    const points=Number(d.points||0),wallet=Number(d.wallet||0),code=d.referral_code||'—';
+    const goldAt=650,progress=Math.min(100,Math.round(points/goldAt*100));
+    box.innerHTML=`${supportHeader('باشگاه مشتریان','با هر خرید، امتیاز بگیرید و از مزایای ویژه استفاده کنید.','👑')}<div class="loyalty-hero"><div class="loyalty-score"><div class="score-ring" style="--progress:${progress}%"><div><strong>${fa(points)}</strong><small>امتیاز شما</small></div></div></div><div class="loyalty-level"><span>سطح عضویت</span><b>⭐ ${points>=goldAt?'طلایی':'نقره‌ای'}</b><div class="loyalty-progress"><i style="width:${progress}%"></i></div><small>${points>=goldAt?'سطح طلایی فعال است':'تا سطح طلایی: '+fa(Math.max(0,goldAt-points))+' امتیاز'}</small></div><div class="loyalty-ref"><span>کد دعوت شما</span><b>${esc(code)}</b><button onclick="copyReferralCode('${esc(code)}')">کپی کد</button></div></div><div class="loyalty-benefits"><div><b>🎁</b><strong>تخفیف‌های ویژه</strong><small>پیشنهادهای اختصاصی اعضا</small></div><div><b>🪙</b><strong>جمع‌آوری امتیاز</strong><small>با خرید و فعالیت در فروشگاه</small></div><div><b>⭐</b><strong>ارتقای سطح</strong><small>مزایای بیشتر با امتیاز بالاتر</small></div></div><div class="loyalty-info"><div><span>موجودی کیف پول</span><b>${fa(wallet)} تومان</b></div><div><span>مزایای عضویت</span><b>فعال ✓</b></div></div><button class="loyalty-cta" onclick="supportTab('tickets')">مشاهده پشتیبانی و مزایا <span>←</span></button>`;
+  }catch(e){box.innerHTML='<div class="support-empty"><div>👑</div><b>اطلاعات باشگاه دریافت نشد</b><small>لطفاً دوباره تلاش کنید.</small></div>'}
+}
+async function copyReferralCode(code){if(!code||code==='—')return;try{await navigator.clipboard.writeText(code);toast('کد دعوت کپی شد ✓')}catch{toast('کپی خودکار در این مرورگر در دسترس نیست')}}
+
