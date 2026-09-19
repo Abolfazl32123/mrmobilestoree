@@ -1,14 +1,12 @@
-# MR MOBILE STORE — V106
+# MR MOBILE STORE — V107
 
-V106 is based on V105 and keeps the existing store functionality, authentication, Google Login integration, admin panel, API and D1 configuration unchanged.
+V107 builds on V106 and keeps the Google OAuth/authentication and existing storefront/admin functionality intact.
 
-## UI update
-- Compact premium desktop hero
-- Reduced hero height and vertical padding
-- Better vertical spacing for title, CTA and benefit cards
-- Hero image remains prominent but is scaled slightly to keep the full composition visible
-- Desktop hero is designed to show the main content and lower benefit cards without excessive vertical overflow
-- Mobile/tablet responsive rules remain intact
-
-## Deploy
-Upload/replace the project files in the existing GitHub repository. Cloudflare Worker deployment continues from the existing configuration.
+Changes:
+- V106 compact premium hero preserved.
+- Reduced spacing between hero and categories.
+- Premium category cards with descriptions.
+- Refined featured-products section.
+- Five-column desktop product grid where space allows.
+- Dedicated featured discount card.
+- Responsive tablet/mobile layouts.

@@ -84,17 +84,20 @@
     <div id="specialOffersGrid" class="special-offers-grid"></div>
   </section>
 
-  <section id="categories" class="section container">
-    <div class="section-head"><h2>دسته‌بندی محصولات 🛍️</h2><a href="#products">مشاهده همه ←</a></div>
+  <section id="categories" class="section container categories-section">
+    <div class="section-head categories-head">
+      <div><span class="section-kicker">انتخاب سریع</span><h2>دسته‌بندی محصولات 🛍️</h2><p>هرآنچه که نیاز دارید، در یک نگاه پیدا کنید.</p></div>
+      <a class="section-link" href="#products">مشاهده همه دسته‌بندی‌ها ←</a>
+    </div>
     <div class="categories">
-      <button onclick="setCategory('همه')">📱<span>همه</span></button>
-      <button onclick="setCategory('موبایل')">📱<span>گوشی موبایل</span></button>
-      <button onclick="setCategory('لوازم جانبی')">🎧<span>لوازم جانبی</span></button>
-      <button onclick="setCategory('تبلت')">▣<span>تبلت</span></button>
-      <button onclick="setCategory('ساعت هوشمند')">⌚<span>ساعت هوشمند</span></button>
-      <button onclick="setCategory('هدفون')">🎧<span>هدفون</span></button>
-      <button onclick="setCategory('اسپیکر')">🔊<span>اسپیکر</span></button>
-      <button onclick="setCategory('کابل و شارژر')">🔌<span>کابل و شارژر</span></button>
+      <button onclick="setCategory('همه')"><i>％</i><span>تخفیف‌ها</span><small>پیشنهادهای ویژه</small></button>
+      <button onclick="setCategory('موبایل')"><i>📱</i><span>گوشی موبایل</span><small>جدیدترین مدل‌ها</small></button>
+      <button onclick="setCategory('لوازم جانبی')"><i>🎧</i><span>لوازم جانبی</span><small>کامل و کاربردی</small></button>
+      <button onclick="setCategory('تبلت')"><i>▣</i><span>تبلت</span><small>برای کار و سرگرمی</small></button>
+      <button onclick="setCategory('ساعت هوشمند')"><i>⌚</i><span>ساعت هوشمند</span><small>هوشمند و شیک</small></button>
+      <button onclick="setCategory('هدفون')"><i>🎧</i><span>هندزفری و هدفون</span><small>صدای بهتر</small></button>
+      <button onclick="setCategory('اسپیکر')"><i>🔊</i><span>اسپیکر</span><small>صدای قدرتمند</small></button>
+      <button onclick="setCategory('کابل و شارژر')"><i>🔌</i><span>شارژر و کابل</span><small>سریع و مطمئن</small></button>
     </div>
   </section>
 
@@ -129,7 +132,16 @@
       <button class="clear-filters" type="button" onclick="clearAdvancedFilters()">پاک کردن فیلترها ↺</button>
     </div>
     <div id="productsResult" class="products-result"></div>
-    <div id="productsGrid" class="products-grid"><div class="loading">در حال دریافت محصولات...</div></div>
+    <div class="featured-products-layout">
+      <div id="productsGrid" class="products-grid"><div class="loading">در حال دریافت محصولات...</div></div>
+      <aside class="featured-promo-card">
+        <div class="promo-orb">٪</div>
+        <span>فرصت محدود</span>
+        <h3>تخفیف‌های ویژه</h3>
+        <p>روی محصولات منتخب تا ۳۰٪ تخفیف بگیرید.</p>
+        <a href="#products" onclick="setCategory('همه')">مشاهده همه تخفیف‌ها <b>←</b></a>
+      </aside>
+    </div>
   </section>
 
   <section id="brands" class="promo-grid container">
