@@ -918,3 +918,9 @@ html,body{max-width:100%;overflow-x:hidden}
   .premium-promo-copy{width:65%;margin-right:5px;padding:20px 10px}
   .premium-promo-copy h3{font-size:18px}
 }
+
+/* V113: real category product photography */
+.categories .category-card .category-art{height:70px;padding:3px;box-sizing:border-box;background:linear-gradient(180deg,#0c1517,#081012);}
+.categories .category-card .category-art img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;display:block;border-radius:12px;}
+@media(max-width:900px){.categories .category-card .category-art{height:68px}}
+@media(max-width:600px){.categories .category-card .category-art{height:64px}}
