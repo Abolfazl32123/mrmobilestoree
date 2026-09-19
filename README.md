@@ -1,16 +1,9 @@
-# MR MOBILE STORE — V108
+# MR MOBILE STORE — V110
 
-V108 rebuilds the category + featured products section to closely follow the approved premium mockup while preserving the V106/V107 header and hero polish.
+Homepage polish based on V109.
 
-Changes:
-- tighter Hero → Categories spacing
-- premium category cards
-- compact product filters in the section header
-- RTL featured-product layout with promotion card on the right
-- compact product cards with price + cart button
-- responsive desktop/tablet/mobile layouts
-- existing auth, Google login, cart, favorites, compare and admin functionality preserved
-
-
-## V109
-Category artwork assets and featured-products layout polish.
+- Category artwork uses the dedicated category SVG artwork.
+- Featured products uses a stable RTL two-column layout: fixed-width promotion card + five-column real product grid on desktop.
+- Empty product state no longer causes the promotion card or grid to stretch unexpectedly.
+- No fake products are injected; product cards come from `/api/products` / the store database.
+- Existing header, hero, authentication and Google OAuth flow are preserved.
