@@ -724,3 +724,21 @@ html,body{max-width:100%;overflow-x:hidden}
 .hero-premium{min-height:520px;margin-top:12px;padding:34px 30px 24px;border-radius:28px}.hero-premium .hero-copy{padding:8px 10px 0 0}.hero-premium .store-name{margin:19px 0 7px}.hero-premium h1{font-size:clamp(46px,4.8vw,70px);max-width:590px}.hero-premium .hero-copy p{max-width:550px;margin-top:14px;line-height:1.9}.hero-premium .hero-buttons{margin-top:20px}.hero-benefits{margin-top:22px;max-width:650px}.hero-premium .hero-visual{min-height:450px}.hero-premium .hero-iphone-stage{min-height:430px;transform:translateX(-3%)}.hero-premium .hero-iphone-stage img{width:116%;max-width:720px}.hero-floating-top{top:5%;right:0}.hero-floating-bottom{bottom:2%;left:1%}
 @media(max-width:1050px){.header-topline{display:none}.main-header{min-height:90px}.nav-inner{justify-content:flex-start}.hero-premium{min-height:500px;padding:30px 22px 22px}.hero-premium h1{font-size:54px}.hero-premium .hero-iphone-stage img{width:118%}}
 @media(max-width:700px){.main-header{min-height:84px;gap:8px}.brand{min-width:auto}.brand img{width:50px;height:50px}.brand strong{font-size:17px}.brand small{display:none}.search-wrap{height:46px}.header-actions .user-btn{display:none}.header-actions .icon-btn{width:44px;height:46px}.header-actions .cart-btn{min-width:90px;height:46px;padding:0 10px}.nav-inner{min-height:56px}.nav-inner a{font-size:10px;padding:12px 8px}.nav-special,.nav-support{display:none}.hero-premium{min-height:auto;padding:25px 14px 18px;margin-top:8px;border-radius:22px}.hero-premium .hero-copy{padding:0}.hero-premium h1{font-size:42px}.hero-premium .hero-copy p{font-size:11px}.hero-premium .hero-visual{min-height:340px}.hero-premium .hero-iphone-stage{min-height:340px;transform:none}.hero-premium .hero-iphone-stage img{width:115%}.hero-floating-top{top:2%;right:2%}}
+
+/* V106: compact premium hero - keep the complete hero visible on desktop */
+@media (min-width:1051px){
+  .hero-premium{min-height:438px;padding:26px 30px 22px;margin-top:10px;border-radius:28px}
+  .hero-premium .hero-copy{padding:4px 10px 0 0}
+  .hero-premium .store-name{margin:14px 0 6px}
+  .hero-premium h1{font-size:clamp(44px,4.35vw,64px);line-height:1.04;max-width:570px}
+  .hero-premium .hero-copy p{max-width:530px;margin-top:11px;line-height:1.75;font-size:12px}
+  .hero-premium .hero-buttons{margin-top:16px}
+  .hero-benefits{margin-top:17px;max-width:620px}
+  .hero-benefits>div{min-height:68px;padding:9px 8px}
+  .hero-benefits i{width:25px;height:25px;margin-bottom:5px}
+  .hero-premium .hero-visual{min-height:370px}
+  .hero-premium .hero-iphone-stage{min-height:350px;transform:translateX(-2%)}
+  .hero-premium .hero-iphone-stage img{width:108%;max-width:660px}
+  .hero-floating-top{top:4%}
+  .hero-floating-bottom{bottom:1%}
+}
