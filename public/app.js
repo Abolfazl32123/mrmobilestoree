@@ -121,7 +121,7 @@ function renderProducts(){
   else list.sort((a,b)=>Number(b.id)-Number(a.id));
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
   updateFilterCount();
-  if(!list.length){$('productsGrid').innerHTML='<div class="loading">محصولی با این فیلترها پیدا نشد.</div>';return}
+  if(!list.length){$('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>محصولی برای نمایش پیدا نشد</strong><span>محصولات واقعی فروشگاه از پنل مدیریت این بخش نمایش داده می‌شوند.</span></div>';return}
   $('productsGrid').innerHTML=list.map(p=>{
     const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price; const remain=saleRemaining(p);
     return `<article class="product-card ${p.available?'':'unavailable'}" onclick="openProductDetail(${p.id})">

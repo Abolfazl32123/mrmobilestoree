@@ -10,3 +10,7 @@ Changes:
 - compact product cards with price + cart button
 - responsive desktop/tablet/mobile layouts
 - existing auth, Google login, cart, favorites, compare and admin functionality preserved
+
+
+## V109
+Category artwork assets and featured-products layout polish.
