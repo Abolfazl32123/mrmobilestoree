@@ -148,21 +148,38 @@
     </div>
   </section>
 
-  <section id="brands" class="promo-grid container">
-    <div class="promo green"><div><small>لوازم جانبی اورجینال</small><h3>شارژر، کابل، هندزفری و بیشتر...</h3><a href="#products">مشاهده محصولات ←</a></div><div class="promo-icon">🎧</div></div>
-    <div class="promo blue"><div><small>خرید گوشی کارکرده</small><h3>با تضمین سلامت و اصالت</h3><a href="#products">مشاهده ←</a></div><div class="promo-icon">📱</div></div>
-  </section>
+  <section id="brands" class="premium-lower container">
+    <div class="premium-promo promo-used">
+      <div class="premium-promo-art"><span class="art-glow"></span><img src="/assets/categories/mobile.svg" alt="گوشی موبایل"></div>
+      <div class="premium-promo-copy">
+        <small>خرید گوشی کارکرده</small>
+        <h3>با تضمین سلامت و اصالت</h3>
+        <div class="premium-promo-features"><span>✓ تضمین سلامت</span><span>✓ اصالت کالا</span><span>✓ تحویل سریع</span></div>
+        <a href="#products" onclick="setCategory('همه')">مشاهده ←</a>
+      </div>
+    </div>
+    <div class="premium-promo promo-accessories">
+      <div class="premium-promo-art"><span class="art-wave"></span><img src="/assets/categories/headphones.svg" alt="هندزفری و هدفون"></div>
+      <div class="premium-promo-copy">
+        <small>لوازم جانبی اورجینال</small>
+        <h3>شارژر، کابل، هندزفری و بیشتر...</h3>
+        <div class="premium-promo-features"><span>✓ کیفیت اورجینال</span><span>✓ ارسال سریع</span><span>✓ قیمت مناسب</span></div>
+        <a href="#products" onclick="setCategory('لوازم جانبی')">مشاهده محصولات ←</a>
+      </div>
+    </div>
 
-  <section class="newsletter container">
-    <div class="mail-icon">✉</div>
-    <div><h3>عضویت در خبرنامه</h3><p>از جدیدترین محصولات و تخفیف‌ها باخبر شوید.</p></div>
-    <input id="newsletterEmail" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="ایمیل خود را وارد کنید ...">
-    <button class="btn primary" onclick="subscribe()">عضویت</button>
-  </section>
+    <section class="newsletter-premium">
+      <div class="newsletter-art"><span class="mail-box">✉</span><span class="mail-spark">•</span></div>
+      <div class="newsletter-copy"><h3>عضویت در خبرنامه</h3><p>از جدیدترین محصولات و تخفیف‌ها باخبر شوید.</p></div>
+      <input id="newsletterEmail" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="ایمیل خود را وارد کنید ...">
+      <button class="btn primary" onclick="subscribe()">عضویت</button>
+    </section>
 
-  <section id="about" class="about container">
-    <h2>فقط یک فروشگاه نیستیم.</h2>
-    <p>اینجا جاییه برای کشف تکنولوژی‌های جدید و پیدا کردن چیزهایی که به سبک زندگی تو می‌خوره.</p>
+    <section id="about" class="about-premium">
+      <div class="about-premium-line"></div>
+      <h2>فقط یک <span>فروشگاه</span> نیستیم.</h2>
+      <p>اینجا جاییه برای کشف تکنولوژی‌های جدید و پیدا کردن چیزهایی که به سبک زندگی تو می‌خوره.</p>
+    </section>
   </section>
 <div id="supportFab" class="support-fab" onclick="openSupportCenter()">💬 پشتیبانی</div>
 <div id="supportModal" class="modal"><div class="modal-card support-card"><button class="modal-close" onclick="closeSupportCenter()">×</button><div class="support-brand"><div class="support-brand-icon">🎧</div><div><h2>مرکز پشتیبانی</h2><p>ما همیشه کنار شما هستیم</p></div></div><div class="support-tabs"><button data-tab="tickets" onclick="supportTab('tickets')">🎫 تیکت‌ها</button><button data-tab="chat" onclick="supportTab('chat')">💬 چت آنلاین</button><button data-tab="account" onclick="supportTab('account')">👑 باشگاه مشتریان</button></div><div id="supportContent"></div></div></div>
