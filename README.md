@@ -1,12 +1,12 @@
-# MR MOBILE STORE — V107
+# MR MOBILE STORE — V108
 
-V107 builds on V106 and keeps the Google OAuth/authentication and existing storefront/admin functionality intact.
+V108 rebuilds the category + featured products section to closely follow the approved premium mockup while preserving the V106/V107 header and hero polish.
 
 Changes:
-- V106 compact premium hero preserved.
-- Reduced spacing between hero and categories.
-- Premium category cards with descriptions.
-- Refined featured-products section.
-- Five-column desktop product grid where space allows.
-- Dedicated featured discount card.
-- Responsive tablet/mobile layouts.
+- tighter Hero → Categories spacing
+- premium category cards
+- compact product filters in the section header
+- RTL featured-product layout with promotion card on the right
+- compact product cards with price + cart button
+- responsive desktop/tablet/mobile layouts
+- existing auth, Google login, cart, favorites, compare and admin functionality preserved

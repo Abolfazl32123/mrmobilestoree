@@ -102,16 +102,20 @@
   </section>
 
   <section id="products" class="section container">
-    <div class="section-head">
-      <h2>محصولات ویژه 🔥</h2>
-      <div class="filters">
-        <button class="filter active" data-cat="همه" onclick="setCategory('همه')">همه</button>
-        <button class="filter" data-cat="موبایل" onclick="setCategory('موبایل')">گوشی موبایل</button>
-        <button class="filter" data-cat="لوازم جانبی" onclick="setCategory('لوازم جانبی')">لوازم جانبی</button>
-        <button class="filter" data-cat="تبلت" onclick="setCategory('تبلت')">تبلت</button>
+    <div class="section-head products-head">
+      <div><span class="section-kicker">منتخب برای شما</span><h2>محصولات ویژه 🔥</h2><p class="products-head-subtitle">انتخاب‌های محبوب با قیمت‌های جذاب</p></div>
+      <div class="products-head-actions">
+        <div class="filters">
+          <button class="filter active" data-cat="همه" onclick="setCategory('همه')">همه</button>
+          <button class="filter" data-cat="موبایل" onclick="setCategory('موبایل')">گوشی موبایل</button>
+          <button class="filter" data-cat="لوازم جانبی" onclick="setCategory('لوازم جانبی')">لوازم جانبی</button>
+          <button class="filter" data-cat="تبلت" onclick="setCategory('تبلت')">تبلت</button>
+        </div>
+        <button class="compact-filter-btn" type="button" onclick="toggleAdvancedFilters()">⚙️ فیلتر حرفه‌ای</button>
+        <a class="section-link products-all-link" href="#products">مشاهده همه محصولات ←</a>
       </div>
     </div>
-    <div class="advanced-filter-bar">
+    <div class="advanced-filter-bar v108-filterbar">
       <div class="filter-search">🔎 <input id="productSearch" type="search" placeholder="جستجوی مدل، برند یا توضیحات..." oninput="syncProductSearch(this.value)"></div>
       <button class="advanced-filter-toggle" type="button" onclick="toggleAdvancedFilters()">⚙️ فیلتر حرفه‌ای <span id="filterCount">۰</span></button>
       <select id="sortProducts" class="sort-select" onchange="setSort(this.value)">
