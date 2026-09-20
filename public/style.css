@@ -995,3 +995,30 @@ html,body{max-width:100%;overflow-x:hidden}
     display:none !important;
   }
 }
+
+
+/* V122 - mobile login icon: dedicated centered SVG, desktop untouched */
+.user-icon-mobile{display:none}
+@media(max-width:700px){
+  .header-actions .user-btn .user-icon{display:none!important}
+  .header-actions .user-btn .user-icon-mobile{
+    display:flex!important;
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    align-items:center!important;
+    justify-content:center!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    line-height:0!important;
+    pointer-events:none!important;
+  }
+  .header-actions .user-btn .user-icon-mobile svg{
+    width:19px!important;
+    height:19px!important;
+    display:block!important;
+    fill:#bfc6c7!important;
+  }
+}
