@@ -1022,3 +1022,19 @@ html,body{max-width:100%;overflow-x:hidden}
     fill:#bfc6c7!important;
   }
 }
+
+
+/* V123 - premium navigation icons */
+.nav-inner a{display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:color .2s,background .2s,box-shadow .2s}
+.nav-inner .nav-icon{width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 17px}
+.nav-inner .nav-icon svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-inner .nav-special .nav-icon svg{stroke-width:1.8}
+.nav-inner a.active{box-shadow:0 0 22px rgba(97,255,34,.04)}
+.nav-inner a.active .nav-icon svg,.nav-inner .nav-special .nav-icon svg{filter:drop-shadow(0 0 4px rgba(97,255,34,.16))}
+.nav-inner .nav-special .nav-icon{color:var(--green)}
+.nav-inner .nav-support .nav-icon{color:#cbd5d2}
+@media(max-width:700px){
+  .nav-inner a{gap:5px;padding:12px 8px}
+  .nav-inner .nav-icon{width:15px;height:15px;flex-basis:15px}
+  .nav-inner .nav-icon svg{width:15px;height:15px}
+}
