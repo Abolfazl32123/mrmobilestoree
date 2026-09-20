@@ -964,22 +964,21 @@ html,body{max-width:100%;overflow-x:hidden}
 }
 
 
-/* V119 - user login icon positioning */
-/* V119.1 - precise login icon centering */
-.header-actions .user-btn { position: relative; }
-.header-actions .user-btn .user-icon {
-  position: absolute;
-  left: calc(50% + 4px);
-  top: calc(50% - 2px);
-  display: block !important;
-  line-height: 1;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  padding: 0;
-}
+
+/* V119.2 - mobile-only login icon positioning
+   Desktop/tablet styles are intentionally untouched. */
 @media (max-width:700px) {
+  .header-actions .user-btn {
+    position: relative;
+  }
   .header-actions .user-btn .user-icon {
+    position: absolute;
     left: calc(50% + 4px);
     top: calc(50% - 2px);
+    display: block !important;
+    line-height: 1;
+    transform: translate(-50%, -50%) !important;
+    margin: 0;
+    padding: 0;
   }
 }
