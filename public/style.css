@@ -1001,12 +1001,26 @@ html,body{max-width:100%;overflow-x:hidden}
   .header-actions .user-btn::after{font-size:6.5px!important}
 }
 
-
-/* V120: center hero character inside its visual frame — no other mobile layout changes */
+/* V120: mobile header account stays after cart (no centering) */
 @media (max-width:700px){
-  .hero-premium .hero-iphone-stage{display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;}
-  .hero-premium .hero-iphone-stage > img{display:block!important;width:100%!important;max-width:520px!important;height:auto!important;margin:0 auto!important;transform:none!important;object-fit:contain!important;}
+  .header-actions{display:flex!important;align-items:center!important;gap:4px!important;margin-right:0!important;margin-left:0!important;position:relative!important;}
+  .header-actions .icon-btn,.header-actions .cart-btn,.header-actions .user-btn{
+    position:relative!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;
+  }
+  .header-actions .user-btn{
+    display:grid!important;
+    width:44px!important;min-width:44px!important;height:46px!important;
+    padding:0!important;border-radius:13px!important;
+    background:#101719!important;border:1px solid #2b373a!important;
+    color:#fff!important;font-size:19px!important;
+    box-shadow:none!important;
+  }
+  .header-actions .user-btn span{display:none!important}
+  .header-actions .user-btn::after{content:'👤';display:block!important;font-size:19px!important;color:#fff!important;line-height:1!important;margin:0!important}
 }
-@media (max-width:430px){
-  .hero-premium .hero-iphone-stage > img{width:100%!important;max-width:360px!important;}
+@media (max-width:390px){
+  .header-actions{gap:3px!important}
+  .header-actions .icon-btn,.header-actions .cart-btn,.header-actions .user-btn{width:40px!important;min-width:40px!important;height:42px!important}
+  .header-actions .cart-btn{font-size:17px!important;padding:0!important}
+  .header-actions .user-btn::after{font-size:17px!important}
 }
