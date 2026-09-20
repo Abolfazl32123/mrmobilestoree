@@ -710,7 +710,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .hero-premium .hero-iphone-stage img{width:105%;max-width:680px;filter:drop-shadow(0 30px 42px rgba(0,0,0,.72)) drop-shadow(0 0 24px rgba(97,255,34,.08));animation:heroFloat 5s ease-in-out infinite}
 .hero-floating-card{position:absolute;z-index:3;border:1px solid rgba(85,115,108,.7);background:rgba(7,17,18,.78);backdrop-filter:blur(15px);border-radius:15px;box-shadow:0 18px 40px rgba(0,0,0,.3);color:#dbe5e2;font-size:9px;padding:11px 13px}.hero-floating-top{top:8%;right:2%}.hero-floating-bottom{bottom:5%;left:4%;display:flex;flex-direction:column;gap:3px}.hero-floating-bottom b{font-size:10px;letter-spacing:2px;color:var(--green)}.hero-floating-bottom span{font-size:8px;color:#7d8e89}.pulse-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-left:6px}
 @keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@media(max-width:1050px){.hero-premium{grid-template-columns:1fr 1fr;gap:10px;padding:42px 24px 28px}.hero-premium h1{font-size:54px}.hero-benefits{grid-template-columns:repeat(2,1fr)}.hero-premium .hero-iphone-stage img{width:115%;transform:translateX(-9%)}}
+@media(max-width:1050px){.hero-premium{grid-template-columns:1fr 1fr;gap:10px;padding:42px 24px 28px}.hero-premium h1{font-size:54px}.hero-benefits{grid-template-columns:repeat(2,1fr)}.hero-premium .hero-iphone-stage img{width:115%}}
 @media(max-width:700px){.hero-premium{grid-template-columns:1fr;min-height:auto;padding:32px 16px 22px;border-radius:24px;margin-top:10px}.hero-premium .hero-copy{order:1;text-align:center;padding:0}.hero-kicker{font-size:9px}.hero-premium .store-name{letter-spacing:4px}.hero-premium h1{font-size:43px;letter-spacing:-1px}.hero-premium .hero-copy p{font-size:11px;line-height:2}.hero-premium .hero-buttons{justify-content:center;flex-wrap:wrap}.hero-benefits{max-width:none}.hero-premium .hero-visual{order:2;min-height:390px}.hero-premium .hero-iphone-stage{min-height:390px}.hero-premium .hero-iphone-stage img{width:108%}.hero-floating-top{top:3%;right:3%}.hero-floating-bottom{bottom:1%;left:2%}}
 @media(max-width:430px){.hero-premium h1{font-size:37px}.hero-benefits{grid-template-columns:1fr 1fr;gap:7px}.hero-benefits>div{min-height:74px}.hero-main-btn{min-width:180px}.hero-secondary-btn{min-width:130px}.hero-premium .hero-visual{min-height:320px}.hero-premium .hero-iphone-stage{min-height:320px}.hero-floating-card{font-size:8px;padding:9px}.hero-floating-bottom span{font-size:7px}}
 
@@ -723,7 +723,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .nav-bar{position:relative;top:auto;background:rgba(6,11,12,.92)}.nav-inner{justify-content:space-between;gap:8px;min-height:62px;align-items:center;overflow-x:auto}.nav-inner a{padding:15px 12px;border:0;border-radius:14px;font-size:12px;white-space:nowrap}.nav-inner a.active{background:rgba(97,255,34,.045);border-bottom:2px solid var(--green);border-radius:14px 14px 0 0}.nav-inner a:hover{border-color:transparent}.nav-special,.nav-support{border:1px solid rgba(82,117,106,.5)!important;background:rgba(10,23,21,.72);color:#c9d6d2!important}.nav-special{color:var(--green)!important}.nav-support{order:-1}
 .hero-premium{min-height:520px;margin-top:12px;padding:34px 30px 24px;border-radius:28px}.hero-premium .hero-copy{padding:8px 10px 0 0}.hero-premium .store-name{margin:19px 0 7px}.hero-premium h1{font-size:clamp(46px,4.8vw,70px);max-width:590px}.hero-premium .hero-copy p{max-width:550px;margin-top:14px;line-height:1.9}.hero-premium .hero-buttons{margin-top:20px}.hero-benefits{margin-top:22px;max-width:650px}.hero-premium .hero-visual{min-height:450px}.hero-premium .hero-iphone-stage{min-height:430px;transform:translateX(-3%)}.hero-premium .hero-iphone-stage img{width:116%;max-width:720px}.hero-floating-top{top:5%;right:0}.hero-floating-bottom{bottom:2%;left:1%}
 @media(max-width:1050px){.header-topline{display:none}.main-header{min-height:90px}.nav-inner{justify-content:flex-start}.hero-premium{min-height:500px;padding:30px 22px 22px}.hero-premium h1{font-size:54px}.hero-premium .hero-iphone-stage img{width:118%}}
-@media(max-width:700px){.main-header{min-height:84px;gap:8px}.brand{min-width:auto}.brand img{width:50px;height:50px}.brand strong{font-size:17px}.brand small{display:none}.search-wrap{height:46px}.header-actions .user-btn{display:none}.header-actions .icon-btn{width:44px;height:46px}.header-actions .cart-btn{min-width:90px;height:46px;padding:0 10px}.nav-inner{min-height:56px}.nav-inner a{font-size:10px;padding:12px 8px}.nav-special,.nav-support{display:none}.hero-premium{min-height:auto;padding:25px 14px 18px;margin-top:8px;border-radius:22px}.hero-premium .hero-copy{padding:0}.hero-premium h1{font-size:42px}.hero-premium .hero-copy p{font-size:11px}.hero-premium .hero-visual{min-height:340px}.hero-premium .hero-iphone-stage{min-height:340px;transform:none}.hero-premium .hero-iphone-stage img{width:115%;transform:translateX(-9%)}.hero-floating-top{top:2%;right:2%}}
+@media(max-width:700px){.main-header{min-height:84px;gap:8px}.brand{min-width:auto}.brand img{width:50px;height:50px}.brand strong{font-size:17px}.brand small{display:none}.search-wrap{height:46px}.header-actions .user-btn{display:none}.header-actions .icon-btn{width:44px;height:46px}.header-actions .cart-btn{min-width:90px;height:46px;padding:0 10px}.nav-inner{min-height:56px}.nav-inner a{font-size:10px;padding:12px 8px}.nav-special,.nav-support{display:none}.hero-premium{min-height:auto;padding:25px 14px 18px;margin-top:8px;border-radius:22px}.hero-premium .hero-copy{padding:0}.hero-premium h1{font-size:42px}.hero-premium .hero-copy p{font-size:11px}.hero-premium .hero-visual{min-height:340px}.hero-premium .hero-iphone-stage{min-height:340px;transform:none}.hero-premium .hero-iphone-stage img{width:115%}.hero-floating-top{top:2%;right:2%}}
 
 /* V106: compact premium hero - keep the complete hero visible on desktop */
 @media (min-width:1051px){
@@ -738,7 +738,7 @@ html,body{max-width:100%;overflow-x:hidden}
   .hero-benefits i{width:25px;height:25px;margin-bottom:5px}
   .hero-premium .hero-visual{min-height:370px}
   .hero-premium .hero-iphone-stage{min-height:350px;transform:translateX(-2%)}
-  .hero-premium .hero-iphone-stage img{width:108%;max-width:660px;transform:translateX(-9%)}
+  .hero-premium .hero-iphone-stage img{width:108%;max-width:660px}
   .hero-floating-top{top:4%}
   .hero-floating-bottom{bottom:1%}
 }
@@ -999,4 +999,22 @@ html,body{max-width:100%;overflow-x:hidden}
 @media (max-width:390px){
   .header-actions .user-btn{width:56px!important;min-width:56px!important;height:42px!important;font-size:17px!important;}
   .header-actions .user-btn::after{font-size:6.5px!important}
+}
+
+/* V120: center the mascot inside the mobile hero without moving the hero card/layout */
+@media (max-width:700px){
+  .hero-premium .hero-iphone-stage{overflow:visible;}
+  .hero-premium .hero-iphone-stage img{
+    width:115%!important;
+    max-width:none!important;
+    transform:translateX(-15%)!important;
+    animation:heroFloatMobile 5s ease-in-out infinite!important;
+  }
+}
+@media (max-width:430px){
+  .hero-premium .hero-iphone-stage img{width:118%!important;transform:translateX(-14%)!important;}
+}
+@keyframes heroFloatMobile{
+  0%,100%{transform:translateX(-15%) translateY(0)}
+  50%{transform:translateX(-15%) translateY(-8px)}
 }
