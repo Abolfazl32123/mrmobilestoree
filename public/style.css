@@ -974,10 +974,10 @@ html,body{max-width:100%;overflow-x:hidden}
   .header-actions .user-btn .user-icon {
     position: absolute;
     left: calc(50% + 4px);
-    top: calc(50% - 2px);
+    top: calc(50% + 1px);
     display: block !important;
     line-height: 1;
-    transform: translate(-50%, -58%) !important;
+    transform: translate(-50%, -50%) !important;
     margin: 0;
     padding: 0;
   }
