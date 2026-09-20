@@ -965,20 +965,33 @@ html,body{max-width:100%;overflow-x:hidden}
 
 
 
-/* V119.2 - mobile-only login icon positioning
-   Desktop/tablet styles are intentionally untouched. */
-@media (max-width:700px) {
-  .header-actions .user-btn {
-    position: relative;
+/* V121 - mobile-only login icon centering */
+@media (max-width:700px){
+  .header-actions .user-btn{
+    position:relative !important;
+    display:grid !important;
+    place-items:center !important;
+    box-sizing:border-box !important;
+    padding:0 !important;
+    line-height:1 !important;
   }
-  .header-actions .user-btn .user-icon {
-    position: absolute;
-    left: calc(50% + 4px);
-    top: calc(50% + 1px);
-    display: block !important;
-    line-height: 1;
-    transform: translate(-50%, -50%) !important;
-    margin: 0;
-    padding: 0;
+
+  .header-actions .user-btn .user-icon{
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+    display:grid !important;
+    place-items:center !important;
+    margin:0 !important;
+    padding:0 !important;
+    line-height:1 !important;
+    transform:none !important;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
+    font-size:19px !important;
+  }
+
+  .header-actions .user-btn #userLabel{
+    display:none !important;
   }
 }
