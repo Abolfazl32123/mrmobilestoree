@@ -1001,16 +1001,12 @@ html,body{max-width:100%;overflow-x:hidden}
   .header-actions .user-btn::after{font-size:6.5px!important}
 }
 
-/* V120: center the mascot character inside the mobile hero frame only */
+
+/* V120: center hero character inside its visual frame — no other mobile layout changes */
 @media (max-width:700px){
-  .hero-premium .hero-iphone-stage{overflow:hidden;}
-  .hero-premium .hero-iphone-stage img{
-    transform:translateX(-13%) !important;
-    transform-origin:center center !important;
-  }
+  .hero-premium .hero-iphone-stage{display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;}
+  .hero-premium .hero-iphone-stage > img{display:block!important;width:100%!important;max-width:520px!important;height:auto!important;margin:0 auto!important;transform:none!important;object-fit:contain!important;}
 }
 @media (max-width:430px){
-  .hero-premium .hero-iphone-stage img{
-    transform:translateX(-15%) !important;
-  }
+  .hero-premium .hero-iphone-stage > img{width:100%!important;max-width:360px!important;}
 }
