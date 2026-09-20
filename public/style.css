@@ -962,3 +962,8 @@ html,body{max-width:100%;overflow-x:hidden}
   .auth-single-panel .social{font-size:10px!important}
   .auth-single-panel .auth-welcome{font-size:22px!important}
 }
+
+
+/* V119 - user login icon positioning */
+.user-btn .user-icon{display:inline-flex;align-items:center;justify-content:center;line-height:1;transform:translate(2px,-2px);}
+@media (max-width:700px){.header-actions .user-btn .user-icon{transform:translate(2px,-2px);}}
