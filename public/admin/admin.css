@@ -73,3 +73,5 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover,.sidebar
 .spec-fields-grid input,.spec-fields-grid select{display:block;width:100%;margin-top:5px;background:#091419;color:#fff;border:1px solid #263a43;border-radius:11px;padding:11px 12px;outline:none}
 .spec-fields-grid input:focus,.spec-fields-grid select:focus{border-color:#35d66a}
 @media(max-width:800px){.spec-fields{grid-column:auto}.spec-fields-grid{grid-template-columns:1fr}}
+
+#quantity{direction:ltr;text-align:center}

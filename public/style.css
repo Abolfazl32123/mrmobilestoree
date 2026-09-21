@@ -1041,3 +1041,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* V129: remove empty trust panel and let product details use full width */
 .product-detail-info:has(.detail-specs){grid-template-columns:1fr}.detail-specs{width:100%}
+
+.compare-btn{border:1px solid #294047;background:#091417;color:#e8f1ee;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:.2s}
+.compare-btn:hover,.compare-btn.active{border-color:#35f24a;color:#35f24a;box-shadow:0 0 14px rgba(53,242,74,.14)}
+.detail-compare{margin-inline-start:8px}

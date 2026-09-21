@@ -45,7 +45,7 @@ function renderFavorites(){
   const favs=state.favorites.map(Number);
   const items=state.products.filter(p=>favs.includes(Number(p.id)));
   if(!items.length){box.innerHTML='<div class="favorites-empty"><div>♡</div><p>هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید.</p><button class="btn primary" onclick="closeFavorites();location.hash="products"">مشاهده محصولات</button></div>';return}
-  box.innerHTML='<div class="favorites-grid">'+items.map(p=>`<article class="favorite-item"><button class="favorite-remove" onclick="toggleFavorite(${Number(p.id)})">×</button><button class="favorite-open" onclick="closeFavorites();openProductDetail(${Number(p.id)})"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"><div><b>${esc(p.name)}</b><span>${toman(cartPrice(p))}</span></div></button></article>`).join('')+'</div>';
+  box.innerHTML='<div class="favorites-grid">'+items.map(p=>`<article class="favorite-item"><button class="favorite-remove" onclick="toggleFavorite(${Number(p.id)})">×</button><button type="button" class="compare-btn detail-compare" data-detail-compare onclick="toggleCompareProduct(product.id)">مقایسه</button><button class="favorite-open" onclick="closeFavorites();openProductDetail(${Number(p.id)})"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"><div><b>${esc(p.name)}</b><span>${toman(cartPrice(p))}</span></div></button></article>`).join('')+'</div>';
 }
 function openFavorites(){renderFavorites();$('favoritesModal')?.classList.add('show')}
 function closeFavorites(){$('favoritesModal')?.classList.remove('show')}
@@ -99,6 +99,22 @@ function populateAdvancedFilters(){
   if(cat)cat.innerHTML='<option value="همه">همه دسته‌ها</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   if(brand)brand.innerHTML='<option value="همه">همه برندها</option>'+brands.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   if(storage)storage.innerHTML='<option value="همه">همه حافظه‌ها</option>'+storages.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+}
+
+function getCompareList(){
+  try{return JSON.parse(localStorage.getItem('mr_compare')||'[]')}catch{return[]}
+}
+function isCompared(id){return getCompareList().some(x=>String(x.id)===String(id))}
+function toggleCompareProduct(id){
+  const list=getCompareList(), i=list.findIndex(x=>String(x.id)===String(id));
+  const product=(window.products||products||[]).find(x=>String(x.id)===String(id));
+  if(i>=0) list.splice(i,1);
+  else if(product) list.push(product);
+  localStorage.setItem('mr_compare',JSON.stringify(list.slice(-4)));
+  document.querySelectorAll(`[data-compare-id="${id}"]`).forEach(b=>{
+    b.classList.toggle('active',isCompared(id));
+    b.textContent=isCompared(id)?'✓ مقایسه شد':'مقایسه';
+  });
 }
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
@@ -157,7 +173,7 @@ window.openProductDetail=async function openProductDetail(id){
   $('detailPrice').textContent=toman(effective); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-effective/price)*100)+'٪ تخفیف':''; const detailTimer=$('detailSaleCountdown'); if(detailTimer){const rem=saleRemaining(p);detailTimer.dataset.saleEnd=rem?String(Date.now()+rem):'';detailTimer.textContent=rem?'⏳ '+formatCountdown(rem):'';detailTimer.hidden=!rem}
   $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
   const sp=productSpecs(p);
-  const storage=sp.storage||getStorage(p);
+  const storage=sp.storage||getStorage(p); const stockQty=Number(p.quantity??0);
   const storageEl=$('detailStorage');
   if(storageEl){ const wrap=storageEl.closest('.detail-spec-item,.spec-card,.mini-spec,.spec-box'); if(wrap) wrap.style.display=(p.category==='موبایل')?'':'none'; storageEl.textContent=(p.category==='موبایل')?storage:'—'; }
   $('detailCondition2').textContent=p.condition||'نو';
@@ -173,7 +189,7 @@ window.openProductDetail=async function openProductDetail(id){
   const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
   const box=$('detailSpecsRows');
   if(box){
-    const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',p.condition||'نو'],...specRows.map(([k,l])=>[l,sp[k]||'ثبت نشده'])];
+    const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',stockQty>0?'موجود':'ناموجود'],['تعداد موجودی',String(stockQty)],...specRows.map(([k,l])=>[l,sp[k]||'ثبت نشده'])];
     box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('');
   }
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
