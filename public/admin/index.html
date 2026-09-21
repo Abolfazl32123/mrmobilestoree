@@ -115,7 +115,7 @@
   </section>
 </div>
 
-<div id="productModal" class="modal" hidden><div class="modal-card"><button class="close" onclick="closeProductForm()">×</button><h2 id="formTitle">افزودن محصول</h2><div class="form-grid"><label>نام محصول *<input id="name" placeholder="مثلاً iPhone 13"></label><label>قیمت *<input id="price" placeholder="۹۲,۰۰۰,۰۰۰"></label><label>قیمت تخفیف<input id="discountPrice" placeholder="مثلاً ۸۹,۰۰۰,۰۰۰"></label><label>شروع تخفیف<input id="saleStart" type="datetime-local"></label><label>پایان تخفیف<input id="saleEnd" type="datetime-local"></label><label>وضعیت<select id="condition"><option>نو</option><option>کارکرده</option><option>استوک</option></select></label><label>دسته‌بندی<select id="category"><option value="موبایل">گوشی موبایل</option><option value="لوازم جانبی">لوازم جانبی</option><option value="تبلت">تبلت</option><option value="ساعت هوشمند">ساعت هوشمند</option><option value="هدفون">هدفون</option><option value="اسپیکر">اسپیکر</option><option value="کابل و شارژر">کابل و شارژر</option></select></label><label class="full-field">برچسب محصول<input id="badge" placeholder="مثلاً پیشنهاد ویژه"></label><label>سلامت باتری<input id="batteryHealth" placeholder="مثلاً ۸۵٪"></label><label>وضعیت ظاهری<input id="appearance" placeholder="مثلاً تمیز / خط و خش جزئی"></label><label>رجیستری<select id="registry"><option value="دارد">دارد</option><option value="ندارد">ندارد</option><option value="نامشخص">نامشخص</option></select></label><label>تعداد سیم‌کارت<input id="simCount" placeholder="مثلاً تک سیم‌کارت"></label><label>RAM<input id="ram" placeholder="مثلاً ۴GB"></label><label>حافظه داخلی<input id="storage" placeholder="مثلاً ۱۲۸GB"></label><label>رنگ<input id="color" placeholder="مثلاً سبز"></label><label>پردازنده<input id="processor" placeholder="مثلاً Apple A15 Bionic"></label><label>لوازم همراه<input id="accessories" placeholder="مثلاً جعبه و کابل"></label><label>گارانتی<input id="warranty" placeholder="مثلاً ۷ روز مهلت تست"></label><div class="check-row full-field"><span>برچسب‌های ویژه:</span><label class="check"><input id="featured" type="checkbox"> ویژه</label><label class="check"><input id="bestseller" type="checkbox"> پرفروش</label><label class="check"><input id="newest" type="checkbox"> جدیدترین</label></div><label class="full-field">لینک مستقیم تصویر<input id="imageUrl" placeholder="https://..."></label><div class="upload-box full-field"><div><strong>یا انتخاب تصویر از دستگاه</strong><small>می‌توانید تا ۵ تصویر انتخاب کنید؛ تصاویر فشرده و به‌صورت گالری ذخیره می‌شوند.</small></div><div class="upload-actions"><label class="upload-btn">📁 انتخاب فایل<input id="imageFile" type="file" accept="image/*" multiple hidden></label><span id="fileName">فایلی انتخاب نشده</span><button type="button" class="ghost" id="clearImage" onclick="clearImageFile()">پاک کردن</button></div></div><label class="full-field">توضیحات<textarea id="desc" placeholder="توضیحات محصول"></textarea></label><label class="check full-field"><input id="available" type="checkbox" checked> محصول موجود است</label></div><div id="preview" class="preview"></div><div class="modal-actions"><button class="ghost" onclick="closeProductForm()">انصراف</button><button class="primary" onclick="saveProduct()">ذخیره محصول</button></div><p id="msg" class="success"></p></div></div>
+<div id="productModal" class="modal" hidden><div class="modal-card"><button class="close" onclick="closeProductForm()">×</button><h2 id="formTitle">افزودن محصول</h2><div class="form-grid"><label>نام محصول *<input id="name" placeholder="مثلاً iPhone 13"></label><label>قیمت *<input id="price" placeholder="۹۲,۰۰۰,۰۰۰"></label><label>قیمت تخفیف<input id="discountPrice" placeholder="مثلاً ۸۹,۰۰۰,۰۰۰"></label><label>شروع تخفیف<input id="saleStart" type="datetime-local"></label><label>پایان تخفیف<input id="saleEnd" type="datetime-local"></label><label>وضعیت<select id="condition"><option>نو</option><option>کارکرده</option><option>استوک</option></select></label><label>دسته‌بندی<select id="category"><option value="موبایل">گوشی موبایل</option><option value="لوازم جانبی">لوازم جانبی</option><option value="تبلت">تبلت</option><option value="ساعت هوشمند">ساعت هوشمند</option><option value="هدفون">هدفون</option><option value="اسپیکر">اسپیکر</option><option value="کابل و شارژر">کابل و شارژر</option></select></label><label class="full-field">برچسب محصول<input id="badge" placeholder="مثلاً پیشنهاد ویژه"></label><div id="specFields" class="spec-fields full-field"></div><div class="check-row full-field"><span>برچسب‌های ویژه:</span><label class="check"><input id="featured" type="checkbox"> ویژه</label><label class="check"><input id="bestseller" type="checkbox"> پرفروش</label><label class="check"><input id="newest" type="checkbox"> جدیدترین</label></div><label class="full-field">لینک مستقیم تصویر<input id="imageUrl" placeholder="https://..."></label><div class="upload-box full-field"><div><strong>یا انتخاب تصویر از دستگاه</strong><small>می‌توانید تا ۵ تصویر انتخاب کنید؛ تصاویر فشرده و به‌صورت گالری ذخیره می‌شوند.</small></div><div class="upload-actions"><label class="upload-btn">📁 انتخاب فایل<input id="imageFile" type="file" accept="image/*" multiple hidden></label><span id="fileName">فایلی انتخاب نشده</span><button type="button" class="ghost" id="clearImage" onclick="clearImageFile()">پاک کردن</button></div></div><label class="full-field">توضیحات<textarea id="desc" placeholder="توضیحات محصول"></textarea></label><label class="check full-field"><input id="available" type="checkbox" checked> محصول موجود است</label></div><div id="preview" class="preview"></div><div class="modal-actions"><button class="ghost" onclick="closeProductForm()">انصراف</button><button class="primary" onclick="saveProduct()">ذخیره محصول</button></div><p id="msg" class="success"></p></div></div>
 
 <div id="toast" class="toast"></div>
 <script>
@@ -168,22 +168,146 @@ function renderReports(){
   const data=stats.monthly_sales||[],max=Math.max(...data.map(x=>Number(x.total)||0),1);$('reportSalesChart').innerHTML=data.length?data.map(x=>`<div class="r-bar-col"><b>${shortMoney(x.total)}</b><div class="r-bar" style="height:${Math.max(10,(Number(x.total)||0)/max*170)}px"></div><span>${esc(x.month)}</span></div>`).join(''):'<div class="empty">هنوز داده فروش کافی نیست.</div>';
   $('reportSummary').innerHTML=`<div><b>${fa(stats.new_orders||0)}</b><span>در انتظار بررسی</span></div><div><b>${fa(stats.completed_orders||0)}</b><span>تکمیل‌شده</span></div><div><b>${fa(orders.filter(o=>String(o.status||'').includes('لغو')).length)}</b><span>لغوشده</span></div><div><b>${toman(stats.avg_order||0)}</b><span>میانگین هر سفارش</span></div>`;
 }
+
 let selectedImageData=[];
-function splitImageInput(raw){const s=String(raw||'').trim();if(!s)return [];return s.split(/\r?\n|\|/).map(x=>x.trim()).filter(Boolean)}
-function renderImagePreview(){const urls=selectedImageData.length?selectedImageData:splitImageInput($('imageUrl').value);$('preview').innerHTML=urls.map((u,i)=>`<div class="preview-item"><img src="${esc(u)}" onerror="this.style.display='none'"><small>تصویر ${i+1}</small></div>`).join('')}
-function openProductForm(p=null){editing=p?.id||null;selectedImageData=[];$('formTitle').textContent=p?'ویرایش محصول':'افزودن محصول';$('name').value=p?.name||'';$('price').value=p?.price||'';$('discountPrice').value=p?.discount_price||'';$('saleStart').value=p?.sale_start_at?String(p.sale_start_at).slice(0,16):'';$('saleEnd').value=p?.sale_end_at?String(p.sale_end_at).slice(0,16):'';$('condition').value=p?.condition||'نو';$('category').value=p?.category||'موبایل';$('badge').value=p?.badge||'';let sp={};try{sp=typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{}$('batteryHealth').value=sp.batteryHealth||'';$('appearance').value=sp.appearance||'';$('registry').value=sp.registry||'دارد';$('simCount').value=sp.simCount||'';$('ram').value=sp.ram||'';$('storage').value=sp.storage||'';$('color').value=sp.color||'';$('processor').value=sp.processor||'';$('accessories').value=sp.accessories||'';$('warranty').value=sp.warranty||'';$('featured').checked=!!p?.featured;$('bestseller').checked=!!p?.bestseller;$('newest').checked=!!p?.newest;$('desc').value=p?.description||'';$('imageUrl').value=p?.image_url||'';$('available').checked=p?p.available!==0:true;$('fileName').textContent=p?.image_url?`${splitImageInput(p.image_url).length} تصویر ثبت شده`:'فایلی انتخاب نشده';$('imageFile').value='';renderImagePreview();$('msg').textContent='';$('productModal').hidden=false}
+
+const SPEC_CONFIG={
+  'موبایل':[
+    ['batteryHealth','سلامت باتری','مثلاً ۸۵٪'],['appearance','وضعیت ظاهری','مثلاً تمیز / خط و خش جزئی'],
+    ['registry','رجیستری',['دارد','ندارد','نامشخص']],['simCount','تعداد سیم‌کارت','مثلاً دو سیم‌کارت'],
+    ['ram','RAM','مثلاً ۸GB'],['storage','حافظه داخلی','مثلاً ۲۵۶GB'],['color','رنگ','مثلاً مشکی'],
+    ['processor','پردازنده','مثلاً Snapdragon 8 Gen 3'],['accessories','لوازم همراه','مثلاً جعبه و کابل'],['warranty','گارانتی','مثلاً ۷ روز مهلت تست']
+  ],
+  'لوازم جانبی':[
+    ['compatibility','سازگاری','مثلاً آیفون / اندروید'],['connection','نوع اتصال','مثلاً Bluetooth / USB-C'],
+    ['material','جنس','مثلاً آلومینیوم'],['power','توان / ظرفیت','مثلاً ۲۰W'],['length','طول','مثلاً ۱ متر'],
+    ['color','رنگ','مثلاً مشکی'],['model','مدل / نسخه','مثلاً A20'],['accessories','لوازم همراه','مثلاً کابل'],
+    ['warranty','گارانتی','مثلاً ۶ ماه']
+  ],
+  'تبلت':[
+    ['display','اندازه صفحه‌نمایش','مثلاً ۱۱ اینچ'],['os','سیستم‌عامل','مثلاً Android 15'],
+    ['ram','RAM','مثلاً ۸GB'],['storage','حافظه داخلی','مثلاً ۲۵۶GB'],['processor','پردازنده','مثلاً Snapdragon 8 Gen 2'],
+    ['battery','ظرفیت باتری','مثلاً ۸۰۰۰mAh'],['simCount','تعداد سیم‌کارت','مثلاً تک سیم‌کارت'],
+    ['camera','دوربین','مثلاً ۱۳MP'],['color','رنگ','مثلاً خاکستری'],['warranty','گارانتی','مثلاً ۷ روز مهلت تست']
+  ],
+  'ساعت هوشمند':[
+    ['display','نوع / اندازه نمایشگر','مثلاً AMOLED 1.9"'],['os','سیستم‌عامل','مثلاً Wear OS'],
+    ['connection','اتصال','مثلاً Bluetooth 5.3'],['battery','باتری','مثلاً تا ۷ روز'],
+    ['waterResistance','مقاومت در برابر آب','مثلاً 5ATM'],['sensors','حسگرها','مثلاً ضربان قلب و SpO2'],
+    ['size','اندازه / بند','مثلاً ۴۴mm'],['color','رنگ','مثلاً مشکی'],['accessories','لوازم همراه','مثلاً بند اضافه'],['warranty','گارانتی','مثلاً ۶ ماه']
+  ],
+  'هدفون':[
+    ['type','نوع','مثلاً TWS / روگوشی'],['connection','اتصال','مثلاً Bluetooth 5.3'],
+    ['battery','شارژدهی','مثلاً ۸ ساعت'],['noiseCancel','حذف نویز','مثلاً ANC دارد'],
+    ['microphone','میکروفون','مثلاً دوگانه'],['driver','درایور','مثلاً ۴۰mm'],
+    ['compatibility','سازگاری','مثلاً Android / iOS'],['color','رنگ','مثلاً مشکی'],['warranty','گارانتی','مثلاً ۶ ماه']
+  ],
+  'اسپیکر':[
+    ['power','توان خروجی','مثلاً ۳۰W'],['connection','اتصال','مثلاً Bluetooth 5.3'],
+    ['battery','باتری / شارژدهی','مثلاً ۱۲ ساعت'],['waterResistance','مقاومت در برابر آب','مثلاً IPX7'],
+    ['inputs','درگاه‌ها / ورودی‌ها','مثلاً USB-C و AUX'],['weight','وزن','مثلاً ۱.۵ کیلوگرم'],
+    ['dimensions','ابعاد','مثلاً ۲۸×۱۲×۱۲ سانتی‌متر'],['color','رنگ','مثلاً مشکی'],['warranty','گارانتی','مثلاً ۶ ماه']
+  ],
+  'کابل و شارژر':[
+    ['type','نوع محصول','مثلاً شارژر دیواری'],['connector','نوع کانکتور','مثلاً USB-C به USB-C'],
+    ['power','توان خروجی','مثلاً ۶۷W'],['length','طول کابل','مثلاً ۱.۲ متر'],
+    ['fastCharge','شارژ سریع','مثلاً PD / QC'],['compatibility','سازگاری','مثلاً iPhone / Android'],
+    ['material','جنس','مثلاً روکش کنفی'],['color','رنگ','مثلاً سفید'],['warranty','گارانتی','مثلاً ۶ ماه']
+  ]
+};
+
+function specConfigFor(category){
+  return SPEC_CONFIG[category]||SPEC_CONFIG['لوازم جانبی'];
+}
+function renderSpecFields(category, values={}){
+  const box=$('specFields'); if(!box)return;
+  const defs=specConfigFor(category);
+  box.innerHTML=`<div class="spec-fields-title"><strong>مشخصات فنی ${esc(category)}</strong><small>مشخصات اختصاصی همین دسته‌بندی را وارد کنید.</small></div>`+
+    `<div class="spec-fields-grid">`+defs.map(([key,label,third])=>{
+      const value=String(values?.[key]??'');
+      if(Array.isArray(third)){
+        return `<label>${esc(label)}<select data-spec-key="${esc(key)}">${third.map(v=>`<option ${v===value?'selected':''}>${esc(v)}</option>`).join('')}</select></label>`;
+      }
+      return `<label>${esc(label)}<input data-spec-key="${esc(key)}" value="${esc(value)}" placeholder="${esc(third)}"></label>`;
+    }).join('')+`</div>`;
+}
+function collectSpecs(){
+  const out={};
+  document.querySelectorAll('#specFields [data-spec-key]').forEach(el=>{
+    const key=el.dataset.specKey, value=String(el.value||'').trim();
+    if(value)out[key]=value;
+  });
+  return out;
+}
+function splitImageInput(raw){
+  const s=String(raw||'').trim(); if(!s)return [];
+  return s.split(/\r?\n|\|/).map(x=>x.trim()).filter(Boolean);
+}
+function renderImagePreview(){
+  const urls=selectedImageData.length?selectedImageData:splitImageInput($('imageUrl').value);
+  $('preview').innerHTML=urls.map((u,i)=>`<div class="preview-item"><img src="${esc(u)}" onerror="this.style.display='none'"><small>تصویر ${i+1}</small></div>`).join('');
+}
+function openProductForm(p=null){
+  editing=p?.id||null; selectedImageData=[];
+  $('formTitle').textContent=p?'ویرایش محصول':'افزودن محصول';
+  $('name').value=p?.name||'';$('price').value=p?.price||'';$('discountPrice').value=p?.discount_price||'';
+  $('saleStart').value=p?.sale_start_at?String(p.sale_start_at).slice(0,16):'';
+  $('saleEnd').value=p?.sale_end_at?String(p.sale_end_at).slice(0,16):'';
+  $('condition').value=p?.condition||'نو'; $('category').value=p?.category||'موبایل'; $('badge').value=p?.badge||'';
+  let sp={};try{sp=typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{}
+  renderSpecFields($('category').value,sp);
+  $('featured').checked=!!p?.featured;$('bestseller').checked=!!p?.bestseller;$('newest').checked=!!p?.newest;
+  $('desc').value=p?.description||'';$('imageUrl').value=p?.image_url||'';$('available').checked=p?p.available!==0:true;
+  $('fileName').textContent=p?.image_url?`${splitImageInput(p.image_url).length} تصویر ثبت شده`:'فایلی انتخاب نشده';
+  $('imageFile').value='';renderImagePreview();$('msg').textContent='';$('productModal').hidden=false;
+}
 function closeProductForm(){$('productModal').hidden=true;editing=null;selectedImageData=[]}
 function clearImageFile(){selectedImageData=[];$('imageFile').value='';$('fileName').textContent='فایلی انتخاب نشده';renderImagePreview()}
-$('imageUrl').addEventListener('input',()=>{selectedImageData=[];renderImagePreview()})
-$('imageFile').addEventListener('change',async()=>{const files=[...($('imageFile').files||[])];if(!files.length)return;try{selectedImageData=[];for(const f of files){selectedImageData.push(await compressImage(f))}const total=selectedImageData.join('\n').length;if(total>1650000)throw new Error('حجم مجموع تصاویر زیاد است؛ لطفاً تعداد یا کیفیت تصاویر را کمتر کنید.');$('imageUrl').value=selectedImageData.join('\n');$('fileName').textContent=`${files.length} تصویر انتخاب شد`;renderImagePreview();$('msg').textContent=''}catch(e){selectedImageData=[];$('imageFile').value='';$('msg').textContent=e.message||'خطا در آماده‌سازی تصاویر.'}})
-function compressImage(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const max=1100,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));c.getContext('2d').drawImage(im,0,0,c.width,c.height);let q=.72,data=c.toDataURL('image/jpeg',q);while(data.length>430000&&q>.38){q-=.07;data=c.toDataURL('image/jpeg',q)}if(data.length>500000)return reject(new Error('یکی از تصاویر هنوز بزرگ است.'));resolve(data)};im.onerror=reject;im.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
-async function saveProduct(){const images=(selectedImageData.length?selectedImageData:splitImageInput($('imageUrl').value));const image_url=images.join('\n');if(images.length>5)return $('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';if(image_url.length>1650000)return $('msg').textContent='حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.';const specs={batteryHealth:$('batteryHealth').value.trim(),appearance:$('appearance').value.trim(),registry:$('registry').value,simCount:$('simCount').value.trim(),ram:$('ram').value.trim(),storage:$('storage').value.trim(),color:$('color').value.trim(),processor:$('processor').value.trim(),accessories:$('accessories').value.trim(),warranty:$('warranty').value.trim()};const body={name:$('name').value.trim(),price:$('price').value.trim(),discount_price:$('discountPrice').value.trim(),sale_start_at:$('saleStart').value||null,sale_end_at:$('saleEnd').value||null,condition:$('condition').value,category:$('category').value,badge:$('badge').value.trim(),featured:$('featured').checked?1:0,bestseller:$('bestseller').checked?1:0,newest:$('newest').checked?1:0,specs,description:$('desc').value.trim(),image_url,available:$('available').checked};try{await api(editing?'/api/products/'+editing:'/api/products',{method:editing?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});closeProductForm();products=await api('/api/products?admin=1');populateProductAdminFilters();renderProducts();renderStats();toast('محصول با موفقیت ذخیره شد ✓')}catch(e){$('msg').textContent=e.message}}
-async function deleteProduct(id){if(!confirm('این محصول حذف شود؟'))return;try{await api('/api/products/'+id,{method:'DELETE'});products=await api('/api/products?admin=1');renderProducts();stats.products=Math.max(0,(stats.products||1)-1);renderStats();toast('محصول حذف شد')}catch(e){toast(e.message)}}
+$('category').addEventListener('change',()=>{renderSpecFields($('category').value,{});});
+$('imageUrl').addEventListener('input',()=>{selectedImageData=[];renderImagePreview()});
+$('imageFile').addEventListener('change',async()=>{
+  const files=[...($('imageFile').files||[])];
+  if(!files.length)return;
+  if(files.length>5){$('imageFile').value='';$('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';return}
+  try{
+    selectedImageData=[];
+    for(const f of files)selectedImageData.push(await compressImage(f));
+    const total=selectedImageData.join('\n').length;
+    if(total>1650000)throw new Error('حجم مجموع تصاویر زیاد است؛ لطفاً تعداد یا کیفیت تصاویر را کمتر کنید.');
+    $('imageUrl').value=selectedImageData.join('\n');
+    $('fileName').textContent=`${files.length} تصویر انتخاب شد`;
+    renderImagePreview();$('msg').textContent='';
+  }catch(e){
+    selectedImageData=[];$('imageFile').value='';$('msg').textContent=e.message||'خطا در آماده‌سازی تصاویر.'
+  }
+});
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      const im=new Image();
+      im.onload=()=>{
+        const max=1100,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));
+        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+        let q=.72,data=c.toDataURL('image/jpeg',q);
+        while(data.length>430000&&q>.38){q-=.07;data=c.toDataURL('image/jpeg',q)}
+        if(data.length>500000)return reject(new Error('یکی از تصاویر هنوز بزرگ است.'));
+        resolve(data)
+      };im.onerror=reject;im.src=r.result
+    };r.onerror=reject;r.readAsDataURL(file)
+  })
+}
+async function saveProduct(){
+  const images=(selectedImageData.length?selectedImageData:splitImageInput($('imageUrl').value));
+  const image_url=images.join('\n');
+  if(images.length>5)return $('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';
+  if(image_url.length>1650000)return $('msg').textContent='حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.';
+  const specs=collectSpecs();
+  const body={name:$('name').value.trim(),price:$('price').value.trim(),discount_price:$('discountPrice').value.trim(),sale_start_at:$('saleStart').value||null,sale_end_at:$('saleEnd').value||null,condition:$('condition').value,category:$('category').value,badge:$('badge').value.trim(),featured:$('featured').checked?1:0,bestseller:$('bestseller').checked?1:0,newest:$('newest').checked?1:0,specs,description:$('desc').value.trim(),image_url,available:$('available').checked};
+  try{await api(editing?'/api/products/'+editing:'/api/products',{method:editing?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});closeProductForm();products=await api('/api/products?admin=1');populateProductAdminFilters();renderProducts();renderStats();toast('محصول با موفقیت ذخیره شد ✓')}catch(e){$('msg').textContent=e.message}
+}
 
-async function loadPayments(){try{[payments,paymentSettings]=await Promise.all([api('/api/admin/payments'),api('/api/admin/payment-settings')]);$('payCardNumber').value=paymentSettings.card_number||'';$('payCardHolder').value=paymentSettings.card_holder||'';$('payBankName').value=paymentSettings.bank_name||'';$('payInstructions').value=paymentSettings.instructions||'';$('gatewayProvider').value=paymentSettings.gateway_provider||'';$('gatewayMerchantId').value=paymentSettings.gateway_merchant_id||'';$('gatewayEnabled').checked=!!paymentSettings.gateway_enabled;$('gatewayStatus').textContent=paymentSettings.gateway_enabled?'فعال':'غیرفعال';$('gatewayStatus').className=paymentSettings.gateway_enabled?'status-on':'status-off';renderPayments()}catch(e){toast(e.message)}}
-let paymentSettings={};
-let reviews=[];
-async function loadReviews(){try{reviews=await api('/api/admin/reviews');renderReviews()}catch(e){toast(e.message)}}
 function renderReviews(){const f=$('reviewStatusFilter')?.value||'';const list=reviews.filter(r=>!f||r.status===f);const pending=reviews.filter(r=>r.status==='pending').length,approved=reviews.filter(r=>r.status==='approved').length,rejected=reviews.filter(r=>r.status==='rejected').length;$('navReviews').textContent=fa(pending);$('reviewsSummary').innerHTML=`<div><b>${fa(pending)}</b><span>در انتظار بررسی</span></div><div><b>${fa(approved)}</b><span>تأیید شده</span></div><div><b>${fa(rejected)}</b><span>رد شده</span></div>`;$('reviewsTable').innerHTML=list.length?list.map(reviewRow).join(''):'<div class="empty">نظری برای نمایش وجود ندارد.</div>'}
 function reviewRow(r){const status=r.status==='approved'?'done':r.status==='rejected'?'cancel':'wait';return `<article class="review-admin-row"><div class="review-admin-main"><div><strong>${esc(r.product_name||'محصول حذف شده')}</strong><small>${esc(r.customer_name||'مشتری')} — ${esc(r.phone||'')}</small></div><span class="payment-status ${status}">${r.status==='approved'?'تأیید شده':r.status==='rejected'?'رد شده':'در انتظار بررسی'}</span><small>${esc(r.created_at||'')}</small></div><div class="review-admin-stars">${'★'.repeat(Number(r.rating)||0)}${'☆'.repeat(5-(Number(r.rating)||0))}</div><p>${esc(r.comment||'')}</p><div class="review-admin-actions">${r.status!=='approved'?`<button class="approve-btn" onclick="reviewStatus(${r.id},'approved')">✓ تأیید و انتشار</button>`:''}${r.status!=='rejected'?`<button class="reject-btn" onclick="reviewStatus(${r.id},'rejected')">× رد</button>`:''}<button class="ghost" onclick="deleteReview(${r.id})">حذف</button></div></article>`}
 async function reviewStatus(id,status){try{await api('/api/admin/reviews/'+id+'/status',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({status})});await loadReviews();toast(status==='approved'?'نظر منتشر شد ✓':'نظر رد شد')}catch(e){toast(e.message)}}

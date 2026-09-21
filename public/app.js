@@ -7,7 +7,7 @@ function numeric(v){
 }
 function imageUrls(p){
   const raw=String(p?.image_url||'').trim();
-  const list=raw.split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
+  const list=raw.split(/\r?\n|\|/).map(x=>x.trim()).filter(Boolean);
   if(p?.image_key && !list.length) list.push('/assets/'+String(p.image_key).replace(/^\/+/,''));
   return list.length?list:['/assets/mr-mobile-logo.png'];
 }
@@ -156,7 +156,25 @@ window.openProductDetail=async function openProductDetail(id){
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
   $('detailPrice').textContent=toman(effective); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-effective/price)*100)+'٪ تخفیف':''; const detailTimer=$('detailSaleCountdown'); if(detailTimer){const rem=saleRemaining(p);detailTimer.dataset.saleEnd=rem?String(Date.now()+rem):'';detailTimer.textContent=rem?'⏳ '+formatCountdown(rem):'';detailTimer.hidden=!rem}
   $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
-  const sp=productSpecs(p); const storage=sp.storage||getStorage(p); $('detailStorage').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; const specMap={batteryHealth:'سلامت باتری',appearance:'وضعیت ظاهری',registry:'رجیستری',simCount:'تعداد سیم‌کارت',ram:'RAM',color:'رنگ',processor:'پردازنده',accessories:'لوازم همراه',warranty:'گارانتی'}; const box=$('detailSpecsRows'); if(box){const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',p.condition||'نو'],['حافظه داخلی',storage],...Object.entries(specMap).map(([k,l])=>[l,sp[k]||'ثبت نشده'])];box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}
+  const sp=productSpecs(p);
+  const storage=sp.storage||getStorage(p);
+  $('detailStorage').textContent=storage;
+  $('detailCondition2').textContent=p.condition||'نو';
+  const detailSpecConfig={
+    'موبایل':[['batteryHealth','سلامت باتری'],['appearance','وضعیت ظاهری'],['registry','رجیستری'],['simCount','تعداد سیم‌کارت'],['ram','RAM'],['storage','حافظه داخلی'],['color','رنگ'],['processor','پردازنده'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'لوازم جانبی':[['compatibility','سازگاری'],['connection','نوع اتصال'],['material','جنس'],['power','توان / ظرفیت'],['length','طول'],['color','رنگ'],['model','مدل / نسخه'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'تبلت':[['display','اندازه صفحه‌نمایش'],['os','سیستم‌عامل'],['ram','RAM'],['storage','حافظه داخلی'],['processor','پردازنده'],['battery','ظرفیت باتری'],['simCount','تعداد سیم‌کارت'],['camera','دوربین'],['color','رنگ'],['warranty','گارانتی']],
+    'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
+    'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
+    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
+  };
+  const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
+  const box=$('detailSpecsRows');
+  if(box){
+    const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',p.condition||'نو'],...specRows.map(([k,l])=>[l,sp[k]||'ثبت نشده'])];
+    box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('');
+  }
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
   const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
   state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
