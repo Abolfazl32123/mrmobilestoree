@@ -84,7 +84,7 @@ async function loadProducts(){
     if(!r.ok) throw new Error('HTTP '+r.status+' '+raw.slice(0,180));
     const data=JSON.parse(raw);
     if(!Array.isArray(data)) throw new Error('پاسخ محصولات معتبر نیست');
-    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();
+    state.products=data;populateAdvancedFilters();renderProducts();applyStockBadges();renderSpecialOffers();
   }catch(e){
     console.error('loadProducts failed',e);
     const grid=$('productsGrid');
@@ -116,6 +116,15 @@ function toggleCompareProduct(id){
     b.textContent=isCompared(id)?'✓ مقایسه شد':'مقایسه';
   });
 }
+
+function applyStockBadges(){
+  document.querySelectorAll('[data-stock-badge]').forEach(b=>{
+    const id=b.dataset.stockBadge;
+    const p=(window.products||[]).find(x=>String(x.id)===String(id));
+    const out=!p || Number(p.quantity??0)<=0 || p.available===0;
+    b.style.display=out?'flex':'none';
+  });
+}
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
   let list=state.products.filter(p=>{
@@ -143,7 +152,7 @@ function renderProducts(){
     return `<article class="product-card ${p.available?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
       <button class="wish ${isFavorite(p.id)?'active':''}" data-favorite-id="${p.id}" aria-pressed="${isFavorite(p.id)?'true':'false'}" title="${isFavorite(p.id)?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'}" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button>
-      <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
+      <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div><div class="stock-badge" data-stock-badge="${p.id}" style="${Number(p.quantity??0)>0 && p.available!==0?'display:none':''}">ناموجود</div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
       <div class="product-bottom"><div class="price">${toman(effective)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div><button class="add-btn" aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" ${p.available?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${p.available?'🛒':'×'}</button></div>${remain?`<div class="sale-countdown" data-sale-end="${Date.now()+remain}">⏳ ${formatCountdown(remain)}</div>`:''}
@@ -156,7 +165,7 @@ function setAdvancedFilter(key,value){state.filters[key]=value;renderProducts()}
 function setSort(value){state.sort=value;renderProducts()}
 function clearAdvancedFilters(){state.filters={category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''};['filterCategory','filterBrand','filterCondition','filterStorage','filterAvailability','filterMinPrice','filterMaxPrice'].forEach(id=>{if($(id))$(id).value=id==='filterMinPrice'||id==='filterMaxPrice'?'': 'همه'});state.category='همه';document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat==='همه'));renderProducts()}
 function updateFilterCount(){const f=state.filters;const n=Object.entries(f).filter(([k,v])=>v&&v!=='همه').length+(state.search?1:0);$('filterCount').textContent=n.toLocaleString('fa-IR')}
-function setCategory(c){state.category=c;state.filters.category=c;const fc=$('filterCategory');if(fc)fc.value=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash="products"}
+function setCategory(c){state.category=c;state.filters.category=c;const fc=$('filterCategory');if(fc)fc.value=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();applyStockBadges();location.hash="products"}
 function applyFilters(){state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()}
 $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;const ps=$('productSearch');if(ps)ps.value=state.search;renderProducts()});
 
@@ -174,6 +183,10 @@ window.openProductDetail=async function openProductDetail(id){
   $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
   const sp=productSpecs(p);
   const storage=sp.storage||getStorage(p); const stockQty=Number(p.quantity??0);
+  const detailStockBadge=$('detailStockBadge'); const detailAdd=$('detailAdd');
+  const outOfStock=stockQty<=0 || p.available===0;
+  if(detailStockBadge)detailStockBadge.hidden=!outOfStock;
+  if(detailAdd){detailAdd.disabled=outOfStock;detailAdd.textContent=outOfStock?'ناموجود':'افزودن به سبد خرید 🛒';}
   const storageEl=$('detailStorage');
   const memoryBox=$('detailStorageBox');
   const isMobileCategory=(p.category||'موبایل')==='موبایل';
@@ -222,7 +235,7 @@ function closeProductDetail(){$('productDetailModal').classList.remove('show')}
 
 {$('productDetailModal').classList.remove('show');}
 
-function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();location.hash="products"}
+function setCategory(c){state.category=c;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.cat===c));renderProducts();applyStockBadges();location.hash="products"}
 function applyFilters(){state.search=$('searchInput').value;renderProducts()}
 $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').value;renderProducts()});
 
