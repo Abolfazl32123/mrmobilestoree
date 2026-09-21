@@ -1037,7 +1037,7 @@ html,body{max-width:100%;overflow-x:hidden}
 }
 .nav-inner{
   width:min(100% - 2px, 1500px);
-  min-height:150px;
+  min-height:112px;
   margin:0 auto;
   padding:0;
   display:flex;
@@ -1055,18 +1055,18 @@ html,body{max-width:100%;overflow-x:hidden}
   position:relative;
   flex:1 1 0;
   min-width:0;
-  min-height:150px;
-  padding:18px 10px 13px;
+  min-height:112px;
+  padding:10px 8px 9px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:10px;
+  gap:7px;
   border:0;
   border-radius:0;
   color:#d7dfdd;
   text-decoration:none;
-  font-size:15px;
+  font-size:13px;
   font-weight:500;
   line-height:1.2;
   white-space:nowrap;
@@ -1083,16 +1083,16 @@ html,body{max-width:100%;overflow-x:hidden}
   background:rgba(70,101,93,.55);
 }
 .nav-inner .nav-icon{
-  width:42px;
-  height:42px;
+  width:34px;
+  height:34px;
   display:grid;
   place-items:center;
   color:#dce4e2;
   transition:color .22s ease,filter .22s ease,transform .22s ease;
 }
 .nav-inner .nav-icon svg{
-  width:38px;
-  height:38px;
+  width:31px;
+  height:31px;
   fill:none;
   stroke:currentColor;
   stroke-width:1.7;
@@ -1114,10 +1114,10 @@ html,body{max-width:100%;overflow-x:hidden}
 .nav-inner a.active::after{
   content:"";
   position:absolute;
-  left:9%;
-  right:9%;
+  left:10%;
+  right:10%;
   bottom:0;
-  height:5px;
+  height:4px;
   border-radius:999px 999px 0 0;
   background:var(--green);
   box-shadow:0 0 15px rgba(97,255,34,.85),0 -2px 12px rgba(97,255,34,.3);
@@ -1125,11 +1125,11 @@ html,body{max-width:100%;overflow-x:hidden}
 .nav-inner a.active .nav-icon{color:var(--green);filter:drop-shadow(0 0 8px rgba(97,255,34,.42))}
 .nav-inner a.nav-special,
 .nav-inner a.nav-support{
-  flex:0 0 250px;
-  margin:10px 8px;
-  min-height:128px;
+  flex:0 0 190px;
+  margin:6px 6px;
+  min-height:96px;
   border:1px solid rgba(65,104,89,.62)!important;
-  border-radius:25px!important;
+  border-radius:18px!important;
   background:linear-gradient(180deg,rgba(10,22,20,.82),rgba(6,14,14,.92));
   box-shadow:inset 0 0 20px rgba(70,255,45,.025);
 }
@@ -1143,10 +1143,10 @@ html,body{max-width:100%;overflow-x:hidden}
 .nav-inner a.nav-support .nav-icon{color:#dce4e2}
 .nav-inner a.nav-support:hover .nav-icon{color:var(--green)}
 @media(max-width:1050px){
-  .nav-inner{min-height:122px;border-radius:24px}
-  .nav-inner a{min-height:122px;font-size:13px;padding:14px 7px}
-  .nav-inner .nav-icon{width:36px;height:36px}.nav-inner .nav-icon svg{width:33px;height:33px}
-  .nav-inner a.nav-special,.nav-inner a.nav-support{flex-basis:185px;min-height:100px;margin:8px 5px;border-radius:20px!important}
+  .nav-inner{min-height:100px;border-radius:20px}
+  .nav-inner a{min-height:100px;font-size:12px;padding:10px 6px;gap:6px}
+  .nav-inner .nav-icon{width:31px;height:31px}.nav-inner .nav-icon svg{width:29px;height:29px}
+  .nav-inner a.nav-special,.nav-inner a.nav-support{flex-basis:160px;min-height:84px;margin:6px 4px;border-radius:17px!important}
 }
 @media(max-width:700px){
   .nav-bar{padding:6px 7px;overflow:hidden}
