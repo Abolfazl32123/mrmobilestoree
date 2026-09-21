@@ -1086,26 +1086,3 @@ html,body{max-width:100%;overflow-x:hidden}
 .review-submit{min-width:126px!important;padding:13px 20px!important;border-radius:13px!important;font-size:13px!important;font-weight:900;box-shadow:0 8px 28px rgba(89,255,125,.13)}
 .review-submit span{font-size:16px;margin-right:5px}
 @media(max-width:700px){.review-form-head{flex-direction:column}.review-help{max-width:none}.review-rating-row{flex-wrap:wrap}.review-rating-hint:before{display:none}.review-form-footer{align-items:flex-end}.review-form-footer>div{flex-direction:column-reverse;align-items:flex-end}.review-submit{min-width:112px!important}}
-
-/* V138 - detail stock quantity + cleaner action buttons */
-.detail-stock.in{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap}
-.detail-stock .stock-count{color:#dfe9e5;font-weight:700;margin-right:4px}
-.detail-actions{display:grid;grid-template-columns:minmax(0,2fr) minmax(130px,1fr) minmax(130px,1fr);gap:10px;margin-top:14px}
-.detail-actions .btn{width:100%;min-height:54px;border-radius:16px;font-family:inherit;font-weight:900;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
-.detail-actions .btn:hover:not(:disabled){transform:translateY(-2px)}
-.detail-actions .btn.primary{box-shadow:0 10px 28px rgba(97,255,34,.12)}
-.detail-actions .btn.ghost{background:linear-gradient(180deg,#10191b,#0b1315);border:1px solid #2b3b3e;color:#e7efed}
-.detail-actions .btn.ghost:hover:not(:disabled){border-color:#59ff7d;color:#59ff7d;box-shadow:0 8px 22px rgba(89,255,125,.08)}
-.detail-actions .compare-detail-btn{min-width:0}
-.detail-actions .btn:disabled{opacity:.58;cursor:not-allowed;box-shadow:none}
-@media(max-width:700px){
-  .detail-actions{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:9px}
-  .detail-actions #detailAdd{grid-column:auto}
-  .detail-actions #detailFavorite{grid-column:auto}
-  .detail-actions #detailCompare{grid-column:1/-1}
-  .detail-actions .btn{min-height:56px;border-radius:16px}
-}
-@media(max-width:430px){
-  .detail-actions{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
-  .detail-actions .btn{font-size:12px}
-}
