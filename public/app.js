@@ -7,7 +7,7 @@ function numeric(v){
 }
 function imageUrls(p){
   const raw=String(p?.image_url||'').trim();
-  const list=raw.split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
+  const list=raw.split(/\r?\n|\|/).map(x=>x.trim()).filter(Boolean);
   if(p?.image_key && !list.length) list.push('/assets/'+String(p.image_key).replace(/^\/+/,''));
   return list.length?list:['/assets/mr-mobile-logo.png'];
 }
@@ -45,7 +45,7 @@ function renderFavorites(){
   const favs=state.favorites.map(Number);
   const items=state.products.filter(p=>favs.includes(Number(p.id)));
   if(!items.length){box.innerHTML='<div class="favorites-empty"><div>♡</div><p>هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید.</p><button class="btn primary" onclick="closeFavorites();location.hash="products"">مشاهده محصولات</button></div>';return}
-  box.innerHTML='<div class="favorites-grid">'+items.map(p=>`<article class="favorite-item"><button class="favorite-remove" onclick="toggleFavorite(${Number(p.id)})">×</button><button class="favorite-open" onclick="closeFavorites();openProductDetail(${Number(p.id)})"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"><div><b>${esc(p.name)}</b><span>${toman(cartPrice(p))}</span></div></button></article>`).join('')+'</div>';
+  box.innerHTML='<div class="favorites-grid">'+items.map(p=>`<article class="favorite-item"><button class="favorite-remove" onclick="toggleFavorite(${Number(p.id)})">×</button><button type="button" class="compare-btn detail-compare" data-detail-compare onclick="toggleCompareProduct(product.id)">مقایسه</button><button class="favorite-open" onclick="closeFavorites();openProductDetail(${Number(p.id)})"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"><div><b>${esc(p.name)}</b><span>${toman(cartPrice(p))}</span></div></button></article>`).join('')+'</div>';
 }
 function openFavorites(){renderFavorites();$('favoritesModal')?.classList.add('show')}
 function closeFavorites(){$('favoritesModal')?.classList.remove('show')}
@@ -99,6 +99,22 @@ function populateAdvancedFilters(){
   if(cat)cat.innerHTML='<option value="همه">همه دسته‌ها</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   if(brand)brand.innerHTML='<option value="همه">همه برندها</option>'+brands.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   if(storage)storage.innerHTML='<option value="همه">همه حافظه‌ها</option>'+storages.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+}
+
+function getCompareList(){
+  try{return JSON.parse(localStorage.getItem('mr_compare')||'[]')}catch{return[]}
+}
+function isCompared(id){return getCompareList().some(x=>String(x.id)===String(id))}
+function toggleCompareProduct(id){
+  const list=getCompareList(), i=list.findIndex(x=>String(x.id)===String(id));
+  const product=(window.products||products||[]).find(x=>String(x.id)===String(id));
+  if(i>=0) list.splice(i,1);
+  else if(product) list.push(product);
+  localStorage.setItem('mr_compare',JSON.stringify(list.slice(-4)));
+  document.querySelectorAll(`[data-compare-id="${id}"]`).forEach(b=>{
+    b.classList.toggle('active',isCompared(id));
+    b.textContent=isCompared(id)?'✓ مقایسه شد':'مقایسه';
+  });
 }
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
@@ -155,14 +171,38 @@ window.openProductDetail=async function openProductDetail(id){
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
   $('detailPrice').textContent=toman(effective); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-effective/price)*100)+'٪ تخفیف':''; const detailTimer=$('detailSaleCountdown'); if(detailTimer){const rem=saleRemaining(p);detailTimer.dataset.saleEnd=rem?String(Date.now()+rem):'';detailTimer.textContent=rem?'⏳ '+formatCountdown(rem):'';detailTimer.hidden=!rem}
-  $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
-  const sp=productSpecs(p); const storage=sp.storage||getStorage(p); $('detailStorage').textContent=storage; $('detailCondition2').textContent=p.condition||'نو'; const specMap={batteryHealth:'سلامت باتری',appearance:'وضعیت ظاهری',registry:'رجیستری',simCount:'تعداد سیم‌کارت',ram:'RAM',color:'رنگ',processor:'پردازنده',accessories:'لوازم همراه',warranty:'گارانتی'}; const box=$('detailSpecsRows'); if(box){const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',p.condition||'نو'],['حافظه داخلی',storage],...Object.entries(specMap).map(([k,l])=>[l,sp[k]||'ثبت نشده'])];box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}
+  const stockQtyDisplay=Math.max(0,Number(p.quantity??0)); $('detailStock').innerHTML=p.available?`● موجود در فروشگاه <span class="stock-count">— ${stockQtyDisplay.toLocaleString('fa-IR')} عدد موجود</span>`:'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
+  const sp=productSpecs(p);
+  const storage=sp.storage||getStorage(p); const stockQty=Number(p.quantity??0);
+  const storageEl=$('detailStorage');
+  const memoryBox=$('detailStorageBox');
+  const isMobileCategory=(p.category||'موبایل')==='موبایل';
+  if(storageEl)storageEl.textContent=isMobileCategory?storage:'—';
+  if(memoryBox)memoryBox.style.display=isMobileCategory?'':'none';
+  const quick=$('detailQuick');
+  if(quick)quick.classList.toggle('single',!isMobileCategory);
+  $('detailCondition2').textContent=p.condition||'نو';
+  const detailSpecConfig={
+    'موبایل':[['batteryHealth','سلامت باتری'],['appearance','وضعیت ظاهری'],['registry','رجیستری'],['simCount','تعداد سیم‌کارت'],['ram','RAM'],['storage','حافظه داخلی'],['color','رنگ'],['processor','پردازنده'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'لوازم جانبی':[['compatibility','سازگاری'],['connection','نوع اتصال'],['material','جنس'],['power','توان / ظرفیت'],['length','طول'],['color','رنگ'],['model','مدل / نسخه'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'تبلت':[['display','اندازه صفحه‌نمایش'],['os','سیستم‌عامل'],['ram','RAM'],['processor','پردازنده'],['battery','ظرفیت باتری'],['simCount','تعداد سیم‌کارت'],['camera','دوربین'],['color','رنگ'],['warranty','گارانتی']],
+    'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
+    'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
+    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
+  };
+  const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
+  const box=$('detailSpecsRows');
+  if(box){
+    const rows=[['دسته‌بندی',p.category||'موبایل'],['وضعیت',stockQty>0?'موجود':'ناموجود'],['تعداد موجودی',String(stockQty)],...specRows.map(([k,l])=>[l,sp[k]||'ثبت نشده'])];
+    box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('');
+  }
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
   const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
-  state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const cmp=$('detailCompare'); if(cmp){const compared=isCompared(id);cmp.classList.toggle('active',compared);cmp.textContent=compared?'✓ حذف از مقایسه':'⚖ مقایسه';} const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
+  state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} const cmp=$('detailCompare'); if(cmp){cmp.classList.toggle('active',isCompared(id));cmp.textContent=isCompared(id)?'✓ حذف از مقایسه':'⚖ مقایسه';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
 }
 function setDetailTab(tab){state.detailTab=tab;document.querySelectorAll('.detail-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.detail-panel').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==tab))}
-async function loadReviews(productId){const box=$('detailReviews');if(!box)return;box.innerHTML='<div class="loading">در حال دریافت نظرات...</div>';try{const d=await fetch('/api/products/'+productId+'/reviews').then(r=>r.json());const rows=Array.isArray(d)?d:[];box.innerHTML=`<div class="review-summary"><strong>${rows.length.toLocaleString('fa-IR')}</strong><span>نظر ثبت شده</span></div>`+(rows.length?rows.map(r=>`<article class="review-card"><div><b>${esc(r.user_name||'مشتری')}</b><span>${'★'.repeat(Number(r.rating)||5)}${'☆'.repeat(5-(Number(r.rating)||5))}</span></div><p>${esc(r.comment||'')}</p><small>${esc(r.created_at||'')}</small></article>`).join(''):'<div class="empty">هنوز نظری برای این محصول ثبت نشده است.</div>')+`<div class="review-form"><h4>نظر شما</h4><div class="review-stars">${[1,2,3,4,5].map(n=>`<button type="button" onclick="setReviewRating(${n})" data-rating="${n}">★</button>`).join('')}</div><textarea id="reviewText" placeholder="نظر خود را درباره این محصول بنویسید..."></textarea><button class="btn primary" onclick="submitReview(${productId})">ثبت نظر</button><small id="reviewMsg"></small></div>`;setReviewRating(5)}catch(e){box.innerHTML='<div class="empty">دریافت نظرات انجام نشد.</div>'}}
+async function loadReviews(productId){const box=$('detailReviews');if(!box)return;box.innerHTML='<div class="loading">در حال دریافت نظرات...</div>';try{const d=await fetch('/api/products/'+productId+'/reviews').then(r=>r.json());const rows=Array.isArray(d)?d:[];box.innerHTML=`<div class="review-summary"><div class="review-summary-dot"></div><strong>${rows.length.toLocaleString('fa-IR')}</strong><span>نظر ثبت شده</span></div>`+(rows.length?rows.map(r=>`<article class="review-card"><div><b>${esc(r.user_name||'مشتری')}</b><span>${'★'.repeat(Number(r.rating)||5)}${'☆'.repeat(5-(Number(r.rating)||5))}</span></div><p>${esc(r.comment||'')}</p><small>${esc(r.created_at||'')}</small></article>`).join(''):'<div class="review-empty"><strong>هنوز نظری برای این محصول ثبت نشده است.</strong><span>اولین نفری باشید که تجربه‌تان را با دیگران به اشتراک می‌گذارد.</span></div>')+`<div class="review-form review-form-modern"><div class="review-form-head"><div><h4>نظر شما</h4><p>تجربه خود را از این محصول با دیگران به اشتراک بگذارید.</p></div><div class="review-help"><span class="review-help-icon">💬</span><div><b>نظر شما برای ما ارزشمند است</b><small>با ثبت نظر، به انتخاب بهتر کاربران دیگر کمک می‌کنید.</small></div></div></div><div class="review-rating-row"><div class="review-stars">${[1,2,3,4,5].map(n=>`<button type="button" onclick="setReviewRating(${n})" data-rating="${n}" aria-label="${n} ستاره">★</button>`).join('')}</div><span class="review-rating-hint">روی ستاره‌ها کلیک کنید</span></div><div class="review-text-wrap"><span class="review-pencil">✎</span><textarea id="reviewText" maxlength="500" placeholder="نظر خود را درباره این محصول بنویسید..."></textarea></div><div class="review-form-footer"><small id="reviewCount">۰ / ۵۰۰</small><div><small id="reviewMsg"></small><button class="btn primary review-submit" onclick="submitReview(${productId})">ثبت نظر <span>➤</span></button></div></div></div>`;setReviewRating(5);const rt=$('reviewText');if(rt){const sync=()=>{const c=$('reviewCount');if(c)c.textContent=`${rt.value.length.toLocaleString('fa-IR')} / ۵۰۰`;};rt.addEventListener('input',sync);sync();}}catch(e){box.innerHTML='<div class="empty">دریافت نظرات انجام نشد.</div>'}}
 let reviewRating=5;function setReviewRating(n){reviewRating=n;document.querySelectorAll('.review-stars button').forEach(b=>b.classList.toggle('selected',Number(b.dataset.rating)<=n))}
 async function submitReview(productId){const text=$('reviewText')?.value.trim();if(!text)return $('reviewMsg').textContent='متن نظر را وارد کنید.';try{const r=await fetch('/api/products/'+productId+'/reviews',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rating:reviewRating,comment:text})});const d=await r.json();if(!r.ok)throw Error(d.error||'خطا');await loadReviews(productId);toast('نظر شما ثبت شد ✓')}catch(e){$('reviewMsg').textContent=e.message}}
 function renderDetailGallery(){
@@ -188,7 +228,7 @@ $('searchInput').addEventListener('input',()=>{state.search=$('searchInput').val
 
 function saveCompare(){state.compare=[...new Set((state.compare||[]).map(Number).filter(Number.isFinite))].slice(0,3);localStorage.setItem('mr_compare',JSON.stringify(state.compare));updateCompareUI()}
 function isCompared(id){return (state.compare||[]).includes(Number(id))}
-function updateCompareUI(){const c=$('compareCount');if(c)c.textContent=(state.compare||[]).length.toLocaleString('fa-IR');document.querySelectorAll('[data-compare-id]').forEach(b=>{const a=isCompared(b.dataset.compareId);b.classList.toggle('active',a);b.textContent=a?'✓ حذف از مقایسه':'⚖ مقایسه'});const dc=$('detailCompare');if(dc&&state.detailProductId){const a=isCompared(state.detailProductId);dc.classList.toggle('active',a);dc.textContent=a?'✓ حذف از مقایسه':'⚖ مقایسه'}}
+function updateCompareUI(){const c=$('compareCount');if(c)c.textContent=(state.compare||[]).length.toLocaleString('fa-IR');document.querySelectorAll('[data-compare-id]').forEach(b=>{const a=isCompared(b.dataset.compareId);b.classList.toggle('active',a);b.textContent=a?'✓ حذف از مقایسه':'⚖ مقایسه'});const d=$('detailCompare');if(d&&state.detailProductId!=null){const a=isCompared(state.detailProductId);d.classList.toggle('active',a);d.textContent=a?'✓ حذف از مقایسه':'⚖ مقایسه'}}
 function toggleCompare(id){const n=Number(id);if(!Number.isFinite(n))return;if(isCompared(n)){state.compare=state.compare.filter(x=>Number(x)!==n);saveCompare();return}if(state.compare.length>=3)return;state.compare.push(n);saveCompare()}
 function renderCompare(){const box=$('compareContent');if(!box)return;const items=(state.compare||[]).map(id=>state.products.find(p=>Number(p.id)===Number(id))).filter(Boolean);if(!items.length){box.innerHTML='<div class="compare-empty"><div>⚖️</div><h3>هنوز محصولی برای مقایسه انتخاب نشده</h3><p>از روی کارت محصولات، گزینه «مقایسه» را بزنید.</p></div>';return}const rows=[['قیمت',p=>{const price=numeric(p.price),d=numeric(p.discount_price);return toman(d>0&&d<price?d:price)}],['برند',p=>getBrand(p.name)],['دسته‌بندی',p=>p.category||'موبایل'],['وضعیت',p=>p.condition||'نو'],['حافظه',p=>productSpecs(p).storage||getStorage(p)],['سلامت باتری',p=>productSpecs(p).batteryHealth||'ثبت نشده'],['RAM',p=>productSpecs(p).ram||'ثبت نشده'],['پردازنده',p=>productSpecs(p).processor||'ثبت نشده'],['رجیستری',p=>productSpecs(p).registry||'ثبت نشده'],['تعداد سیم‌کارت',p=>productSpecs(p).simCount||'ثبت نشده'],['رنگ',p=>productSpecs(p).color||'ثبت نشده']];box.innerHTML='<div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>مشخصات</th>'+items.map(p=>`<th><button class="compare-remove" onclick="toggleCompare(${Number(p.id)});renderCompare()">×</button><img src="${esc(imgUrl(p))}" alt=""><b>${esc(p.name)}</b></th>`).join('')+'</tr></thead><tbody>'+rows.map(([l,f])=>`<tr><td>${esc(l)}</td>`+items.map(p=>`<td>${esc(f(p))}</td>`).join('')+'</tr>').join('')+'</tbody></table></div><div class="compare-open-note">برای دیدن همه مشخصات، داخل جدول اسکرول کنید ↔️</div>';updateCompareUI()}
 function openCompare(){
