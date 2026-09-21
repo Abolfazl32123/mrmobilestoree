@@ -1,4 +1,2 @@
-Mr Mobile V138
-- Shows exact inventory count beside product availability in product detail.
-- Improves detail action buttons layout and mobile responsiveness.
-- Preserves existing product/cart/favorite/compare functionality.
+Mr Mobile V139 - Premium Dynamic Product Detail
+Based on V138. Product detail purchase panel redesigned to match the requested mockup while keeping product data dynamic from admin: price, discount, stock, quantity, category, condition, specs, description and images. Added quantity selector capped by admin inventory and cart add quantity support.

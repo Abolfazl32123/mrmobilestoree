@@ -198,7 +198,14 @@ window.openProductDetail=async function openProductDetail(id){
     box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('');
   }
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
-  const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
+  state.detailQty=1;
+  const maxQty=Math.max(0,Number(p.quantity??0));
+  const qtyEl=$('detailQty'); if(qtyEl) qtyEl.textContent='۱';
+  const minus=$('detailQtyMinus'), plus=$('detailQtyPlus');
+  if(minus) minus.onclick=()=>{state.detailQty=Math.max(1,(state.detailQty||1)-1); if(qtyEl)qtyEl.textContent=state.detailQty.toLocaleString('fa-IR');};
+  if(plus) plus.onclick=()=>{if(maxQty>0)state.detailQty=Math.min(maxQty,(state.detailQty||1)+1); if(qtyEl)qtyEl.textContent=state.detailQty.toLocaleString('fa-IR');};
+  const btn=$('detailAdd'); btn.disabled=!p.available||maxQty<1; btn.innerHTML=p.available&&maxQty>0?'افزودن به سبد خرید <span class="cart-icon">🛒</span>':'ناموجود'; btn.onclick=()=>{if(p.available&&maxQty>0){addToCart(p.id,state.detailQty||1);closeProductDetail();}};
+  if(minus)minus.disabled=!p.available||maxQty<1; if(plus)plus.disabled=!p.available||maxQty<1;
   state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} const cmp=$('detailCompare'); if(cmp){cmp.classList.toggle('active',isCompared(id));cmp.textContent=isCompared(id)?'✓ حذف از مقایسه':'⚖ مقایسه';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
 }
 function setDetailTab(tab){state.detailTab=tab;document.querySelectorAll('.detail-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.detail-panel').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==tab))}
@@ -245,7 +252,7 @@ function closeCompare(){
 }
 
 
-function addToCart(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;const x=state.cart.find(i=>i.id===p.id);x?(x.qty++,x.price=getEffectivePrice(p)):state.cart.push({id:p.id,qty:1,name:p.name,price:getEffectivePrice(p),image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();}
+function addToCart(id,requestedQty=1){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;const maxQty=Math.max(0,Number(p.quantity??0));if(maxQty<1)return;const wanted=Math.max(1,Number(requestedQty)||1);const x=state.cart.find(i=>i.id===p.id);if(x){x.qty=Math.min(maxQty,x.qty+wanted);x.price=getEffectivePrice(p)}else state.cart.push({id:p.id,qty:Math.min(maxQty,wanted),name:p.name,price:getEffectivePrice(p),image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();}
 function cartPrice(x){return Number(String(x.price).replace(/[^\d]/g,''))||0}
 function renderCart(){
   const count=state.cart.reduce((a,x)=>a+x.qty,0), subtotal=state.cart.reduce((a,x)=>a+cartPrice(x)*x.qty,0), total=Math.max(0,subtotal-(state.coupon.discount||0));
