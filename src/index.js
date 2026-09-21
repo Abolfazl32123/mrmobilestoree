@@ -28,14 +28,6 @@ async function validOAuthState(request,env,provider,state){
   return !!d && d.provider===provider && d.exp>Date.now() && state===getCookie(request,'oauth_state');
 }
 function pemToBytes(pem){const clean=String(pem||'').replace(/-----BEGIN [^-]+-----/g,'').replace(/-----END [^-]+-----/g,'').replace(/\s+/g,'');return fromB64u(clean.replace(/\+/g,'-').replace(/\//g,'_'))}
-async function appleClientSecret(env){
-  if(!env.APPLE_TEAM_ID||!env.APPLE_KEY_ID||!env.APPLE_PRIVATE_KEY||!env.APPLE_CLIENT_ID)throw new Error('تنظیمات Apple OAuth کامل نیست.');
-  const now=Math.floor(Date.now()/1000);const header={alg:'ES256',kid:env.APPLE_KEY_ID};const payload={iss:env.APPLE_TEAM_ID,iat:now,exp:now+86400*180,aud:'https://appleid.apple.com',sub:env.APPLE_CLIENT_ID};
-  const enc=o=>b64u(new TextEncoder().encode(JSON.stringify(o)));const input=enc(header)+'.'+enc(payload);
-  const key=await crypto.subtle.importKey('pkcs8',pemToBytes(env.APPLE_PRIVATE_KEY),{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
-  const sig=new Uint8Array(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},key,new TextEncoder().encode(input)));
-  return input+'.'+b64u(sig);
-}
 async function findOrCreateSocialUser(env,provider,providerId,profile){
   await ensureCustomerTables(env);
   const pid=String(providerId||'').slice(0,255);if(!pid)throw new Error('شناسه حساب اجتماعی دریافت نشد.');
@@ -186,14 +178,7 @@ export default {async fetch(request,env){
       const state=url.searchParams.get('state')||'';if(!await validOAuthState(request,env,'google',state))return redirectAuthError(request,'نشست ورود Google منقضی یا نامعتبر است.');const code=url.searchParams.get('code')||'';if(!code)return redirectAuthError(request,'ورود با Google لغو شد.');
       const redirectUri=new URL('/api/auth/google/callback',request.url).toString();const form=new URLSearchParams({code,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:redirectUri,grant_type:'authorization_code'});const tr=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:form});const td=await tr.json().catch(()=>({}));if(!tr.ok||!td.access_token)return redirectAuthError(request,'دریافت دسترسی از Google انجام نشد.');const ur=await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:'Bearer '+td.access_token}});const profile=await ur.json().catch(()=>({}));if(!ur.ok||!profile.sub)return redirectAuthError(request,'اطلاعات حساب Google دریافت نشد.');const u=await findOrCreateSocialUser(env,'google',profile.sub,{email:profile.email,name:profile.name});const token=await signSession(env.ADMIN_SECRET||'fallback','mr_user',{uid:u.id,exp:Date.now()+30*86400000});const dest=new URL('/',request.url);dest.searchParams.set('auth','success');return new Response(null,{status:302,headers:{'Location':dest.toString(),'Set-Cookie':cookie('mr_user',token,30*86400)}});
     }
-    if(path==='/api/auth/apple/start'&&request.method==='GET'){
-      if(!env.APPLE_CLIENT_ID||!env.APPLE_TEAM_ID||!env.APPLE_KEY_ID||!env.APPLE_PRIVATE_KEY)return redirectAuthError(request,'ورود با Apple هنوز تنظیم نشده است.');
-      const st=await oauthState(env,'apple');const redirectUri=new URL('/api/auth/apple/callback',request.url).toString();const q=new URLSearchParams({client_id:env.APPLE_CLIENT_ID,redirect_uri:redirectUri,response_type:'code',response_mode:'form_post',scope:'name email',state:st.token});return new Response(null,{status:302,headers:{'Location':'https://appleid.apple.com/auth/authorize?'+q.toString(),'Set-Cookie':cookie('oauth_state',st.token,600)}});
-    }
-    if(path==='/api/auth/apple/callback'&&request.method==='POST'){
-      const form=await request.formData().catch(()=>new FormData());const state=String(form.get('state')||'');if(!await validOAuthState(request,env,'apple',state))return redirectAuthError(request,'نشست ورود Apple منقضی یا نامعتبر است.');const code=String(form.get('code')||'');if(!code)return redirectAuthError(request,'ورود با Apple لغو شد.');
-      const redirectUri=new URL('/api/auth/apple/callback',request.url).toString();const clientSecret=await appleClientSecret(env);const body=new URLSearchParams({client_id:env.APPLE_CLIENT_ID,client_secret:clientSecret,code,grant_type:'authorization_code',redirect_uri:redirectUri});const tr=await fetch('https://appleid.apple.com/auth/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body});const td=await tr.json().catch(()=>({}));if(!tr.ok||!td.id_token)return redirectAuthError(request,'دریافت حساب Apple انجام نشد.');const parts=String(td.id_token).split('.');const claims=parts.length===3?decodeJwtPart(parts[1]):null;if(!claims?.sub)return redirectAuthError(request,'توکن Apple معتبر نیست.');const userRaw=form.get('user');let appleName='';try{const parsed=JSON.parse(String(userRaw||'{}'));appleName=[parsed.name?.firstName,parsed.name?.lastName].filter(Boolean).join(' ')}catch{}const u=await findOrCreateSocialUser(env,'apple',claims.sub,{email:claims.email,name:appleName||claims.email?.split('@')[0]});const token=await signSession(env.ADMIN_SECRET||'fallback','mr_user',{uid:u.id,exp:Date.now()+30*86400000});const dest=new URL('/',request.url);dest.searchParams.set('auth','success');return new Response(null,{status:303,headers:{'Location':dest.toString(),'Set-Cookie':cookie('mr_user',token,30*86400)}});
-    }
+
     if(path==='/api/auth/register'&&request.method==='POST'){
       await ensureCustomerTables(env);const b=await request.json().catch(()=>({}));const name=String(b.name||'').trim(),phone=String(b.phone||'').trim(),password=String(b.password||'');
       if(name.length<2||!/^09\d{9}$/.test(phone)||password.length<6)return json({error:'نام، شماره موبایل معتبر و رمز حداقل ۶ کاراکتری لازم است.'},400);
