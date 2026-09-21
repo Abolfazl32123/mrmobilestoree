@@ -1038,3 +1038,6 @@ html,body{max-width:100%;overflow-x:hidden}
   .nav-inner .nav-icon{width:15px;height:15px;flex-basis:15px}
   .nav-inner .nav-icon svg{width:15px;height:15px}
 }
+
+/* V129: remove empty trust panel and let product details use full width */
+.product-detail-info:has(.detail-specs){grid-template-columns:1fr}.detail-specs{width:100%}

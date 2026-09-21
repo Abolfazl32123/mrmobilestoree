@@ -158,12 +158,13 @@ window.openProductDetail=async function openProductDetail(id){
   $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
   const sp=productSpecs(p);
   const storage=sp.storage||getStorage(p);
-  $('detailStorage').textContent=storage;
+  const storageEl=$('detailStorage');
+  if(storageEl){ const wrap=storageEl.closest('.detail-spec-item,.spec-card,.mini-spec,.spec-box'); if(wrap) wrap.style.display=(p.category==='موبایل')?'':'none'; storageEl.textContent=(p.category==='موبایل')?storage:'—'; }
   $('detailCondition2').textContent=p.condition||'نو';
   const detailSpecConfig={
     'موبایل':[['batteryHealth','سلامت باتری'],['appearance','وضعیت ظاهری'],['registry','رجیستری'],['simCount','تعداد سیم‌کارت'],['ram','RAM'],['storage','حافظه داخلی'],['color','رنگ'],['processor','پردازنده'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'لوازم جانبی':[['compatibility','سازگاری'],['connection','نوع اتصال'],['material','جنس'],['power','توان / ظرفیت'],['length','طول'],['color','رنگ'],['model','مدل / نسخه'],['accessories','لوازم همراه'],['warranty','گارانتی']],
-    'تبلت':[['display','اندازه صفحه‌نمایش'],['os','سیستم‌عامل'],['ram','RAM'],['storage','حافظه داخلی'],['processor','پردازنده'],['battery','ظرفیت باتری'],['simCount','تعداد سیم‌کارت'],['camera','دوربین'],['color','رنگ'],['warranty','گارانتی']],
+    'تبلت':[['display','اندازه صفحه‌نمایش'],['os','سیستم‌عامل'],['ram','RAM'],['processor','پردازنده'],['battery','ظرفیت باتری'],['simCount','تعداد سیم‌کارت'],['camera','دوربین'],['color','رنگ'],['warranty','گارانتی']],
     'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
     'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
