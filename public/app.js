@@ -171,7 +171,7 @@ window.openProductDetail=async function openProductDetail(id){
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
   $('detailPrice').textContent=toman(effective); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-effective/price)*100)+'٪ تخفیف':''; const detailTimer=$('detailSaleCountdown'); if(detailTimer){const rem=saleRemaining(p);detailTimer.dataset.saleEnd=rem?String(Date.now()+rem):'';detailTimer.textContent=rem?'⏳ '+formatCountdown(rem):'';detailTimer.hidden=!rem}
-  $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
+  const stockQtyDisplay=Math.max(0,Number(p.quantity??0)); $('detailStock').innerHTML=p.available?`● موجود در فروشگاه <span class="stock-count">— ${stockQtyDisplay.toLocaleString('fa-IR')} عدد موجود</span>`:'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
   const sp=productSpecs(p);
   const storage=sp.storage||getStorage(p); const stockQty=Number(p.quantity??0);
   const storageEl=$('detailStorage');
