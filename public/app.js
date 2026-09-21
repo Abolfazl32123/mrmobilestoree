@@ -79,12 +79,13 @@ function renderSpecialOffers(){const wrap=$('specialOffers'),grid=$('specialOffe
 async function loadHomepageBanners(){try{const r=await fetch('/api/homepage-banners',{cache:'no-store'});if(!r.ok)return;const list=await r.json();const b=list[0];if(!b)return;if($('heroTitle'))$('heroTitle').textContent=b.title||'فراتر از یک موبایل‌فروشی.';if($('heroSubtitle'))$('heroSubtitle').textContent=b.subtitle||'تکنولوژی برای سبک زندگی تو.';if($('heroButton')){$('heroButton').textContent=b.button_text||'مشاهده محصولات';$('heroButton').href=b.button_link||'#products'}}catch(e){}}
 async function loadProducts(){
   try{
-    const r=await fetch('/api/products',{cache:'no-store'});
+    let r=await fetch('/api/catalog?_='+Date.now(),{cache:'no-store',credentials:'same-origin',headers:{'Accept':'application/json'}});
+    if(!r.ok){r=await fetch('/api/products?_='+Date.now(),{cache:'no-store',credentials:'same-origin',headers:{'Accept':'application/json'}});}
     const raw=await r.text();
     if(!r.ok) throw new Error('HTTP '+r.status+' '+raw.slice(0,180));
     const data=JSON.parse(raw);
     if(!Array.isArray(data)) throw new Error('پاسخ محصولات معتبر نیست');
-    state.products=data;populateAdvancedFilters();renderProducts();applyStockBadges();renderSpecialOffers();
+    state.products=data.map(p=>({...p,stock_qty:Math.max(0,Number(p.stock_qty ?? (p.available?1:0))||0),available:Number(p.stock_qty ?? (p.available?1:0))>0?1:0}));populateAdvancedFilters();renderProducts();applyStockBadges();renderSpecialOffers();
   }catch(e){
     console.error('loadProducts failed',e);
     const grid=$('productsGrid');
