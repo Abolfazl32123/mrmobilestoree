@@ -1,5 +1,3 @@
-V124 — Premium navigation redesign applied. Apple Login remains removed from the previous V123 build.
-
 # MR MOBILE STORE — V110
 
 Homepage polish based on V109.
