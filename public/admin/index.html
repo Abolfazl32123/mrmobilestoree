@@ -257,7 +257,7 @@ function openProductForm(p=null){
   let sp={};try{sp=typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{}
   renderSpecFields($('category').value,sp);
   $('featured').checked=!!p?.featured;$('bestseller').checked=!!p?.bestseller;$('newest').checked=!!p?.newest;
-  $('desc').value=p?.description||'';$('imageUrl').value=p?.image_url||'';$('quantity').value=Math.max(0,Number(p?.stock_qty??p?.quantity??0));$('available').checked=$('quantity').value>0;
+  $('desc').value=p?.description||'';$('imageUrl').value=p?.image_url||'';$('available').checked=p?p.available!==0:true;$('quantity').value=Number(p?.quantity??0);
   $('fileName').textContent=p?.image_url?`${splitImageInput(p.image_url).length} تصویر ثبت شده`:'فایلی انتخاب نشده';
   $('imageFile').value='';renderImagePreview();$('msg').textContent='';$('productModal').hidden=false;
 }
@@ -304,7 +304,7 @@ async function saveProduct(){
   if(images.length>5)return $('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';
   if(image_url.length>1650000)return $('msg').textContent='حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.';
   const quantity=Math.max(0,parseInt($('quantity').value||'0',10));$('available').checked=quantity>0;const specs=collectSpecs();
-  const body={name:$('name').value.trim(),price:$('price').value.trim(),discount_price:$('discountPrice').value.trim(),sale_start_at:$('saleStart').value||null,sale_end_at:$('saleEnd').value||null,condition:$('condition').value,category:$('category').value,badge:$('badge').value.trim(),featured:$('featured').checked?1:0,bestseller:$('bestseller').checked?1:0,newest:$('newest').checked?1:0,specs,description:$('desc').value.trim(),image_url,available:quantity>0,stock_qty:quantity};
+  const body={name:$('name').value.trim(),price:$('price').value.trim(),discount_price:$('discountPrice').value.trim(),sale_start_at:$('saleStart').value||null,sale_end_at:$('saleEnd').value||null,condition:$('condition').value,category:$('category').value,badge:$('badge').value.trim(),featured:$('featured').checked?1:0,bestseller:$('bestseller').checked?1:0,newest:$('newest').checked?1:0,specs,description:$('desc').value.trim(),image_url,available:$('available').checked,quantity};
   try{await api(editing?'/api/products/'+editing:'/api/products',{method:editing?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});closeProductForm();products=await api('/api/products?admin=1');populateProductAdminFilters();renderProducts();renderStats();toast('محصول با موفقیت ذخیره شد ✓')}catch(e){$('msg').textContent=e.message}
 }
 

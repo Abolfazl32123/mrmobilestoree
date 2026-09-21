@@ -1,9 +1,9 @@
-# MR Mobile V136
-Fixes:
-- Public product API no longer hides out-of-stock products; they remain visible with ناموجود overlay.
-- Inventory is consistently read from stock_qty.
-- Admin product form sends stock_qty correctly (legacy quantity is also accepted by backend).
-- Editing a product now loads stock_qty correctly.
-- Product availability is synchronized with stock quantity.
-- Checkout uses stock_qty and preserves legacy products that are marked available but have a zero stock field.
-- Product cards/detail/add-to-cart/availability filter now use stock_qty consistently.
+# MR MOBILE STORE — V110
+
+Homepage polish based on V109.
+
+- Category artwork uses the dedicated category SVG artwork.
+- Featured products uses a stable RTL two-column layout: fixed-width promotion card + five-column real product grid on desktop.
+- Empty product state no longer causes the promotion card or grid to stretch unexpectedly.
+- No fake products are injected; product cards come from `/api/products` / the store database.
+- Existing header, hero, authentication and Google OAuth flow are preserved.

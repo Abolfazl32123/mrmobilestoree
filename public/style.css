@@ -1049,15 +1049,3 @@ html,body{max-width:100%;overflow-x:hidden}
 .detail-quick.single{grid-template-columns:1fr}
 .compare-detail-btn{min-width:145px}
 .detail-actions .compare-detail-btn.active{border-color:#59ff7d;color:#59ff7d;background:#102018}
-
-/* V134: technical specifications use the full detail width */
-.detail-bottom{grid-template-columns:1fr}
-.detail-related-box{display:none!important}
-.detail-spec-box{width:100%;box-sizing:border-box}
-.detail-spec-box .spec-row{min-height:42px;align-items:center}
-@media(max-width:900px){.detail-bottom{grid-template-columns:1fr}}
-
-/* V135 stock status */
-.stock-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,12,14,.62);backdrop-filter:blur(2px);color:#fff;font-weight:900;font-size:15px;z-index:5;pointer-events:none}
-.stock-badge::before{content:'';position:absolute;inset:10px;border:1px solid rgba(255,255,255,.28);border-radius:14px}
-.detail-stock-badge{display:block;margin:0 0 10px;padding:9px 14px;border-radius:10px;background:#3a1116;color:#ff7d86;border:1px solid #7b2933;text-align:center;font-weight:800}
