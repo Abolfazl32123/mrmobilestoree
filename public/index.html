@@ -249,19 +249,8 @@
           <div id="detailStorageBox"><span>حافظه داخلی</span><b id="detailStorage">—</b></div>
           <div><span>وضعیت</span><b id="detailCondition2">سالم و تست‌شده</b></div>
         </div>
-        <div class="detail-purchase-row">
-          <div class="detail-quantity-box">
-            <span>تعداد</span>
-            <div class="detail-quantity-controls">
-              <button type="button" id="detailQtyMinus" aria-label="کم کردن تعداد">−</button>
-              <b id="detailQty">۱</b>
-              <button type="button" id="detailQtyPlus" aria-label="زیاد کردن تعداد">+</button>
-            </div>
-          </div>
-          <button id="detailAdd" class="btn primary full">افزودن به سبد خرید <span class="cart-icon">🛒</span></button>
-        </div>
-        <div class="detail-actions-secondary"><button id="detailFavorite" class="btn ghost" onclick="toggleFavorite(state.detailProductId)">♡ علاقه‌مندی</button><button id="detailCompare" class="btn ghost compare-detail-btn" onclick="toggleCompare(state.detailProductId)">⚖ مقایسه</button></div>
-        <div class="detail-benefits"><span>🛡️<b>ضمانت اصالت کالا</b><small>کالای اورجینال</small></span><span>🚚<b>ارسال سریع</b><small>به سراسر کشور</small></span><span>🎧<b>پشتیبانی ۲۴ ساعته</b><small>پاسخگویی آنلاین</small></span><span>↩<b>۷ روز ضمانت بازگشت</b><small>خرید با اطمینان</small></span></div>
+        <div class="detail-actions"><button id="detailAdd" class="btn primary full">افزودن به سبد خرید 🛒</button><button id="detailFavorite" class="btn ghost" onclick="toggleFavorite(state.detailProductId)">♡ علاقه‌مندی</button><button id="detailCompare" class="btn ghost compare-detail-btn" onclick="toggleCompare(state.detailProductId)">⚖ مقایسه</button></div>
+        <div class="detail-benefits"><span>↩ ۷ روز ضمانت بازگشت</span><span>🚚 ارسال سریع</span><span>🛡️ ضمانت اصالت کالا</span></div>
       </div>
     </div>
     <div class="detail-tabs"><button data-tab="specs" class="active" onclick="setDetailTab('specs')">مشخصات فنی</button><button data-tab="desc" onclick="setDetailTab('desc')">توضیحات</button><button data-tab="reviews" onclick="setDetailTab('reviews')">نظرات مشتریان</button></div>
