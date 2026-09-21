@@ -308,6 +308,22 @@ async function saveProduct(){
   try{await api(editing?'/api/products/'+editing:'/api/products',{method:editing?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});closeProductForm();products=await api('/api/products?admin=1');populateProductAdminFilters();renderProducts();renderStats();toast('محصول با موفقیت ذخیره شد ✓')}catch(e){$('msg').textContent=e.message}
 }
 
+
+async function deleteProduct(id){
+  if(!id)return;
+  if(!confirm('این محصول حذف شود؟'))return;
+  try{
+    await api('/api/products/'+id,{method:'DELETE'});
+    products=await api('/api/products?admin=1');
+    populateProductAdminFilters();
+    renderProducts();
+    renderStats();
+    toast('محصول با موفقیت حذف شد ✓');
+  }catch(e){
+    toast(e.message||'حذف محصول انجام نشد.');
+  }
+}
+
 async function loadReviews(){try{reviews=await api('/api/admin/reviews');renderReviews()}catch(e){toast(e.message)}}
 function renderReviews(){const f=$('reviewStatusFilter')?.value||'';const list=reviews.filter(r=>!f||r.status===f);const pending=reviews.filter(r=>r.status==='pending').length,approved=reviews.filter(r=>r.status==='approved').length,rejected=reviews.filter(r=>r.status==='rejected').length;$('navReviews').textContent=fa(pending);$('reviewsSummary').innerHTML=`<div><b>${fa(pending)}</b><span>در انتظار بررسی</span></div><div><b>${fa(approved)}</b><span>تأیید شده</span></div><div><b>${fa(rejected)}</b><span>رد شده</span></div>`;$('reviewsTable').innerHTML=list.length?list.map(reviewRow).join(''):'<div class="empty">نظری برای نمایش وجود ندارد.</div>'}
 function reviewRow(r){const status=r.status==='approved'?'done':r.status==='rejected'?'cancel':'wait';return `<article class="review-admin-row"><div class="review-admin-main"><div><strong>${esc(r.product_name||'محصول حذف شده')}</strong><small>${esc(r.customer_name||'مشتری')} — ${esc(r.phone||'')}</small></div><span class="payment-status ${status}">${r.status==='approved'?'تأیید شده':r.status==='rejected'?'رد شده':'در انتظار بررسی'}</span><small>${esc(r.created_at||'')}</small></div><div class="review-admin-stars">${'★'.repeat(Number(r.rating)||0)}${'☆'.repeat(5-(Number(r.rating)||0))}</div><p>${esc(r.comment||'')}</p><div class="review-admin-actions">${r.status!=='approved'?`<button class="approve-btn" onclick="reviewStatus(${r.id},'approved')">✓ تأیید و انتشار</button>`:''}${r.status!=='rejected'?`<button class="reject-btn" onclick="reviewStatus(${r.id},'rejected')">× رد</button>`:''}<button class="ghost" onclick="deleteReview(${r.id})">حذف</button></div></article>`}
