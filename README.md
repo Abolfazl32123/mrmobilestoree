@@ -4,3 +4,5 @@ V150
 - Added favorite button, arrows, pagination dots, responsive layout, and stable card dimensions.
 - Hardened admin product save flow so validation/API/date errors are shown in the form instead of making the save button appear unresponsive.
 - Preserved existing gallery, stock, Jalali sale dates, and product editing behavior.
+
+V151: restored floating support button positioning lost in V150; no other support behavior changed.
