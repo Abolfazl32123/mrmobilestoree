@@ -22,3 +22,5 @@ V145: fixed product edit gallery persistence. Existing multi-image galleries are
 V146: stock_qty is authoritative for availability. Public/admin APIs expose quantity=stock_qty and derive available from quantity; product cards/detail show exact stock count; cart prevents adding beyond stock. Admin create/edit persists quantity into stock_qty.
 
 V147: Product timed discounts now use Persian (Jalali/Shamsi) date/time fields in admin. Values are converted to ISO timestamps for real backend enforcement. Customer-facing countdown timers show remaining time to sale end on special-offer cards and discounted product cards, updating every second. End date validation is enforced.
+
+V148: Added working calendar buttons beside Jalali sale start/end fields. Native datetime picker opens from calendar buttons and selected Gregorian date/time is converted back to Persian/Jalali display and ISO for backend.
