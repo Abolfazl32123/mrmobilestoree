@@ -10,3 +10,5 @@ Homepage polish based on V109.
 
 
 V138 change: product-detail cart, favorite, and compare buttons are now equal-width, equal-height, and arranged in one row on mobile; only this button layout was changed.
+
+V141: product detail action buttons kept equal-width; removed compare min-width and removed the primary cart button top margin so all three align cleanly.
