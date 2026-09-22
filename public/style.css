@@ -952,8 +952,8 @@ html,body{max-width:100%;overflow-x:hidden}
   .auth-single-panel .field input{height:48px!important}
   .auth-single-panel .auth-options{flex-wrap:wrap!important;gap:8px!important;margin:5px 0 12px!important}
   .auth-single-panel .auth-submit{height:52px!important;min-height:52px!important}
-  .auth-single-panel .social-login{grid-template-columns:1fr 1fr!important}
-  .auth-single-panel .social{height:48px!important}
+  .auth-single-panel .social-login{grid-template-columns:1fr!important;width:100%!important}
+  .auth-single-panel .social{height:48px!important;width:100%!important;box-sizing:border-box!important}
   .auth-close{top:9px!important;left:9px!important;width:38px!important;height:38px!important;display:flex!important;align-items:center!important;justify-content:center!important}
 }
 @media (max-width:360px){
