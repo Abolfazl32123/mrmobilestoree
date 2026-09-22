@@ -120,6 +120,7 @@
 <div id="toast" class="toast"></div>
 <script>
 let editing=null, products=[], orders=[], users=[], stats={}, payments=[], coupons=[], inventory=[], banners=[];
+let originalEditImages=[], originalEditImageText='';
 const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -254,6 +255,8 @@ function renderImagePreview(){
 }
 function openProductForm(p=null){
   editing=p?.id||null; selectedImageData=[];
+  originalEditImages=p?splitImageInput(p.image_url):[];
+  originalEditImageText=p?String(p.image_url||''):'';
   $('formTitle').textContent=p?'ویرایش محصول':'افزودن محصول';
   $('name').value=p?.name||'';$('price').value=p?.price||'';$('discountPrice').value=p?.discount_price||'';
   $('saleStart').value=p?.sale_start_at?String(p.sale_start_at).slice(0,16):'';
@@ -266,7 +269,7 @@ function openProductForm(p=null){
   $('fileName').textContent=p?.image_url?`${splitImageInput(p.image_url).length} تصویر ثبت شده`:'فایلی انتخاب نشده';
   $('imageFile').value='';renderImagePreview();$('msg').textContent='';$('productModal').hidden=false;
 }
-function closeProductForm(){$('productModal').hidden=true;editing=null;selectedImageData=[]}
+function closeProductForm(){$('productModal').hidden=true;editing=null;selectedImageData=[];originalEditImages=[];originalEditImageText=''}
 function clearImageFile(){selectedImageData=[];$('imageFile').value='';$('fileName').textContent='فایلی انتخاب نشده';renderImagePreview()}
 $('category').addEventListener('change',()=>{renderSpecFields($('category').value,{});});
 $('imageUrl').addEventListener('input',()=>{selectedImageData=[];renderImagePreview()});
@@ -304,7 +307,9 @@ function compressImage(file){
   })
 }
 async function saveProduct(){
-  const images=(selectedImageData.length?selectedImageData:splitImageInput($('imageUrl').value));
+  const currentImageText=String($('imageUrl').value||'');
+  const imageInputChanged=currentImageText!==originalEditImageText;
+  const images=(selectedImageData.length?selectedImageData:(editing&&!imageInputChanged?originalEditImages:splitImageInput(currentImageText)));
   const image_url=images.join('\n');
   if(images.length>5)return $('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';
   if(image_url.length>1650000)return $('msg').textContent='حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.';
