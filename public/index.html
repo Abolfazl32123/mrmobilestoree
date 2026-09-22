@@ -80,8 +80,16 @@
   </section>
 
   <section id="specialOffers" class="special-offers container" hidden>
-    <div class="section-head"><div><h2>پیشنهادهای ویژه ⚡</h2><p class="offers-subtitle">تخفیف‌های زمان‌دار آقای موبایل</p></div><a href="#products">مشاهده همه ←</a></div>
-    <div id="specialOffersGrid" class="special-offers-grid"></div>
+    <div class="section-head offers-head">
+      <div><h2>پیشنهادهای ویژه <span class="offers-bolt">⚡</span></h2><p class="offers-subtitle">تخفیف‌های زمان‌دار آقای موبایل</p></div>
+      <a class="offers-all" href="#products">مشاهده همه محصولات <span>←</span></a>
+    </div>
+    <div class="offers-carousel">
+      <button class="offers-nav offers-prev" type="button" aria-label="قبلی" onclick="moveSpecialOffers(-1)">‹</button>
+      <div id="specialOffersGrid" class="special-offers-grid"></div>
+      <button class="offers-nav offers-next" type="button" aria-label="بعدی" onclick="moveSpecialOffers(1)">›</button>
+    </div>
+    <div id="specialOffersDots" class="offers-dots" aria-label="صفحات پیشنهادهای ویژه"></div>
   </section>
 
   <section id="categories" class="section container categories-section">

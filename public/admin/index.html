@@ -386,18 +386,55 @@ function compressImage(file){
   })
 }
 async function saveProduct(){
-  const currentImageText=String($('imageUrl').value||'').trim();
-  const originalEditableText=originalEditImages.join('|');
-  const imageInputChanged=editing ? currentImageText!==originalEditableText : !!currentImageText;
-  // When editing, unchanged gallery images are always preserved. Only replace them
-  // if the admin explicitly selected new files or changed the image URL field.
-  const images=(selectedImageData.length?selectedImageData:(editing&&!imageInputChanged?originalEditImages:splitImageInput(currentImageText)));
-  const image_url=images.join('\n');
-  if(images.length>5)return $('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';
-  if(image_url.length>1650000)return $('msg').textContent='حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.';
-  const quantity=Math.max(0,parseInt($('quantity').value||'0',10));$('available').checked=quantity>0;syncSaleDateInputs();const specs=collectSpecs();
-  const body={name:$('name').value.trim(),price:$('price').value.trim(),discount_price:$('discountPrice').value.trim(),sale_start_at:$('saleStart').value||null,sale_end_at:$('saleEnd').value||null,condition:$('condition').value,category:$('category').value,badge:$('badge').value.trim(),featured:$('featured').checked?1:0,bestseller:$('bestseller').checked?1:0,newest:$('newest').checked?1:0,specs,description:$('desc').value.trim(),image_url,available:$('available').checked,quantity};
-  try{await api(editing?'/api/products/'+editing:'/api/products',{method:editing?'PUT':'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});closeProductForm();products=await api('/api/products?admin=1');populateProductAdminFilters();renderProducts();renderStats();toast('محصول با موفقیت ذخیره شد ✓')}catch(e){$('msg').textContent=e.message}
+  try{
+    const currentImageText=String($('imageUrl').value||'').trim();
+    const originalEditableText=originalEditImages.join('|');
+    const imageInputChanged=editing ? currentImageText!==originalEditableText : !!currentImageText;
+    const images=(selectedImageData.length?selectedImageData:(editing&&!imageInputChanged?originalEditImages:splitImageInput(currentImageText)));
+    const image_url=images.join('\n');
+    if(!String($('name').value||'').trim()) throw Error('نام محصول الزامی است.');
+    if(!String($('price').value||'').trim()) throw Error('قیمت محصول الزامی است.');
+    if(images.length>5) throw Error('حداکثر ۵ تصویر برای هر محصول انتخاب کنید.');
+    if(image_url.length>1650000) throw Error('حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.');
+    const quantity=Math.max(0,parseInt($('quantity').value||'0',10)||0);
+    $('available').checked=quantity>0;
+    syncSaleDateInputs();
+    const specs=collectSpecs();
+    const body={
+      name:$('name').value.trim(),
+      price:$('price').value.trim(),
+      discount_price:$('discountPrice').value.trim(),
+      sale_start_at:$('saleStart').value||null,
+      sale_end_at:$('saleEnd').value||null,
+      condition:$('condition').value,
+      category:$('category').value,
+      badge:$('badge').value.trim(),
+      featured:$('featured').checked?1:0,
+      bestseller:$('bestseller').checked?1:0,
+      newest:$('newest').checked?1:0,
+      specs,
+      description:$('desc').value.trim(),
+      image_url,
+      available:quantity>0,
+      quantity
+    };
+    const result=await api(editing?'/api/products/'+editing:'/api/products',{
+      method:editing?'PUT':'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!result || result.ok===false) throw Error(result?.error||'ذخیره محصول انجام نشد.');
+    closeProductForm();
+    products=await api('/api/products?admin=1');
+    populateProductAdminFilters();
+    renderProducts();
+    renderStats();
+    toast('محصول با موفقیت ذخیره شد ✓');
+  }catch(e){
+    console.error('saveProduct failed',e);
+    $('msg').textContent=e?.message||'خطا در ذخیره محصول';
+    $('msg').className='error';
+  }
 }
 
 

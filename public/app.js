@@ -75,7 +75,52 @@ function getStorage(p){
   const m=String((p.name||'')+' '+(p.description||'')).match(/(?:\d{2,4}\s?(?:GB|TB)|\d{2,4}\s?گیگ)/i);
   return m?m[0].replace(/\s+/g,' ').trim().toUpperCase().replace(/گیگ/,'GB'):'—';
 }
-function renderSpecialOffers(){const wrap=$('specialOffers'),grid=$('specialOffersGrid');if(!wrap||!grid)return;const items=state.products.filter(p=>getEffectivePrice(p)<numeric(p.price)&&saleRemaining(p)>0).slice(0,4);if(!items.length){wrap.hidden=true;return}wrap.hidden=false;grid.innerHTML=items.map(p=>{const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p),pct=Math.max(1,Math.round((1-effective/price)*100));return `<article class="offer-card" onclick="openProductDetail(${p.id})"><div class="offer-img"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}"></div><div class="offer-body"><span class="offer-badge">${pct}٪ تخفیف</span><h3>${esc(p.name)}</h3><div class="offer-price"><strong>${toman(effective)}</strong><del>${toman(price)}</del></div><div class="sale-countdown" data-sale-end="${Date.now()+remain}">${formatCountdown(remain)}</div></div></article>`}).join('');updateSaleTimers()}
+function renderSpecialOffers(){
+  const wrap=$('specialOffers'),grid=$('specialOffersGrid');
+  if(!wrap||!grid)return;
+  const items=state.products.filter(p=>getEffectivePrice(p)<numeric(p.price)&&saleRemaining(p)>0);
+  if(!items.length){wrap.hidden=true;return}
+  wrap.hidden=false;
+  const visible=items.slice(0,8);
+  grid.innerHTML=visible.map((p,i)=>{
+    const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p);
+    const pct=Math.max(1,Math.round((1-effective/price)*100));
+    return `<article class="offer-card" onclick="openProductDetail(${p.id})">
+      <div class="offer-img">
+        <img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" loading="lazy">
+        <span class="offer-badge">${pct}٪ تخفیف</span>
+        <button class="offer-fav" type="button" aria-label="افزودن به علاقه‌مندی" onclick="event.stopPropagation();toggleFavorite(${p.id})">♡</button>
+      </div>
+      <div class="offer-body">
+        <h3>${esc(p.name)}</h3>
+        <div class="offer-price"><strong>${toman(effective)}</strong><del>${toman(price)}</del></div>
+        <div class="sale-countdown" data-sale-end="${Date.now()+remain}">${formatCountdown(remain)}</div>
+      </div>
+    </article>`
+  }).join('');
+  const nav=wrap.querySelector('.offers-nav');
+  const dots=wrap.querySelector('.offers-dots');
+  if(nav)nav.hidden=visible.length<=4;
+  if(dots){
+    const pages=Math.max(1,Math.ceil(visible.length/4));
+    dots.innerHTML=Array.from({length:pages},(_,i)=>`<button type="button" class="${i===0?'active':''}" aria-label="صفحه ${i+1}" onclick="event.stopPropagation();scrollSpecialOffers(${i})"></button>`).join('');
+    dots.hidden=pages<=1;
+  }
+  updateSaleTimers();
+}
+function scrollSpecialOffers(page){
+  const grid=$('specialOffersGrid');if(!grid)return;
+  const width=grid.clientWidth;
+  grid.scrollTo({left:page*width,behavior:'smooth'});
+  const dots=document.querySelectorAll('.offers-dots button');
+  dots.forEach((d,i)=>d.classList.toggle('active',i===page));
+}
+function moveSpecialOffers(dir){
+  const grid=$('specialOffersGrid');if(!grid)return;
+  const amount=Math.max(280,Math.round(grid.clientWidth*.9));
+  grid.scrollBy({left:dir*amount,behavior:'smooth'});
+}
+
 async function loadHomepageBanners(){try{const r=await fetch('/api/homepage-banners',{cache:'no-store'});if(!r.ok)return;const list=await r.json();const b=list[0];if(!b)return;if($('heroTitle'))$('heroTitle').textContent=b.title||'فراتر از یک موبایل‌فروشی.';if($('heroSubtitle'))$('heroSubtitle').textContent=b.subtitle||'تکنولوژی برای سبک زندگی تو.';if($('heroButton')){$('heroButton').textContent=b.button_text||'مشاهده محصولات';$('heroButton').href=b.button_link||'#products'}}catch(e){}}
 async function loadProducts(){
   try{

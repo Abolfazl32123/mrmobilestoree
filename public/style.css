@@ -133,12 +133,43 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{backgrou
   .modal-card>.modal-close{width:34px;height:34px}
 }
 
-/* V57: timed special offers */
-.special-offers{margin-top:18px;margin-bottom:18px;padding:22px;border:1px solid #1f3b31;border-radius:24px;background:linear-gradient(145deg,#0b1716,#091114);box-shadow:0 16px 40px rgba(0,0,0,.22)}
-.offers-subtitle{margin:4px 0 0;color:#81928e;font-size:12px}.special-offers-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.offer-card{overflow:hidden;border:1px solid #213932;border-radius:18px;background:#0c1719;cursor:pointer;transition:.2s}.offer-card:hover{transform:translateY(-3px);border-color:#3a9d68}.offer-img{height:160px;background:#0a1215;display:grid;place-items:center}.offer-img img{width:100%;height:100%;object-fit:contain}.offer-body{padding:13px}.offer-badge{display:inline-flex;padding:5px 8px;border-radius:8px;background:#153b28;color:#62f18b;font-size:10px;font-weight:800}.offer-body h3{font-size:13px;margin:9px 0;color:#edf6f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.offer-price{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.offer-price strong{color:#fff;font-size:14px}.offer-price del{color:#6d7c7b;font-size:10px}.sale-countdown{margin-top:7px;padding:5px 8px;min-height:28px;box-sizing:border-box;border-radius:9px;background:linear-gradient(135deg,rgba(16,41,31,.95),rgba(13,29,25,.95));border:1px solid rgba(43,116,78,.75);color:#63ef8a;font-size:9px;font-weight:800;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 0 12px rgba(54,255,105,.06)}.sale-countdown::before{content:"⏱";font-size:13px}.detail-sale-countdown{width:max-content;min-width:150px}.sale-active-label{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:4px 7px;border-radius:7px;background:#35151b;color:#ff7380;font-size:9px;font-weight:800}.sale-admin-note{display:block;color:#55e987;font-size:8px;margin-top:4px}.sale-admin-note.muted{color:#75837f}@media(max-width:1000px){.special-offers-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.special-offers{padding:14px}.special-offers-grid{grid-template-columns:1fr 1fr;gap:9px}.offer-img{height:125px}.offer-body{padding:10px}.offer-body h3{font-size:11px}.offer-price strong{font-size:11px}.sale-countdown{font-size:9px}}
+/* V150: premium timed special offers */
+.special-offers{position:relative;margin-top:22px;margin-bottom:22px;padding:28px 28px 24px;border:1px solid #1f4033;border-radius:28px;background:radial-gradient(circle at 50% 30%,rgba(23,100,54,.13),transparent 45%),linear-gradient(145deg,#071512,#091113);box-shadow:0 18px 50px rgba(0,0,0,.25);overflow:hidden}
+.special-offers:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(54,255,105,.035),transparent)}
+.offers-head{position:relative;z-index:1;align-items:center;margin-bottom:20px}
+.offers-head h2{margin:0;font-size:25px}
+.offers-bolt{color:#ffd21c;text-shadow:0 0 14px rgba(255,210,28,.3)}
+.offers-subtitle{margin:5px 0 0;color:#819b91;font-size:12px}
+.offers-all{display:inline-flex;align-items:center;gap:9px;padding:11px 18px;border:1px solid #21844d;border-radius:14px;color:#dfffea;background:rgba(8,30,21,.55);font-size:12px;font-weight:800;text-decoration:none;transition:.2s}
+.offers-all:hover{background:#123d27;transform:translateY(-1px)}
+.offers-carousel{position:relative;z-index:1;display:flex;align-items:center;gap:14px}
+.special-offers-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;flex:1;min-width:0;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding:2px}
+.special-offers-grid::-webkit-scrollbar{display:none}
+.offer-card{position:relative;min-width:0;overflow:hidden;border:1px solid #1e6a43;border-radius:21px;background:linear-gradient(180deg,#0d1918,#091213);cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
+.offer-card:hover{transform:translateY(-4px);border-color:#4df58b;box-shadow:0 14px 35px rgba(35,255,100,.09)}
+.offer-img{position:relative;height:190px;background:#0a1215;display:grid;place-items:center;overflow:hidden}
+.offer-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 65%,rgba(3,12,10,.42))}
+.offer-img img{width:100%;height:100%;object-fit:cover;display:block}
+.offer-badge{position:absolute;z-index:2;top:12px;left:12px;display:inline-flex;padding:6px 10px;border:1px solid #43f083;border-radius:999px;background:rgba(7,46,27,.9);color:#62f18b;font-size:10px;font-weight:900}
+.offer-fav{position:absolute;z-index:3;top:12px;right:12px;width:38px;height:38px;border:1px solid #315247;border-radius:50%;background:rgba(6,22,19,.82);color:#fff;font-size:21px;line-height:1;cursor:pointer}
+.offer-body{padding:13px 14px 14px}
+.offer-body h3{font-size:13px;line-height:1.7;margin:0 0 8px;color:#edf6f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.offer-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.offer-price strong{color:#5df48b;font-size:16px;font-weight:900}
+.offer-price del{color:#6d7c7b;font-size:10px}
+.sale-countdown{margin-top:10px;padding:7px 10px;min-height:34px;box-sizing:border-box;border-radius:11px;background:linear-gradient(135deg,#123a27,#0b2019);border:1px solid #2cae61;color:#64f38c;font-size:10px;font-weight:900;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 0 15px rgba(54,255,105,.07)}
+.sale-countdown::before{content:"⏱";font-size:14px}
+.offers-nav{flex:0 0 44px;width:44px;height:44px;border:1px solid #277b4b;border-radius:50%;background:#0a2118;color:#54f58b;font-size:30px;line-height:1;cursor:pointer;display:grid;place-items:center;z-index:2}
+.offers-nav:hover{background:#123d27;border-color:#55f68b}
+.offers-dots{display:flex;justify-content:center;gap:8px;margin-top:17px}
+.offers-dots button{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:#29403a;cursor:pointer}
+.offers-dots button.active{width:24px;border-radius:99px;background:#49ef83}
+.detail-sale-countdown{width:max-content;min-width:150px}
+.sale-active-label{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:4px 7px;border-radius:7px;background:#35151b;color:#ff7380;font-size:9px;font-weight:800}
+.sale-admin-note{display:block;color:#55e987;font-size:8px;margin-top:4px}.sale-admin-note.muted{color:#75837f}
+@media(max-width:1000px){.special-offers-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.offer-img{height:170px}}
+@media(max-width:560px){.special-offers{padding:18px 12px 18px;border-radius:22px}.offers-head{gap:12px}.offers-head h2{font-size:20px}.offers-all{padding:9px 12px;font-size:10px}.offers-carousel{gap:6px}.offers-nav{flex-basis:34px;width:34px;height:34px;font-size:24px}.special-offers-grid{grid-template-columns:1fr 1fr;gap:9px}.offer-img{height:135px}.offer-badge{top:8px;left:8px;padding:5px 7px;font-size:9px}.offer-fav{top:8px;right:8px;width:32px;height:32px;font-size:18px}.offer-body{padding:9px}.offer-body h3{font-size:10px}.offer-price strong{font-size:11px}.offer-price del{font-size:8px}.sale-countdown{font-size:8px;min-height:29px;padding:5px}.offers-dots{margin-top:11px}}
 
-#onlinePayBtn{margin-bottom:8px} #onlinePayBtn[hidden]{display:none!important}
-.support-fab{position:fixed;left:18px;bottom:18px;z-index:40;background:#15945c;color:#fff;padding:11px 16px;border-radius:999px;box-shadow:0 10px 30px #0008;cursor:pointer;font-weight:800}.support-card{max-width:760px;max-height:85vh;overflow:auto}.support-tabs{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}.support-tabs button{border:1px solid #2a4d3c;background:#0e1713;color:#fff;padding:9px 14px;border-radius:10px}.ticket-row,.chat-row,.advanced-card{background:#101914;border:1px solid #244233;border-radius:14px;padding:12px;margin:8px 0}.ticket-row{cursor:pointer}.ticket-meta{font-size:12px;color:#9ab5a7}.support-compose{display:flex;gap:8px;margin-top:10px}.support-compose textarea{flex:1;min-height:80px}.wallet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.wallet-grid .advanced-card strong{display:block;font-size:20px}@media(max-width:600px){.support-fab{left:10px;bottom:10px}.wallet-grid{grid-template-columns:1fr}}
 /* V93 — Premium support / chat / loyalty UI */
 .support-fab{background:linear-gradient(135deg,#59ff32,#22d93f);color:#061006;border:1px solid #63ff48;box-shadow:0 12px 34px rgba(60,255,60,.2);font-size:12px}
 .support-card{width:min(720px,100%);padding:26px;overflow-x:hidden;background:linear-gradient(145deg,#0b1517,#0a1113 60%,#0c1915);border-color:#29413a}
