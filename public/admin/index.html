@@ -251,7 +251,7 @@ function splitImageInput(raw){
 }
 function renderImagePreview(){
   const urls=selectedImageData.length?selectedImageData:splitImageInput($('imageUrl').value);
-  $('preview').innerHTML=urls.map((u,i)=>`<div class="preview-item"><img src="${esc(u)}" onerror="this.style.display='none'"><small>تصویر ${i+1}</small></div>`).join('');
+  $('preview').innerHTML=urls.map((u,i)=>`<div class="preview-item"><img src="${esc(u)}" alt="تصویر ${i+1}" onerror="this.style.opacity='.25'"><small>تصویر ${i+1}</small></div>`).join('');
 }
 function openProductForm(p=null){
   editing=p?.id||null; selectedImageData=[];
@@ -265,14 +265,21 @@ function openProductForm(p=null){
   let sp={};try{sp=typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{}
   renderSpecFields($('category').value,sp);
   $('featured').checked=!!p?.featured;$('bestseller').checked=!!p?.bestseller;$('newest').checked=!!p?.newest;
-  $('desc').value=p?.description||'';$('imageUrl').value=p?.image_url||'';$('available').checked=p?p.available!==0:true;$('quantity').value=Number(p?.quantity??0);
-  $('fileName').textContent=p?.image_url?`${splitImageInput(p.image_url).length} تصویر ثبت شده`:'فایلی انتخاب نشده';
+  $('desc').value=p?.description||'';
+  // Text inputs cannot reliably retain newline-separated data URLs. Keep the real
+  // existing gallery in JS state and show the URLs with a pipe separator only for editing.
+  $('imageUrl').value=originalEditImages.join('|');
+  $('available').checked=p?p.available!==0:true;$('quantity').value=Number(p?.quantity??0);
+  $('fileName').textContent=originalEditImages.length?`${originalEditImages.length} تصویر ثبت شده`:'فایلی انتخاب نشده';
   $('imageFile').value='';renderImagePreview();$('msg').textContent='';$('productModal').hidden=false;
 }
 function closeProductForm(){$('productModal').hidden=true;editing=null;selectedImageData=[];originalEditImages=[];originalEditImageText=''}
 function clearImageFile(){selectedImageData=[];$('imageFile').value='';$('fileName').textContent='فایلی انتخاب نشده';renderImagePreview()}
 $('category').addEventListener('change',()=>{renderSpecFields($('category').value,{});});
-$('imageUrl').addEventListener('input',()=>{selectedImageData=[];renderImagePreview()});
+$('imageUrl').addEventListener('input',()=>{
+  selectedImageData=[];
+  renderImagePreview();
+});
 $('imageFile').addEventListener('change',async()=>{
   const files=[...($('imageFile').files||[])];
   if(!files.length)return;
@@ -307,8 +314,11 @@ function compressImage(file){
   })
 }
 async function saveProduct(){
-  const currentImageText=String($('imageUrl').value||'');
-  const imageInputChanged=currentImageText!==originalEditImageText;
+  const currentImageText=String($('imageUrl').value||'').trim();
+  const originalEditableText=originalEditImages.join('|');
+  const imageInputChanged=editing ? currentImageText!==originalEditableText : !!currentImageText;
+  // When editing, unchanged gallery images are always preserved. Only replace them
+  // if the admin explicitly selected new files or changed the image URL field.
   const images=(selectedImageData.length?selectedImageData:(editing&&!imageInputChanged?originalEditImages:splitImageInput(currentImageText)));
   const image_url=images.join('\n');
   if(images.length>5)return $('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';
