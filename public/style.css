@@ -1217,3 +1217,51 @@ html{scroll-behavior:auto}
   .featured-products-layout>.products-grid .product-card .cart-btn{width:32px;height:32px;min-width:32px}
   .products-slide-btn{width:34px;height:34px;flex-basis:34px;font-size:20px}
 }
+
+
+/* V158: mobile-only polish for special offers + lower homepage spacing */
+@media(max-width:700px){
+  /* Keep desktop untouched. On mobile, show exactly two offer cards per slide. */
+  .special-offers{padding:20px 10px 18px;border-radius:20px;margin-top:16px;margin-bottom:18px}
+  .offers-head{margin-bottom:14px}
+  .offers-head h2{font-size:18px}
+  .offers-subtitle{font-size:9px;margin-top:4px}
+  .offers-carousel{gap:7px}
+  .special-offers-grid{
+    grid-template-columns:none;
+    grid-template-rows:1fr;
+    grid-auto-flow:column;
+    grid-auto-columns:calc((100% - 8px)/2);
+    gap:8px;
+    width:100%;
+    padding:2px 1px;
+    scroll-padding-inline:1px;
+  }
+  .offer-card{border-radius:15px}
+  .offer-img{height:108px}
+  .offer-badge{top:6px;left:6px;padding:4px 6px;font-size:7px}
+  .offer-fav{top:6px;right:6px;width:28px;height:28px;font-size:16px}
+  .offer-body{padding:8px 8px 9px;min-height:91px}
+  .offer-body h3{font-size:9px;line-height:1.55;margin-bottom:5px}
+  .offer-price{gap:4px}
+  .offer-price strong{font-size:11px}
+  .offer-price del{font-size:7px}
+  .offer-body>.sale-countdown{font-size:7px;min-height:21px;height:21px;padding:3px 4px;margin-top:6px}
+  .offers-nav{flex-basis:30px;width:30px;height:30px;font-size:21px}
+  .offers-dots{margin-top:11px;gap:6px}
+  .offers-dots button{width:7px;height:7px}
+  .offers-dots button.active{width:18px}
+
+  /* Separate newsletter and about blocks so they don't visually merge. */
+  .premium-lower>.newsletter-premium{margin-top:22px;margin-bottom:30px}
+  .premium-lower>.about-premium{margin-top:0;padding-top:38px;padding-bottom:42px}
+}
+@media(max-width:430px){
+  .special-offers{padding-left:8px;padding-right:8px}
+  .special-offers-grid{grid-auto-columns:calc((100% - 7px)/2);gap:7px}
+  .offer-img{height:102px}
+  .offer-body{min-height:88px;padding:7px}
+  .offer-body h3{font-size:8.5px}
+  .offer-price strong{font-size:10px}
+  .offers-nav{flex-basis:28px;width:28px;height:28px;font-size:19px}
+}

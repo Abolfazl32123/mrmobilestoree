@@ -9,3 +9,5 @@ V154: Special offers now show 5 cards per desktop slide; additional discounted p
 V155: the main products section now paginates into a slider with 5 products per desktop slide and 2 on mobile, with arrows/dots; filters/sorting remain dynamic.
 
 V156: both product and special-offers sliders auto-advance every 3 seconds and loop.
+
+V158: mobile-only special-offers card sizing and newsletter/about spacing. Desktop styles untouched.
