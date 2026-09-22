@@ -1342,3 +1342,26 @@ html{scroll-behavior:auto}
     min-width:0!important;
   }
 }
+
+/* V161: keep modal/overlay above the sticky navigation */
+.site-header, .main-header, header, .main-nav, .navbar, .sticky-nav, nav{
+  z-index:100!important;
+}
+.modal-overlay, .modal-backdrop, .overlay, .dialog-backdrop{
+  position:fixed!important;
+  inset:0!important;
+  z-index:9990!important;
+}
+.modal, .modal-content, .dialog, .favorite-modal, .favorites-modal,
+.product-detail-modal, .login-modal{
+  position:relative;
+  z-index:9991!important;
+}
+#favoritesModal, #favoriteModal, #favorites-modal, .favorites-modal{
+  z-index:9990!important;
+}
+#favoritesModal .modal-content, #favoriteModal .modal-content,
+#favorites-modal .modal-content, .favorites-modal .modal-content{
+  position:relative!important;
+  z-index:9991!important;
+}
