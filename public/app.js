@@ -1,4 +1,4 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},coupon:{code:'',discount:0},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest',productsPage:0};
+const state={products:[],category:'همه',search:'',specialOffersPage:0,cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},coupon:{code:'',discount:0},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest',productsPage:0};
 
 const $=id=>document.getElementById(id);
 function numeric(v){
@@ -75,14 +75,23 @@ function getStorage(p){
   const m=String((p.name||'')+' '+(p.description||'')).match(/(?:\d{2,4}\s?(?:GB|TB)|\d{2,4}\s?گیگ)/i);
   return m?m[0].replace(/\s+/g,' ').trim().toUpperCase().replace(/گیگ/,'GB'):'—';
 }
+function getSpecialOffersPerPage(){
+  return window.innerWidth<=700?2:5;
+}
 function renderSpecialOffers(){
   const wrap=$('specialOffers'),grid=$('specialOffersGrid');
   if(!wrap||!grid)return;
   const items=state.products.filter(p=>getEffectivePrice(p)<numeric(p.price)&&saleRemaining(p)>0);
-  if(!items.length){wrap.hidden=true;return}
+  if(!items.length){wrap.hidden=true;state.specialOffersPage=0;return}
   wrap.hidden=false;
-  const visible=items;
-  grid.innerHTML=visible.map((p,i)=>{
+
+  const perPage=getSpecialOffersPerPage();
+  const pages=Math.max(1,Math.ceil(items.length/perPage));
+  if(state.specialOffersPage>=pages)state.specialOffersPage=0;
+  const page=state.specialOffersPage;
+  const pageItems=items.slice(page*perPage,(page+1)*perPage);
+
+  grid.innerHTML=pageItems.map((p)=>{
     const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p);
     const pct=Math.max(1,Math.round((1-effective/price)*100));
     return `<article class="offer-card" onclick="openProductDetail(${p.id})">
@@ -98,38 +107,30 @@ function renderSpecialOffers(){
       </div>
     </article>`
   }).join('');
+
   const nav=wrap.querySelector('.offers-nav');
   const dots=wrap.querySelector('.offers-dots');
-  const perPage=getSpecialOffersPerPage();
-  const pages=Math.max(1,Math.ceil(visible.length/perPage));
-  if(nav)nav.hidden=visible.length<=perPage;
+  if(nav)nav.hidden=pages<=1;
   if(dots){
-    dots.innerHTML=Array.from({length:pages},(_,i)=>`<button type="button" class="${i===0?'active':''}" aria-label="صفحه ${i+1}" onclick="event.stopPropagation();scrollSpecialOffers(${i})"></button>`).join('');
+    dots.innerHTML=Array.from({length:pages},(_,i)=>
+      `<button type="button" class="${i===page?'active':''}" aria-label="صفحه ${i+1}" onclick="event.stopPropagation();setSpecialOffersPage(${i})"></button>`
+    ).join('');
     dots.hidden=pages<=1;
   }
   updateSaleTimers();
   restartSpecialOffersAutoSlide();
 }
-function getSpecialOffersPerPage(){
-  if(window.innerWidth<=560)return 2;
-  if(window.innerWidth<=1000)return 2;
-  return 5;
+function setSpecialOffersPage(page){
+  const wrap=$('specialOffers');
+  if(!wrap)return;
+  const items=state.products.filter(p=>getEffectivePrice(p)<numeric(p.price)&&saleRemaining(p)>0);
+  const pages=Math.max(1,Math.ceil(items.length/getSpecialOffersPerPage()));
+  state.specialOffersPage=(Math.max(0,Number(page)||0))%pages;
+  renderSpecialOffers();
 }
-function scrollSpecialOffers(page){
-  const grid=$('specialOffersGrid');if(!grid)return;
-  const width=grid.clientWidth;
-  grid.scrollTo({left:page*width,behavior:'smooth'});
-  const dots=document.querySelectorAll('.offers-dots button');
-  dots.forEach((d,i)=>d.classList.toggle('active',i===page));
-}
+function scrollSpecialOffers(page){setSpecialOffersPage(page)}
 function moveSpecialOffers(dir){
-  const grid=$('specialOffersGrid');if(!grid)return;
-  const width=grid.clientWidth;
-  const max=Math.max(0,grid.scrollWidth-width);
-  const target=Math.min(max,Math.max(0,grid.scrollLeft+dir*width));
-  grid.scrollTo({left:target,behavior:'smooth'});
-  const page=Math.round(target/Math.max(1,width));
-  document.querySelectorAll('.offers-dots button').forEach((d,i)=>d.classList.toggle('active',i===page));
+  setSpecialOffersPage((state.specialOffersPage||0)+Number(dir||0));
 }
 
 async function loadHomepageBanners(){try{const r=await fetch('/api/homepage-banners',{cache:'no-store'});if(!r.ok)return;const list=await r.json();const b=list[0];if(!b)return;if($('heroTitle'))$('heroTitle').textContent=b.title||'فراتر از یک موبایل‌فروشی.';if($('heroSubtitle'))$('heroSubtitle').textContent=b.subtitle||'تکنولوژی برای سبک زندگی تو.';if($('heroButton')){$('heroButton').textContent=b.button_text||'مشاهده محصولات';$('heroButton').href=b.button_link||'#products'}}catch(e){}}
@@ -256,8 +257,8 @@ function restartSpecialOffersAutoSlide(){
   specialOffersAutoSlideTimer=setInterval(()=>{
     const dots=document.querySelectorAll('#specialOffers .offers-dots button');
     if(dots.length<=1)return;
-    const active=[...dots].findIndex(d=>d.classList.contains('active'));
-    scrollSpecialOffers(active<0||active>=dots.length-1?0:active+1);
+    const current=state.specialOffersPage||0;
+    setSpecialOffersPage(current>=dots.length-1?0:current+1);
   },3000);
 }
 function restartAllAutoSlides(){restartProductsAutoSlide();restartSpecialOffersAutoSlide();}
@@ -580,67 +581,3 @@ async function copyReferralCode(code){if(!code||code==='—')return;try{await na
 })();
 
 
-/* V159: mobile-only carousel paging fix */
-(function(){
-  if (window.__mrV159MobileSliderFix) return;
-  window.__mrV159MobileSliderFix = true;
-
-  function init(){
-    if (window.innerWidth > 560) return;
-
-    const roots = [
-      '.products-slider','.products-carousel','.special-offers-slider','.offers-slider',
-      '[data-products-slider]','[data-special-offers-slider]'
-    ];
-
-    roots.forEach(sel=>{
-      document.querySelectorAll(sel).forEach(root=>{
-        if(root.dataset.v159Ready) return;
-        const track = root.querySelector(
-          '.products-slider-track,.products-carousel-track,.special-offers-track,.offers-slider-track,'+
-          '[data-slider-track],.slider-track'
-        );
-        if(!track) return;
-
-        const cards=[...track.children].filter(el=>el.nodeType===1);
-        if(cards.length<=2) return;
-
-        root.dataset.v159Ready='1';
-        let page=0;
-        const pages=Math.ceil(cards.length/2);
-
-        function go(p, smooth=true){
-          page=(p+pages)%pages;
-          const first=cards[Math.min(page*2,cards.length-1)];
-          if(!first) return;
-          const left=first.offsetLeft;
-          track.style.transition=smooth?'transform .45s ease':'none';
-          track.style.transform=`translate3d(${-left}px,0,0)`;
-
-          const dots=root.querySelectorAll('[data-slide-dot],.slide-dot,.carousel-dot');
-          dots.forEach((d,i)=>d.classList.toggle('active',i===page));
-        }
-
-        root.querySelectorAll('[data-next],.slider-next,.carousel-next').forEach(b=>{
-          b.addEventListener('click',e=>{e.preventDefault();go(page+1);});
-        });
-        root.querySelectorAll('[data-prev],.slider-prev,.carousel-prev').forEach(b=>{
-          b.addEventListener('click',e=>{e.preventDefault();go(page-1);});
-        });
-
-        // Hide overflow at the viewport level and ensure initial page is exact.
-        requestAnimationFrame(()=>go(0,false));
-
-        // Keep page position correct after resize, without affecting desktop.
-        let t;
-        window.addEventListener('resize',()=>{
-          clearTimeout(t);
-          t=setTimeout(()=>{ if(window.innerWidth<=560) go(page,false); },120);
-        });
-      });
-    });
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
-})();
