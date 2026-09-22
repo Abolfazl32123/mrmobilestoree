@@ -128,7 +128,7 @@ function renderProducts(){
       && (state.filters.brand==='همه'||getBrand(p.name)===state.filters.brand)
       && (state.filters.condition==='همه'||String(p.condition||'نو')===state.filters.condition)
       && (state.filters.storage==='همه'||getStorage(p)===state.filters.storage)
-      && (state.filters.availability==='همه'||(state.filters.availability==='available'?!!p.available:!p.available))
+      && (state.filters.availability==='همه'||(state.filters.availability==='available'?Number(p.quantity??p.stock_qty??(p.available?1:0))>0:Number(p.quantity??p.stock_qty??(p.available?1:0))<=0))
       && (!min||price>=min) && (!max||price<=max);
   });
   if(state.sort==='priceAsc')list.sort((a,b)=>getEffectivePrice(a)-getEffectivePrice(b));
@@ -139,14 +139,14 @@ function renderProducts(){
   updateFilterCount();
   if(!list.length){$('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>محصولی برای نمایش پیدا نشد</strong><span>محصولات واقعی فروشگاه از پنل مدیریت این بخش نمایش داده می‌شوند.</span></div>';return}
   $('productsGrid').innerHTML=list.map(p=>{
-    const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price; const remain=saleRemaining(p);
-    return `<article class="product-card ${p.available?'':'unavailable'}" onclick="openProductDetail(${p.id})">
+    const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price; const remain=saleRemaining(p); const stockQty=Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0); const inStock=stockQty>0;
+    return `<article class="product-card ${inStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
       <button class="wish ${isFavorite(p.id)?'active':''}" data-favorite-id="${p.id}" aria-pressed="${isFavorite(p.id)?'true':'false'}" title="${isFavorite(p.id)?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'}" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button>
       <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
-      <div class="product-bottom"><div class="price">${toman(effective)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div><button class="add-btn" aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" ${p.available?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${p.available?'🛒':'×'}</button></div>${remain?`<div class="sale-countdown" data-sale-end="${Date.now()+remain}">⏳ ${formatCountdown(remain)}</div>`:''}
+      <div class="product-bottom"><div class="price">${toman(effective)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div><div class="stock-mini ${inStock?'in':'out'}">${inStock?`● موجود · ${stockQty.toLocaleString('fa-IR')} عدد`:'● ناموجود'}</div><button class="add-btn" aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" ${inStock?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${inStock?'🛒':'×'}</button></div>${remain?`<div class="sale-countdown" data-sale-end="${Date.now()+remain}">⏳ ${formatCountdown(remain)}</div>`:''}
       <button class="compare-btn ${isCompared(p.id)?'active':''}" data-compare-id="${p.id}" onclick="event.stopPropagation();toggleCompare(${p.id})">${isCompared(p.id)?'✓ حذف از مقایسه':'⚖ مقایسه'}</button>
     </article>`}).join('');
 }
@@ -171,9 +171,9 @@ window.openProductDetail=async function openProductDetail(id){
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
   $('detailPrice').textContent=toman(effective); $('detailOldPrice').textContent=hasDiscount?toman(price):''; $('detailDiscount').textContent=hasDiscount?Math.round((1-effective/price)*100)+'٪ تخفیف':''; const detailTimer=$('detailSaleCountdown'); if(detailTimer){const rem=saleRemaining(p);detailTimer.dataset.saleEnd=rem?String(Date.now()+rem):'';detailTimer.textContent=rem?'⏳ '+formatCountdown(rem):'';detailTimer.hidden=!rem}
-  $('detailStock').textContent=p.available?'● موجود در فروشگاه':'● ناموجود'; $('detailStock').className='detail-stock '+(p.available?'in':'out');
+  const detailQty=Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0); const detailInStock=detailQty>0; $('detailStock').textContent=detailInStock?`● موجود در فروشگاه · ${detailQty.toLocaleString('fa-IR')} عدد موجود`:'● ناموجود'; $('detailStock').className='detail-stock '+(detailInStock?'in':'out');
   const sp=productSpecs(p);
-  const storage=sp.storage||getStorage(p); const stockQty=Number(p.quantity??0);
+  const storage=sp.storage||getStorage(p); const stockQty=detailQty;
   const storageEl=$('detailStorage');
   const memoryBox=$('detailStorageBox');
   const isMobileCategory=(p.category||'موبایل')==='موبایل';
@@ -198,7 +198,7 @@ window.openProductDetail=async function openProductDetail(id){
     box.innerHTML=rows.map(([l,v])=>`<div class="spec-row"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('');
   }
   const urls=imageUrls(p); state.detailGallery={urls,index:0}; renderDetailGallery();
-  const btn=$('detailAdd'); btn.disabled=!p.available; btn.textContent=p.available?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(p.available){addToCart(p.id);closeProductDetail();}};
+  const btn=$('detailAdd'); btn.disabled=!detailInStock; btn.textContent=detailInStock?'افزودن به سبد خرید 🛒':'ناموجود'; btn.onclick=()=>{if(detailInStock){addToCart(p.id);closeProductDetail();}};
   state.detailProductId=Number(id); updateFavoriteButtons(Number(id)); const fav=$('detailFavorite'); if(fav){fav.classList.toggle('active',isFavorite(id));fav.textContent=isFavorite(id)?'♥ در علاقه‌مندی':'♡ علاقه‌مندی';} const cmp=$('detailCompare'); if(cmp){cmp.classList.toggle('active',isCompared(id));cmp.textContent=isCompared(id)?'✓ حذف از مقایسه':'⚖ مقایسه';} setDetailTab('specs'); $('productDetailModal').classList.add('show'); await loadReviews(Number(id));
 }
 function setDetailTab(tab){state.detailTab=tab;document.querySelectorAll('.detail-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.detail-panel').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==tab))}
@@ -245,7 +245,7 @@ function closeCompare(){
 }
 
 
-function addToCart(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p||!p.available)return;const x=state.cart.find(i=>i.id===p.id);x?(x.qty++,x.price=getEffectivePrice(p)):state.cart.push({id:p.id,qty:1,name:p.name,price:getEffectivePrice(p),image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();}
+function addToCart(id){const p=state.products.find(x=>Number(x.id)===Number(id));const availableQty=Math.max(0,Number(p?.quantity??p?.stock_qty??(p?.available?1:0))||0);if(!p||availableQty<=0)return;const x=state.cart.find(i=>i.id===p.id);if(x){if(x.qty>=availableQty){toast(`حداکثر ${availableQty.toLocaleString('fa-IR')} عدد موجود است`);return;}x.qty++;x.price=getEffectivePrice(p)}else state.cart.push({id:p.id,qty:1,name:p.name,price:getEffectivePrice(p),image:imgUrl(p)});saveCart();toast('محصول به سبد خرید اضافه شد');toggleCart();}
 function cartPrice(x){return Number(String(x.price).replace(/[^\d]/g,''))||0}
 function renderCart(){
   const count=state.cart.reduce((a,x)=>a+x.qty,0), subtotal=state.cart.reduce((a,x)=>a+cartPrice(x)*x.qty,0), total=Math.max(0,subtotal-(state.coupon.discount||0));

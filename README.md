@@ -17,3 +17,6 @@ V143: fixed admin product thumbnails to display the first saved product image in
 
 
 V145: fixed product edit gallery persistence. Existing multi-image galleries are kept in JS state; editing a product without selecting new images no longer drops images. Preview shows all saved images.
+
+
+V146: stock_qty is authoritative for availability. Public/admin APIs expose quantity=stock_qty and derive available from quantity; product cards/detail show exact stock count; cart prevents adding beyond stock. Admin create/edit persists quantity into stock_qty.

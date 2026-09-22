@@ -1086,3 +1086,5 @@ html,body{max-width:100%;overflow-x:hidden}
 .review-submit{min-width:126px!important;padding:13px 20px!important;border-radius:13px!important;font-size:13px!important;font-weight:900;box-shadow:0 8px 28px rgba(89,255,125,.13)}
 .review-submit span{font-size:16px;margin-right:5px}
 @media(max-width:700px){.review-form-head{flex-direction:column}.review-help{max-width:none}.review-rating-row{flex-wrap:wrap}.review-rating-hint:before{display:none}.review-form-footer{align-items:flex-end}.review-form-footer>div{flex-direction:column-reverse;align-items:flex-end}.review-submit{min-width:112px!important}}
+
+.stock-mini{margin:6px 0 0;font-size:9px;font-weight:800}.stock-mini.in{color:#58f77b}.stock-mini.out{color:#ff6874}
