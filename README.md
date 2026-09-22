@@ -7,3 +7,5 @@ V153: fixed main navigation anchors. Navigation links now use controlled offset-
 V154: Special offers now show 5 cards per desktop slide; additional discounted products continue on horizontal slides with arrows and dots. Tablet/mobile use 2 cards per slide.
 
 V155: the main products section now paginates into a slider with 5 products per desktop slide and 2 on mobile, with arrows/dots; filters/sorting remain dynamic.
+
+V156: both product and special-offers sliders auto-advance every 3 seconds and loop.

@@ -108,6 +108,7 @@ function renderSpecialOffers(){
     dots.hidden=pages<=1;
   }
   updateSaleTimers();
+  restartSpecialOffersAutoSlide();
 }
 function getSpecialOffersPerPage(){
   if(window.innerWidth<=560)return 2;
@@ -236,7 +237,33 @@ function renderProducts(){
     </article>`
   }).join('');
   renderProductsSliderControls(totalPages);
+  restartProductsAutoSlide();
 }
+// V156: automatic 3-second slide rotation for both product sections.
+let productsAutoSlideTimer=null;
+let specialOffersAutoSlideTimer=null;
+function restartProductsAutoSlide(){
+  if(productsAutoSlideTimer) clearInterval(productsAutoSlideTimer);
+  productsAutoSlideTimer=setInterval(()=>{
+    const controls=document.querySelector('#productsSliderControls .products-slide-dots');
+    if(!controls)return;
+    const total=controls.querySelectorAll('button').length;
+    if(total<=1)return;
+    const current=state.productsPage||0;
+    setProductsPage(current>=total-1?0:current+1);
+  },3000);
+}
+function restartSpecialOffersAutoSlide(){
+  if(specialOffersAutoSlideTimer) clearInterval(specialOffersAutoSlideTimer);
+  specialOffersAutoSlideTimer=setInterval(()=>{
+    const dots=document.querySelectorAll('#specialOffers .offers-dots button');
+    if(dots.length<=1)return;
+    const active=[...dots].findIndex(d=>d.classList.contains('active'));
+    scrollSpecialOffers(active<0||active>=dots.length-1?0:active+1);
+  },3000);
+}
+function restartAllAutoSlides(){restartProductsAutoSlide();restartSpecialOffersAutoSlide();}
+
 function syncProductSearch(v){state.search=v;const h=$('searchInput');if(h&&h.value!==v)h.value=v;renderProducts()}
 function toggleAdvancedFilters(){$('advancedFilters').classList.toggle('hidden')}
 function setAdvancedFilter(key,value){state.filters[key]=value;renderProducts()}
@@ -427,6 +454,8 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
 
 loadProducts();loadMe();renderCart();updateFavoriteCount();updateCompareUI();
+restartAllAutoSlides();
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(productsAutoSlideTimer)clearInterval(productsAutoSlideTimer);if(specialOffersAutoSlideTimer)clearInterval(specialOffersAutoSlideTimer);productsAutoSlideTimer=null;specialOffersAutoSlideTimer=null;}else restartAllAutoSlides();});
 (()=>{const q=new URLSearchParams(location.search),err=q.get('auth_error');if(err){openAuth('login');$('authError').textContent=err;history.replaceState({},'',location.pathname)}})();
 
 // V31: robust product-card click handling
