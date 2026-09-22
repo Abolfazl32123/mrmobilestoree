@@ -1,4 +1,4 @@
-const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},coupon:{code:'',discount:0},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest'};
+const state={products:[],category:'همه',search:'',cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},coupon:{code:'',discount:0},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest',productsPage:0};
 
 const $=id=>document.getElementById(id);
 function numeric(v){
@@ -171,6 +171,23 @@ function toggleCompareProduct(id){
     b.textContent=isCompared(id)?'✓ مقایسه شد':'مقایسه';
   });
 }
+function getProductsPerPage(){
+  return window.innerWidth<=700?2:5;
+}
+function setProductsPage(page){
+  state.productsPage=Math.max(0,Number(page)||0);
+  renderProducts();
+  const grid=$('productsGrid');
+  if(grid)grid.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderProductsSliderControls(totalPages){
+  const box=$('productsSliderControls');
+  if(!box)return;
+  if(totalPages<=1){box.hidden=true;box.innerHTML='';return}
+  const current=Math.min(state.productsPage,totalPages-1);
+  box.hidden=false;
+  box.innerHTML=`<button type="button" class="products-slide-btn" aria-label="محصولات قبلی" ${current<=0?'disabled':''} onclick="setProductsPage(${current-1})">‹</button><div class="products-slide-dots">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="${i===current?'active':''}" aria-label="اسلاید ${i+1}" onclick="setProductsPage(${i})"></button>`).join('')}</div><button type="button" class="products-slide-btn" aria-label="محصولات بعدی" ${current>=totalPages-1?'disabled':''} onclick="setProductsPage(${current+1})">›</button>`;
+}
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
   let list=state.products.filter(p=>{
@@ -192,8 +209,21 @@ function renderProducts(){
   else list.sort((a,b)=>Number(b.id)-Number(a.id));
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
   updateFilterCount();
-  if(!list.length){$('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>محصولی برای نمایش پیدا نشد</strong><span>محصولات واقعی فروشگاه از پنل مدیریت این بخش نمایش داده می‌شوند.</span></div>';return}
-  $('productsGrid').innerHTML=list.map(p=>{
+  if(!list.length){
+    $('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>محصولی برای نمایش پیدا نشد</strong><span>محصولات واقعی فروشگاه از پنل مدیریت این بخش نمایش داده می‌شوند.</span></div>';
+    renderProductsSliderControls(0);
+    return;
+  }
+  const perPage=getProductsPerPage();
+  const totalPages=Math.max(1,Math.ceil(list.length/perPage));
+  if(state.productsPage>=totalPages)state.productsPage=0;
+  const startIndex=state.productsPage*perPage;
+  const pageItems=list.slice(startIndex,startIndex+perPage);
+  const grid=$('productsGrid');
+  grid.classList.remove('products-page-enter');
+  void grid.offsetWidth;
+  grid.classList.add('products-page-enter');
+  grid.innerHTML=pageItems.map(p=>{
     const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price; const remain=saleRemaining(p); const stockQty=Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0); const inStock=stockQty>0;
     return `<article class="product-card ${inStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
@@ -203,7 +233,9 @@ function renderProducts(){
       <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
       <div class="product-bottom"><div class="price">${toman(effective)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div><div class="stock-mini ${inStock?'in':'out'}">${inStock?`● موجود · ${stockQty.toLocaleString('fa-IR')} عدد`:'● ناموجود'}</div><button class="add-btn" aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" ${inStock?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${inStock?'🛒':'×'}</button></div>${remain?`<div class="sale-countdown" data-sale-end="${Date.now()+remain}">${formatCountdown(remain)}</div>`:''}
       <button class="compare-btn ${isCompared(p.id)?'active':''}" data-compare-id="${p.id}" onclick="event.stopPropagation();toggleCompare(${p.id})">${isCompared(p.id)?'✓ حذف از مقایسه':'⚖ مقایسه'}</button>
-    </article>`}).join('');
+    </article>`
+  }).join('');
+  renderProductsSliderControls(totalPages);
 }
 function syncProductSearch(v){state.search=v;const h=$('searchInput');if(h&&h.value!==v)h.value=v;renderProducts()}
 function toggleAdvancedFilters(){$('advancedFilters').classList.toggle('hidden')}
