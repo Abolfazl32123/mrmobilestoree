@@ -578,3 +578,69 @@ async function copyReferralCode(code){if(!code||code==='—')return;try{await na
     });
   });
 })();
+
+
+/* V159: mobile-only carousel paging fix */
+(function(){
+  if (window.__mrV159MobileSliderFix) return;
+  window.__mrV159MobileSliderFix = true;
+
+  function init(){
+    if (window.innerWidth > 560) return;
+
+    const roots = [
+      '.products-slider','.products-carousel','.special-offers-slider','.offers-slider',
+      '[data-products-slider]','[data-special-offers-slider]'
+    ];
+
+    roots.forEach(sel=>{
+      document.querySelectorAll(sel).forEach(root=>{
+        if(root.dataset.v159Ready) return;
+        const track = root.querySelector(
+          '.products-slider-track,.products-carousel-track,.special-offers-track,.offers-slider-track,'+
+          '[data-slider-track],.slider-track'
+        );
+        if(!track) return;
+
+        const cards=[...track.children].filter(el=>el.nodeType===1);
+        if(cards.length<=2) return;
+
+        root.dataset.v159Ready='1';
+        let page=0;
+        const pages=Math.ceil(cards.length/2);
+
+        function go(p, smooth=true){
+          page=(p+pages)%pages;
+          const first=cards[Math.min(page*2,cards.length-1)];
+          if(!first) return;
+          const left=first.offsetLeft;
+          track.style.transition=smooth?'transform .45s ease':'none';
+          track.style.transform=`translate3d(${-left}px,0,0)`;
+
+          const dots=root.querySelectorAll('[data-slide-dot],.slide-dot,.carousel-dot');
+          dots.forEach((d,i)=>d.classList.toggle('active',i===page));
+        }
+
+        root.querySelectorAll('[data-next],.slider-next,.carousel-next').forEach(b=>{
+          b.addEventListener('click',e=>{e.preventDefault();go(page+1);});
+        });
+        root.querySelectorAll('[data-prev],.slider-prev,.carousel-prev').forEach(b=>{
+          b.addEventListener('click',e=>{e.preventDefault();go(page-1);});
+        });
+
+        // Hide overflow at the viewport level and ensure initial page is exact.
+        requestAnimationFrame(()=>go(0,false));
+
+        // Keep page position correct after resize, without affecting desktop.
+        let t;
+        window.addEventListener('resize',()=>{
+          clearTimeout(t);
+          t=setTimeout(()=>{ if(window.innerWidth<=560) go(page,false); },120);
+        });
+      });
+    });
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();

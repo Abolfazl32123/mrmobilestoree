@@ -75,3 +75,45 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover,.sidebar
 @media(max-width:800px){.spec-fields{grid-column:auto}.spec-fields-grid{grid-template-columns:1fr}}
 
 #quantity{direction:ltr;text-align:center}
+
+/* V159 mobile slider fix: only mobile */
+@media (max-width: 560px){
+  .products-slider-viewport,
+  .products-carousel-viewport,
+  .special-offers-viewport,
+  .offers-slider-viewport{
+    width:100%!important;
+    overflow:hidden!important;
+    min-width:0!important;
+  }
+  .products-slider-track,
+  .products-carousel-track,
+  .special-offers-track,
+  .offers-slider-track{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    width:max-content!important;
+    min-width:100%!important;
+    transform:translate3d(0,0,0);
+    transition:transform .45s ease;
+    will-change:transform;
+  }
+  .products-slider-track > *,
+  .products-carousel-track > *,
+  .special-offers-track > *,
+  .offers-slider-track > *{
+    flex:0 0 calc(50vw - 22px)!important;
+    width:calc(50vw - 22px)!important;
+    max-width:calc(50vw - 22px)!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  .products-slider,
+  .products-carousel,
+  .special-offers-slider,
+  .offers-slider{
+    overflow:hidden!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+}
