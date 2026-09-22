@@ -487,3 +487,25 @@ async function renderLoyaltyClub(){
 }
 async function copyReferralCode(code){if(!code||code==='—')return;try{await navigator.clipboard.writeText(code);toast('کد دعوت کپی شد ✓')}catch{toast('کپی خودکار در این مرورگر در دسترس نیست')}}
 
+
+// V153: controlled main navigation. Use an offset-aware scroll so sticky navigation
+// never leaves a section hidden underneath the bar or appears to break the page.
+(function(){
+  const nav=document.getElementById('mainNav');
+  if(!nav)return;
+  nav.querySelectorAll('a.nav-scroll').forEach(link=>{
+    link.addEventListener('click', function(e){
+      const href=this.getAttribute('href')||'';
+      if(!href.startsWith('#'))return;
+      const target=document.querySelector(href);
+      if(!target)return;
+      e.preventDefault();
+      document.querySelectorAll('#mainNav a.nav-scroll').forEach(a=>a.classList.remove('active'));
+      this.classList.add('active');
+      const navH=nav.getBoundingClientRect().height||0;
+      const y=target.getBoundingClientRect().top + window.pageYOffset - navH - 12;
+      window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+      history.replaceState(null,'',href);
+    });
+  });
+})();

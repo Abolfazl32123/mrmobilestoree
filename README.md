@@ -1,8 +1,5 @@
-V150
-- Redesigned timed Special Offers section to a polished 4-card carousel matching the approved mockup.
-- Kept product data, discounts, countdown logic, and dynamic admin-controlled content intact.
-- Added favorite button, arrows, pagination dots, responsive layout, and stable card dimensions.
-- Hardened admin product save flow so validation/API/date errors are shown in the form instead of making the save button appear unresponsive.
-- Preserved existing gallery, stock, Jalali sale dates, and product editing behavior.
+Mr Mobile V152
 
-V151: restored floating support button positioning lost in V150; no other support behavior changed.
+Fix: About Us (#about) section now renders as a stable full-width premium card so clicking the About link no longer leaves a large broken-looking empty area. No product, admin, inventory, sale, login, or support logic changed.
+
+V153: fixed main navigation anchors. Navigation links now use controlled offset-aware smooth scrolling, sticky-nav safe spacing, and active-state synchronization. No product/admin logic changed.

@@ -1130,3 +1130,48 @@ html,body{max-width:100%;overflow-x:hidden}
 .offer-price{min-height:24px}
 .offer-body>.sale-countdown{margin-top:auto}
 @media(max-width:560px){.offer-img{flex-basis:125px}.offer-body{min-height:118px}.product-card>.sale-countdown{font-size:8px;height:26px;min-height:26px;padding:4px 6px}}
+
+/* V152: stable full-width About section — prevents the #about anchor from looking like a broken/empty page */
+.about-premium{
+  position:relative;
+  width:100%;
+  box-sizing:border-box;
+  min-height:240px;
+  margin-top:8px;
+  padding:54px 42px 58px;
+  text-align:center;
+  overflow:hidden;
+  border:1px solid #1f3031;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(97,255,34,.09),transparent 42%),
+    linear-gradient(135deg,rgba(13,24,23,.96),rgba(7,13,14,.98));
+}
+.about-premium:before,
+.about-premium:after{
+  content:"";
+  position:absolute;
+  border:1px solid rgba(97,255,34,.12);
+  border-radius:50%;
+  pointer-events:none;
+}
+.about-premium:before{width:260px;height:260px;left:-150px;bottom:-170px}
+.about-premium:after{width:220px;height:220px;right:-130px;top:-150px}
+.about-premium h2,
+.about-premium p,
+.about-premium-line{position:relative;z-index:1}
+.about-premium h2{margin:0;font-size:31px;font-weight:900;letter-spacing:-.5px}
+.about-premium p{width:min(760px,100%);max-width:none;margin:14px auto 0;color:#82908d;font-size:12px;line-height:2.2}
+.about-premium-line{position:absolute;right:50%;bottom:25px;transform:translateX(50%);width:min(360px,55%);height:1px;background:linear-gradient(90deg,transparent,rgba(97,255,34,.55),transparent)}
+@media(max-width:600px){
+  .about-premium{min-height:200px;padding:44px 20px 48px;border-radius:20px}
+  .about-premium h2{font-size:24px}
+  .about-premium p{font-size:10px;line-height:2}
+  .about-premium-line{width:55%}
+}
+
+/* V153: stable navigation scrolling — never leaves the user on a blank/offset section */
+html{scroll-behavior:auto}
+#home,#specialOffers,#categories,#products,#brands,#about,#contact{scroll-margin-top:88px}
+.nav-bar{z-index:100}
+@media(max-width:700px){#home,#specialOffers,#categories,#products,#brands,#about,#contact{scroll-margin-top:74px}}
