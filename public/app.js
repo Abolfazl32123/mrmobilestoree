@@ -81,7 +81,7 @@ function renderSpecialOffers(){
   const items=state.products.filter(p=>getEffectivePrice(p)<numeric(p.price)&&saleRemaining(p)>0);
   if(!items.length){wrap.hidden=true;return}
   wrap.hidden=false;
-  const visible=items.slice(0,8);
+  const visible=items;
   grid.innerHTML=visible.map((p,i)=>{
     const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p);
     const pct=Math.max(1,Math.round((1-effective/price)*100));
@@ -100,13 +100,19 @@ function renderSpecialOffers(){
   }).join('');
   const nav=wrap.querySelector('.offers-nav');
   const dots=wrap.querySelector('.offers-dots');
-  if(nav)nav.hidden=visible.length<=4;
+  const perPage=getSpecialOffersPerPage();
+  const pages=Math.max(1,Math.ceil(visible.length/perPage));
+  if(nav)nav.hidden=visible.length<=perPage;
   if(dots){
-    const pages=Math.max(1,Math.ceil(visible.length/4));
     dots.innerHTML=Array.from({length:pages},(_,i)=>`<button type="button" class="${i===0?'active':''}" aria-label="صفحه ${i+1}" onclick="event.stopPropagation();scrollSpecialOffers(${i})"></button>`).join('');
     dots.hidden=pages<=1;
   }
   updateSaleTimers();
+}
+function getSpecialOffersPerPage(){
+  if(window.innerWidth<=560)return 2;
+  if(window.innerWidth<=1000)return 2;
+  return 5;
 }
 function scrollSpecialOffers(page){
   const grid=$('specialOffersGrid');if(!grid)return;
@@ -117,8 +123,12 @@ function scrollSpecialOffers(page){
 }
 function moveSpecialOffers(dir){
   const grid=$('specialOffersGrid');if(!grid)return;
-  const amount=Math.max(280,Math.round(grid.clientWidth*.9));
-  grid.scrollBy({left:dir*amount,behavior:'smooth'});
+  const width=grid.clientWidth;
+  const max=Math.max(0,grid.scrollWidth-width);
+  const target=Math.min(max,Math.max(0,grid.scrollLeft+dir*width));
+  grid.scrollTo({left:target,behavior:'smooth'});
+  const page=Math.round(target/Math.max(1,width));
+  document.querySelectorAll('.offers-dots button').forEach((d,i)=>d.classList.toggle('active',i===page));
 }
 
 async function loadHomepageBanners(){try{const r=await fetch('/api/homepage-banners',{cache:'no-store'});if(!r.ok)return;const list=await r.json();const b=list[0];if(!b)return;if($('heroTitle'))$('heroTitle').textContent=b.title||'فراتر از یک موبایل‌فروشی.';if($('heroSubtitle'))$('heroSubtitle').textContent=b.subtitle||'تکنولوژی برای سبک زندگی تو.';if($('heroButton')){$('heroButton').textContent=b.button_text||'مشاهده محصولات';$('heroButton').href=b.button_link||'#products'}}catch(e){}}
