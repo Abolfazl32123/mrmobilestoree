@@ -178,8 +178,6 @@ function getProductsPerPage(){
 function setProductsPage(page){
   state.productsPage=Math.max(0,Number(page)||0);
   renderProducts();
-  const grid=$('productsGrid');
-  if(grid)grid.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function renderProductsSliderControls(totalPages){
   const box=$('productsSliderControls');

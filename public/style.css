@@ -1191,3 +1191,29 @@ html{scroll-behavior:auto}
 @keyframes productsPageIn{from{opacity:.25;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:1100px){.products-slider-controls{grid-column:1;grid-row:3}}
 @media(max-width:700px){.products-slider-controls{gap:12px;padding-top:8px}.products-slide-btn{width:38px;height:38px;font-size:23px}.products-slide-dots button{width:8px;height:8px}.products-slide-dots button.active{width:20px}}
+
+
+/* ===== V157: mobile slider stability + sizing ===== */
+@media(max-width:700px){
+  #products.section{overflow:hidden}
+  .featured-products-layout{width:100%;min-width:0;overflow:hidden}
+  .featured-products-layout>.products-grid{width:100%;min-width:0;overflow:hidden;gap:8px!important}
+  .featured-products-layout>.products-grid .product-card{min-width:0;width:100%;box-sizing:border-box;border-radius:16px;overflow:hidden}
+  .featured-products-layout>.products-grid .product-image{height:145px!important;min-height:145px;max-height:145px;border-radius:12px;margin:7px 7px 0;width:calc(100% - 14px)}
+  .featured-products-layout>.products-grid .product-card .product-name{font-size:10px;line-height:1.65;min-height:34px;margin:7px 8px 3px}
+  .featured-products-layout>.products-grid .product-card .price{font-size:12px}
+  .featured-products-layout>.products-grid .product-card .card-bottom{padding:6px 8px 9px;gap:5px}
+  .featured-products-layout>.products-grid .product-card .cart-btn{width:34px;height:34px;min-width:34px;border-radius:10px}
+  .featured-products-layout>.products-grid .product-card .stock-mini{font-size:8px}
+  .featured-products-layout>.products-grid .product-card .sale-countdown{font-size:7px;min-height:24px;height:24px;padding:3px 5px;margin:4px 7px 7px}
+  .products-slider-controls{width:100%;box-sizing:border-box;overflow:hidden;padding:9px 0 2px;gap:10px}
+  .products-slide-btn{flex:0 0 36px;width:36px;height:36px}
+}
+@media(max-width:430px){
+  .featured-products-layout>.products-grid{gap:7px!important}
+  .featured-products-layout>.products-grid .product-image{height:130px!important;min-height:130px;max-height:130px}
+  .featured-products-layout>.products-grid .product-card .product-name{font-size:9px;line-height:1.55}
+  .featured-products-layout>.products-grid .product-card .price{font-size:11px}
+  .featured-products-layout>.products-grid .product-card .cart-btn{width:32px;height:32px;min-width:32px}
+  .products-slide-btn{width:34px;height:34px;flex-basis:34px;font-size:20px}
+}
