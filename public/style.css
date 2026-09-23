@@ -1342,21 +1342,3 @@ html{scroll-behavior:auto}
     min-width:0!important;
   }
 }
-
-/* V163: customer overlays must sit ABOVE the sticky navigation.
-   Keep the navigation behavior unchanged; only fix stacking/layer order. */
-.nav-bar{
-  z-index:100!important;
-}
-.backdrop{
-  z-index:9000!important;
-}
-.drawer{
-  z-index:9010!important;
-}
-.modal{
-  z-index:9990!important;
-}
-.auth-modal{
-  z-index:99999!important;
-}

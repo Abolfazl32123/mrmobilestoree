@@ -264,6 +264,7 @@ export default {async fetch(request,env){
       await env.DB.prepare('INSERT INTO payments(order_id,user_id,amount,tracking_code,receipt_data,status) VALUES(?,?,?,?,?,?)').bind(id,uid,order.total,tracking,receipt,'در انتظار بررسی').run();
       await env.DB.prepare("UPDATE orders SET status='در انتظار بررسی' WHERE id=? AND status NOT IN ('تکمیل شده','در حال ارسال')").bind(id).run();
       const customer=await env.DB.prepare('SELECT name FROM users WHERE id=?').bind(uid).first();
+      await addAdminNotification(env,'order','سفارش جدید',`رسید سفارش #${id} از ${customer?.name||'مشتری'} ارسال شد — سفارش برای بررسی مدیریت آماده است.`,`/admin/?section=orders`);
       await addAdminNotification(env,'payment','رسید پرداخت جدید',`رسید سفارش #${id} از ${customer?.name||'مشتری'} ارسال شد.`,`/admin/?section=payments`);
       return json({ok:true,status:'در انتظار بررسی'});
     }
@@ -275,10 +276,8 @@ export default {async fetch(request,env){
       const a=await env.DB.prepare('SELECT first_name,last_name,phone,province,city,address,postal_code FROM customer_addresses WHERE user_id=?').bind(uid).first();
       if(!a)return json({error:'آدرس ارسال را وارد کنید.',code:'ADDRESS_REQUIRED'},400);
       const cr=await getCoupon(env,b.coupon_code,subtotal);if(cr.error)return json({error:cr.error},400);const discount=cr.discount||0,total=subtotal-discount;
-      const r=await env.DB.prepare('INSERT INTO orders(user_id,total) VALUES(?,?)').bind(uid,total).run();const oid=r.meta.last_row_id;
+      const r=await env.DB.prepare("INSERT INTO orders(user_id,total,status) VALUES(?,?,?)").bind(uid,total,'در انتظار پرداخت').run();const oid=r.meta.last_row_id;
       if(cr.coupon)await env.DB.prepare('UPDATE discount_coupons SET used_count=used_count+1 WHERE id=?').bind(cr.coupon.id).run();
-      const customer=await env.DB.prepare('SELECT name FROM users WHERE id=?').bind(uid).first();
-      await addAdminNotification(env,'order','سفارش جدید',`سفارش #${oid} توسط ${customer?.name||'مشتری'} ثبت شد — ${total.toLocaleString('fa-IR')} تومان.`,`/admin/?section=orders`);
       const stmts=[...clean.map(x=>env.DB.prepare('INSERT INTO order_items(order_id,product_id,quantity,price) VALUES(?,?,?,?)').bind(oid,x.id,x.q,x.price)),env.DB.prepare('INSERT INTO order_addresses(order_id,user_id,first_name,last_name,phone,province,city,address,postal_code) VALUES(?,?,?,?,?,?,?,?,?)').bind(oid,uid,a.first_name,a.last_name,a.phone,a.province,a.city,a.address,a.postal_code)];
       await env.DB.batch(stmts);await env.DB.batch(clean.map(x=>env.DB.prepare("UPDATE products SET stock_qty=MAX(0,stock_qty-?),available=CASE WHEN MAX(0,stock_qty-?)>0 THEN 1 ELSE 0 END WHERE id=?").bind(x.q,x.q,x.id)));return json({ok:true,order_id:oid,total,subtotal,discount,coupon:cr.coupon?.code||''})
     }
@@ -386,7 +385,7 @@ export default {async fetch(request,env){
     }
     if(path==='/api/admin/orders'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);
-      const rows=(await env.DB.prepare(`SELECT o.id,o.total,o.status,o.created_at,u.name AS customer_name,u.phone,(SELECT p.status FROM payments p WHERE p.order_id=o.id ORDER BY p.id DESC LIMIT 1) AS payment_status,s.carrier,s.tracking_code,s.status AS shipping_status,s.shipped_at,s.delivered_at FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN shipments s ON s.order_id=o.id ORDER BY o.id DESC`).all()).results;
+      const rows=(await env.DB.prepare(`SELECT o.id,o.total,o.status,o.created_at,u.name AS customer_name,u.phone,(SELECT p.status FROM payments p WHERE p.order_id=o.id ORDER BY p.id DESC LIMIT 1) AS payment_status,s.carrier,s.tracking_code,s.status AS shipping_status,s.shipped_at,s.delivered_at FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN shipments s ON s.order_id=o.id WHERE EXISTS (SELECT 1 FROM payments p2 WHERE p2.order_id=o.id) ORDER BY o.id DESC`).all()).results;
       for(const o of rows){const items=(await env.DB.prepare(`SELECT oi.product_id,oi.quantity,oi.price,COALESCE(p.name,'محصول حذف‌شده') AS name FROM order_items oi LEFT JOIN products p ON p.id=oi.product_id WHERE oi.order_id=?`).bind(o.id).all()).results;o.items=items;o.items_text=items.map(i=>`${i.name} ×${i.quantity}`).join('، ')}
       return json(rows);
     }
