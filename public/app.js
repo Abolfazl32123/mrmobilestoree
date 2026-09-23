@@ -1,3 +1,13 @@
+
+function orderHasReceipt(o){
+  return !!(o && (
+    o.receipt || o.receiptUrl || o.receipt_url ||
+    o.paymentReceipt || o.payment_receipt ||
+    o.receiptImage || o.receipt_image ||
+    o.trackingCode || o.tracking_code
+  ));
+}
+
 const state={products:[],category:'همه',search:'',specialOffersPage:0,cart:JSON.parse(localStorage.getItem('mr_cart')||'[]'),compare:JSON.parse(localStorage.getItem('mr_compare')||'[]'),favorites:JSON.parse(localStorage.getItem('mr_favorites')||'[]'),authMode:'login',user:null,payment:{orderId:null,amount:0,receiptData:''},coupon:{code:'',discount:0},pendingOrderItems:null,filters:{category:'همه',brand:'همه',condition:'همه',storage:'همه',availability:'همه',minPrice:'',maxPrice:''},sort:'newest',productsPage:0};
 
 const $=id=>document.getElementById(id);

@@ -1342,3 +1342,10 @@ html{scroll-behavior:auto}
     min-width:0!important;
   }
 }
+
+/* V165: drawers/modals must render above the navigation */
+.nav-bar{z-index:100!important}
+.backdrop{z-index:9000!important}
+.drawer{z-index:9100!important}
+.modal{z-index:9900!important}
+.auth-modal{z-index:9999!important}
