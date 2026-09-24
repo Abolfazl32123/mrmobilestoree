@@ -437,7 +437,7 @@ async function openPayment(orderId,amount){
   if(!state.user)return openAuth('login');
   state.payment={orderId,amount:Number(amount)||0,receiptData:''};
   $('paymentOrderId').textContent='#'+fa(orderId);$('paymentAmount').textContent=toman(amount);$('paymentTracking').value='';$('receiptName').textContent='هنوز فایلی انتخاب نشده';$('receiptPreview').hidden=true;$('receiptPreview').src='';$('paymentError').textContent='';$('sendPaymentBtn').disabled=false;
-  try{const st=await fetch('/api/payment-settings').then(r=>r.json());$('paymentBank').textContent=st.bank_name||'کارت فروشگاه';$('paymentCard').textContent=st.card_number||'شماره کارت هنوز تنظیم نشده';$('paymentHolder').textContent=st.card_holder?'به نام '+st.card_holder:'';$('paymentInstructions').textContent=st.instructions||'پس از کارت‌به‌کارت، شماره پیگیری و تصویر رسید را ارسال کنید.';const online=!!st.gateway_enabled&&!!st.gateway_provider;$('onlinePayBtn').hidden=!online;$('onlinePayBtn').textContent=online?('💳 پرداخت آنلاین با '+(st.gateway_provider==='zarinpal'?'زرین‌پال':st.gateway_provider==='zibal'?'زیبال':'درگاه آنلاین')):'💳 پرداخت آنلاین'}catch(e){$('paymentError').textContent='دریافت اطلاعات کارت انجام نشد.'}
+  try{const st=await fetch('/api/payment-settings').then(r=>r.json());$('paymentBank').textContent=st.bank_name||'کارت فروشگاه';$('paymentCard').textContent=st.card_number||'شماره کارت هنوز تنظیم نشده';$('paymentHolder').textContent=st.card_holder?'به نام '+st.card_holder:'';$('paymentInstructions').textContent=st.instructions||'پس از کارت‌به‌کارت، شماره پیگیری و تصویر رسید را ارسال کنید.';const online=!!st.gateway_enabled&&!!st.gateway_provider;$('onlinePayBtn').disabled=!online;$('onlinePayBtn').textContent=online?('💳 پرداخت آنلاین با '+(st.gateway_provider==='zarinpal'?'زرین‌پال':st.gateway_provider==='zibal'?'زیبال':'درگاه آنلاین')):'💳 پرداخت آنلاین';$('onlinePayBtn').querySelector('small').textContent=online?'ورود به درگاه امن':'هنوز تنظیم نشده'}catch(e){$('paymentError').textContent='دریافت اطلاعات کارت انجام نشد.'}
   $('paymentModal').classList.add('show');
 }
 async function startOnlinePayment(){const btn=$('onlinePayBtn');btn.disabled=true;btn.textContent='در حال انتقال به درگاه...';$('paymentError').textContent='';try{const r=await fetch('/api/gateway/create',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({order_id:state.payment.orderId})});const d=await r.json();if(!r.ok)throw Error(d.error||'شروع پرداخت آنلاین ناموفق بود.');if(!d.url)throw Error('آدرس درگاه دریافت نشد.');location.href=d.url}catch(e){$('paymentError').textContent=e.message;btn.disabled=false;btn.textContent='💳 پرداخت آنلاین'}}
@@ -591,3 +591,19 @@ async function copyReferralCode(code){if(!code||code==='—')return;try{await na
 })();
 
 
+
+async function cancelCurrentPayment(){
+  if(!state.payment?.orderId)return closePayment();
+  if(!confirm('آیا مطمئن هستید که می‌خواهید پرداخت و سفارش فعلی را لغو کنید؟'))return;
+  const id=Number(state.payment.orderId);
+  try{
+    const r=await fetch('/api/orders/'+id+'/cancel',{method:'POST'});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw Error(d.error||'لغو سفارش انجام نشد.');
+    closePayment();
+    if(typeof renderCart==='function')renderCart();
+    toast('پرداخت و سفارش لغو شد ✓');
+  }catch(e){
+    $('paymentError').textContent=e.message||'لغو سفارش انجام نشد.';
+  }
+}

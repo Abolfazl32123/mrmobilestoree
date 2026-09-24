@@ -282,6 +282,21 @@ export default {async fetch(request,env){
       await env.DB.batch(stmts);await env.DB.batch(clean.map(x=>env.DB.prepare("UPDATE products SET stock_qty=MAX(0,stock_qty-?),available=CASE WHEN MAX(0,stock_qty-?)>0 THEN 1 ELSE 0 END WHERE id=?").bind(x.q,x.q,x.id)));return json({ok:true,order_id:oid,total,subtotal,discount,coupon:cr.coupon?.code||''})
     }
 
+    if(path.startsWith('/api/orders/')&&path.endsWith('/cancel')&&request.method==='POST'){
+      await ensureCustomerTables(env);
+      const uid=await userFromReq(request,env);
+      if(!uid)return json({error:'ابتدا وارد حساب شوید.'},401);
+      const id=Number(path.split('/')[3]);
+      const order=await env.DB.prepare("SELECT id,status FROM orders WHERE id=? AND user_id=?").bind(id,uid).first();
+      if(!order)return json({error:'سفارش پیدا نشد.'},404);
+      if(['در حال ارسال','تکمیل شده'].includes(order.status))return json({error:'این سفارش دیگر قابل لغو نیست.'},400);
+      const items=(await env.DB.prepare('SELECT product_id,quantity FROM order_items WHERE order_id=?').bind(id).all()).results||[];
+      for(const it of items){
+        await env.DB.prepare("UPDATE products SET stock_qty=COALESCE(stock_qty,0)+?,available=1 WHERE id=?").bind(Number(it.quantity)||0,Number(it.product_id)).run();
+      }
+      await env.DB.prepare("UPDATE orders SET status='لغو شده' WHERE id=? AND user_id=?").bind(id,uid).run();
+      return json({ok:true});
+    }
     if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true,token},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
     if(path==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_admin','',0)})
     if(path==='/api/admin/reviews'&&request.method==='GET'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const rows=(await env.DB.prepare(`SELECT r.id,r.product_id,r.user_id,r.rating,r.comment,r.status,r.created_at,p.name AS product_name,u.name AS customer_name,u.phone FROM product_reviews r LEFT JOIN products p ON p.id=r.product_id LEFT JOIN users u ON u.id=r.user_id ORDER BY r.id DESC`).all()).results;return json(rows)}

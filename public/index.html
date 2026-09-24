@@ -357,9 +357,23 @@
       <small id="receiptName">هنوز فایلی انتخاب نشده</small>
       <img id="receiptPreview" class="receipt-preview" hidden alt="پیش‌نمایش رسید">
     </div>
-    <button id="onlinePayBtn" class="btn primary full" onclick="startOnlinePayment()" hidden>💳 پرداخت آنلاین</button>
-    <button id="sendPaymentBtn" class="btn primary full" onclick="submitPaymentReceipt()">ارسال رسید برای بررسی</button>
-    <button class="btn ghost full" onclick="closePayment()">بعداً ارسال می‌کنم</button>
+    <div class="payment-actions payment-actions-three">
+      <button id="onlinePayBtn" type="button" class="payment-action payment-online" onclick="startOnlinePayment()" disabled>
+        <span class="payment-action-icon">💳</span>
+        <strong>پرداخت آنلاین</strong>
+        <small>هنوز تنظیم نشده</small>
+      </button>
+      <button id="sendPaymentBtn" type="button" class="payment-action payment-receipt" onclick="submitPaymentReceipt()">
+        <span class="payment-action-icon">🧾</span>
+        <strong>ارسال رسید برای بررسی</strong>
+        <small>بعد از ارسال، سفارش ثبت می‌شود</small>
+      </button>
+      <button type="button" class="payment-action payment-cancel" onclick="cancelCurrentPayment()">
+        <span class="payment-action-icon">✕</span>
+        <strong>لغو پرداخت</strong>
+        <small>لغو کامل سفارش</small>
+      </button>
+    </div>
     <div id="paymentError" class="form-error"></div>
   </div>
 </div>
