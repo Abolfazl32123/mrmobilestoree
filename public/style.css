@@ -1349,3 +1349,8 @@ html{scroll-behavior:auto}
 .drawer{z-index:9100!important}
 .modal{z-index:9900!important}
 .auth-modal{z-index:9999!important}
+
+/* V166: discount badge for regular product cards only */
+.product-card .product-image{position:relative!important;}
+.product-card .product-discount-badge{position:absolute!important;left:10px!important;bottom:10px!important;width:42px!important;height:42px!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#ff3b55!important;color:#fff!important;font-size:11px!important;font-weight:900!important;line-height:1!important;z-index:5!important;pointer-events:none!important;direction:rtl!important;box-shadow:0 5px 14px rgba(255,59,85,.28)!important;}
+@media(max-width:700px){.product-card .product-discount-badge{width:34px!important;height:34px!important;left:7px!important;bottom:7px!important;font-size:9px!important;}}

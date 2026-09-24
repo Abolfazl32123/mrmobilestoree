@@ -238,7 +238,7 @@ function renderProducts(){
     return `<article class="product-card ${inStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
       <button class="wish ${isFavorite(p.id)?'active':''}" data-favorite-id="${p.id}" aria-pressed="${isFavorite(p.id)?'true':'false'}" title="${isFavorite(p.id)?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'}" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button>
-      <div class="product-image"><img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
+      <div class="product-image">${hasDiscount?`<span class="product-discount-badge">${Math.max(1,Math.round((1-effective/price)*100))}٪</span>`:''}<img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
       <div class="product-bottom"><div class="price">${toman(effective)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div><div class="stock-mini ${inStock?'in':'out'}">${inStock?`● موجود · ${stockQty.toLocaleString('fa-IR')} عدد`:'● ناموجود'}</div><button class="add-btn" aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" ${inStock?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${inStock?'🛒':'×'}</button></div>${remain?`<div class="sale-countdown" data-sale-end="${Date.now()+remain}">${formatCountdown(remain)}</div>`:''}
