@@ -220,7 +220,7 @@ function renderProducts(){
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
   updateFilterCount();
   if(!list.length){
-    $('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>محصولی برای نمایش پیدا نشد</strong><span>محصولات واقعی فروشگاه از پنل مدیریت این بخش نمایش داده می‌شوند.</span></div>';
+    $('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>هنوز محصولی برای نمایش وجود ندارد</strong><span>محصولات جدید به‌زودی در فروشگاه قرار می‌گیرند. منتظر پیشنهادهای جذاب آقای موبایل باشید!</span></div>';
     renderProductsSliderControls(0);
     return;
   }
