@@ -1415,8 +1415,8 @@ html{scroll-behavior:auto}
 
 /* V169: wider, cleaner payment modal with compact responsive layout */
 .payment-card{
-  width:min(720px,calc(100vw - 28px))!important;
-  max-width:720px!important;
+  width:min(644px,calc(100vw - 28px))!important;
+  max-width:644px!important;
   max-height:calc(100vh - 28px)!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
