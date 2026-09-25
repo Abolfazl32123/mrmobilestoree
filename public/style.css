@@ -1355,15 +1355,19 @@ html{scroll-behavior:auto}
 .product-card .product-discount-badge{position:absolute!important;left:10px!important;bottom:10px!important;width:42px!important;height:42px!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#ff3b55!important;color:#fff!important;font-size:11px!important;font-weight:900!important;line-height:1!important;z-index:5!important;pointer-events:none!important;direction:rtl!important;box-shadow:0 5px 14px rgba(255,59,85,.28)!important;}
 @media(max-width:700px){.product-card .product-discount-badge{width:34px!important;height:34px!important;left:7px!important;bottom:7px!important;font-size:9px!important;}}
 
-/* V167: payment area - three equal actions */
+/* V168: payment actions - vertical, equal-size cards on all screens */
 .payment-actions-three{
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  display:flex!important;
+  flex-direction:column!important;
   gap:10px!important;
   margin-top:14px!important;
+  width:100%!important;
 }
 .payment-actions-three .payment-action{
+  width:100%!important;
   min-height:88px!important;
+  height:88px!important;
+  box-sizing:border-box!important;
   border:1px solid var(--line,#263b3e)!important;
   border-radius:16px!important;
   background:rgba(8,18,20,.9)!important;
@@ -1373,7 +1377,7 @@ html{scroll-behavior:auto}
   align-items:center!important;
   justify-content:center!important;
   gap:5px!important;
-  padding:10px 8px!important;
+  padding:10px 12px!important;
   font-weight:800!important;
   cursor:pointer!important;
 }
@@ -1382,7 +1386,7 @@ html{scroll-behavior:auto}
   opacity:.62!important;
   font-weight:500!important;
 }
-.payment-actions-three .payment-action-icon{font-size:19px!important}
+.payment-actions-three .payment-action-icon{font-size:19px!important;line-height:1!important}
 .payment-actions-three .payment-online{
   opacity:.62!important;
   cursor:not-allowed!important;
@@ -1394,20 +1398,16 @@ html{scroll-behavior:auto}
   box-shadow:0 8px 22px rgba(69,255,24,.18)!important;
 }
 .payment-actions-three .payment-receipt small{color:#071007!important}
-.payment-actions-three .payment-cancel{
-  border-color:#6a3038!important;
-}
-.payment-actions-three .payment-cancel:hover{
-  background:rgba(120,25,35,.18)!important;
-}
+.payment-actions-three .payment-cancel{border-color:#6a3038!important}
+.payment-actions-three .payment-cancel:hover{background:rgba(120,25,35,.18)!important}
 @media(max-width:700px){
-  .payment-actions-three{grid-template-columns:1fr!important}
   .payment-actions-three .payment-action{
-    min-height:64px!important;
-    flex-direction:row!important;
-    justify-content:flex-start!important;
-    text-align:right!important;
-    padding:10px 14px!important;
+    min-height:88px!important;
+    height:88px!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    text-align:center!important;
+    padding:10px 12px!important;
   }
-  .payment-actions-three .payment-action small{margin-right:auto!important}
+  .payment-actions-three .payment-action small{margin-right:0!important}
 }
