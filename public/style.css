@@ -1411,3 +1411,89 @@ html{scroll-behavior:auto}
   }
   .payment-actions-three .payment-action small{margin-right:0!important}
 }
+
+
+/* V169: wider, cleaner payment modal with compact responsive layout */
+.payment-card{
+  width:min(720px,calc(100vw - 28px))!important;
+  max-width:720px!important;
+  max-height:calc(100vh - 28px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:22px 24px!important;
+  border-radius:24px!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:#4d6a58 #0a1012!important;
+}
+.payment-card::-webkit-scrollbar{width:7px!important}
+.payment-card::-webkit-scrollbar-track{background:#0a1012!important;border-radius:99px!important}
+.payment-card::-webkit-scrollbar-thumb{background:#3f5f4b!important;border-radius:99px!important}
+.payment-card .payment-icon{width:52px!important;height:52px!important;border-radius:15px!important;font-size:24px!important;margin:0 auto 8px!important}
+.payment-card h2{font-size:24px!important;margin:7px 0 3px!important}
+.payment-card>p{margin:5px 0!important}
+.payment-bank{
+  padding:13px 16px!important;
+  margin:12px 0!important;
+  border-radius:16px!important;
+}
+.payment-bank b{
+  font-size:24px!important;
+  letter-spacing:.7px!important;
+  margin:6px 0!important;
+  direction:ltr!important;
+}
+.payment-bank button{padding:7px 11px!important}
+.payment-instructions{font-size:10px!important;line-height:1.65!important;margin:8px 0!important}
+.payment-card .field{margin:9px 0!important}
+.payment-card .field label{margin-bottom:5px!important}
+.payment-card .field input{height:42px!important}
+.receipt-box{
+  padding:10px!important;
+  margin:10px 0!important;
+  border-radius:14px!important;
+}
+.receipt-pick{padding:9px 14px!important;font-size:11px!important}
+.receipt-box small{margin-top:6px!important;font-size:10px!important}
+.receipt-preview{max-height:135px!important;margin-top:8px!important}
+.payment-actions-three{
+  gap:8px!important;
+  margin-top:10px!important;
+}
+.payment-actions-three .payment-action{
+  min-height:66px!important;
+  height:66px!important;
+  border-radius:14px!important;
+  padding:7px 10px!important;
+  gap:3px!important;
+}
+.payment-actions-three .payment-action-icon{font-size:17px!important}
+.payment-actions-three .payment-action strong{font-size:12px!important}
+.payment-actions-three .payment-action small{font-size:9px!important}
+.payment-card #paymentError{min-height:14px!important;margin-top:5px!important}
+
+@media(max-width:700px){
+  .modal{padding:8px!important;align-items:center!important}
+  .payment-card{
+    width:calc(100vw - 16px)!important;
+    max-width:none!important;
+    max-height:calc(100vh - 16px)!important;
+    padding:16px 14px!important;
+    border-radius:20px!important;
+  }
+  .payment-card .payment-icon{width:46px!important;height:46px!important;font-size:21px!important;margin-bottom:5px!important}
+  .payment-card h2{font-size:21px!important;margin:5px 0 2px!important}
+  .payment-bank{padding:10px 12px!important;margin:9px 0!important}
+  .payment-bank b{font-size:21px!important}
+  .payment-instructions{font-size:9px!important;line-height:1.55!important}
+  .payment-card .field{margin:7px 0!important}
+  .payment-card .field input{height:40px!important}
+  .receipt-box{padding:8px!important;margin:8px 0!important}
+  .receipt-preview{max-height:105px!important}
+  .payment-actions-three .payment-action{
+    min-height:62px!important;
+    height:62px!important;
+  }
+}
+
+/* When content is slightly taller than the viewport, keep scrolling smooth and contained */
+.payment-card{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
