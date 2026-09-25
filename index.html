@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a0d0e">
+  <title>آقای موبایل | فروشگاه موبایل و لوازم جانبی</title>
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" type="image/png" href="/assets/mr-mobile-logo.png">
+  <link rel="apple-touch-icon" href="/assets/mr-mobile-logo.png">
+  <link rel="stylesheet" href="/style.css?v=43">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-topline">
+    <div class="container header-topline-inner">
+      <span>🛡️ ضمانت اصالت کالا</span><i></i><span>🚚 ارسال سریع</span><i></i><span>🎧 پشتیبانی ۲۴/۷</span>
+      <span class="topline-spacer"></span><span>📍 مازندران، قائمشهر</span><span>در تکنولوژی سفر کنید...</span>
+    </div>
+  </div>
+  <div class="main-header container">
+    <a class="brand" href="/">
+      <img src="/assets/mr-mobile-logo.png" alt="آقای موبایل">
+      <div><strong>آقای موبایل <b>MR</b></strong><small>فروش انواع موبایل و لوازم جانبی</small></div>
+    </a>
+
+    <div class="search-wrap">
+      <input id="searchInput" type="search" placeholder="جستجوی گوشی، برند، مدل ...">
+      <button onclick="applyFilters()">⌕</button>
+    </div>
+
+    <div class="header-actions">
+      <button class="icon-btn favorite-header" onclick="openFavorites()" title="علاقه‌مندی‌ها">♡<span id="favoriteCount">0</span></button>
+      <button class="icon-btn compare-header" onclick="openCompare()" title="مقایسه محصولات">⚖<span id="compareCount">0</span></button>
+      <button class="cart-btn" onclick="toggleCart()">🛒 <span>سبد خرید</span><small id="cartTotal">۰ تومان</small></button>
+      <button class="user-btn" onclick="openAccount()"><span class="user-icon" aria-hidden="true">👤</span><span class="user-icon-mobile" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="7.2" r="3.3"></circle><path d="M5.6 20c.45-4.05 2.55-6.15 6.4-6.15s5.95 2.1 6.4 6.15H5.6Z"></path></svg></span> <span id="userLabel">ثبت نام / ورود</span></button>
+    </div>
+  </div>
+
+  <nav class="nav-bar" id="mainNav">
+    <div class="container nav-inner">
+      <a class="nav-special nav-scroll" href="#specialOffers"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12v8H4v-8M2 8h20v4H2zM12 8v12M12 8H7.5A2.5 2.5 0 1 1 10 5.5C10 7 12 8 12 8Zm0 0h4.5A2.5 2.5 0 1 0 14 5.5C14 7 12 8 12 8Z"/></svg></span><span>پیشنهاد ویژه</span></a>
+      <a class="active nav-scroll" href="#home"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>صفحه اصلی</span></a>
+      <a class="nav-scroll" href="#products"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10 5h4M10 18h4"/></svg></span><span>محصولات</span></a>
+      <a class="nav-scroll" href="#categories"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span>دسته‌بندی‌ها</span></a>
+      <a class="nav-scroll" href="#brands"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 13.5 13.5 20.5a2 2 0 0 1-2.8 0l-7.2-7.2a2 2 0 0 1 0-2.8l7-7h8.5l4 4z"/><circle cx="15.5" cy="8.5" r="1.4"/></svg></span><span>برندها</span></a>
+      <a class="nav-scroll" href="#about"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7.2h.01"/></svg></span><span>درباره ما</span></a>
+      <a class="nav-scroll" href="#contact"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.8a15 15 0 0 0 4.7 4.7L15 13l5 2v4c0 1.1-.9 2-2 2C10.3 21 3 13.7 3 5a2 2 0 0 1 2-2Z"/></svg></span><span>تماس با ما</span></a>
+      <a class="nav-support nav-scroll" href="#contact"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1M4 13v4a2 2 0 0 0 2 2h1v-6H6a2 2 0 0 0-2 2Zm16 0v4a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2ZM15 19c-.7 1-1.8 1.5-3 1.5"/></svg></span><span>پشتیبانی ۲۴/۷</span></a>
+    </div>
+  </nav>
+</header>
+
+<main id="home">
+  <section class="hero hero-premium container">
+    <div class="hero-copy">
+      <div class="hero-kicker"><span></span> فروش تخصصی موبایل و لوازم جانبی</div>
+      <div class="store-name">MR MOBILE STORE</div>
+      <h1 id="heroTitle">موبایل و لوازم جانبی، با ضمانت اصالت از قائم‌شهر</h1>
+      <p id="heroSubtitle">گوشی نو و کارکرده، تست‌شده و گارانتی‌دار؛ سفارش آنلاین یا حضوری، تحویل سریع در سراسر کشور.</p>
+      <div class="hero-buttons">
+        <a id="heroButton" class="btn primary hero-main-btn" href="#products">مشاهده محصولات <b>←</b></a>
+        <a href="#about" class="btn ghost hero-secondary-btn">درباره ما</a>
+      </div>
+      <div class="hero-benefits">
+        <div><i>🚚</i><strong>ارسال سریع</strong><small>به سراسر کشور</small></div>
+        <div><i>✓</i><strong>ضمانت اصالت</strong><small>کالای اورجینال</small></div>
+        <div><i>◉</i><strong>پشتیبانی ۲۴/۷</strong><small>همیشه کنار شما</small></div>
+        <div><i>▣</i><strong>پرداخت امن</strong><small>خیال راحت</small></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-glow"></div>
+      <div class="hero-iphone-stage">
+        <div class="hero-floating-card hero-floating-top"><span class="pulse-dot"></span> خرید مطمئن، ارسال سریع</div>
+        <img src="/assets/hero-iphone-mascot.png" alt="آقای موبایل و آیفون">
+        <div class="hero-floating-card hero-floating-bottom"><b>MR MOBILE</b><span>تکنولوژی برای سبک زندگی تو</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="specialOffers" class="special-offers container" hidden>
+    <div class="section-head offers-head">
+      <div><h2>پیشنهادهای ویژه <span class="offers-bolt">⚡</span></h2><p class="offers-subtitle">تخفیف‌های زمان‌دار آقای موبایل</p></div>
+      <a class="offers-all" href="#products">مشاهده همه محصولات <span>←</span></a>
+    </div>
+    <div class="offers-carousel">
+      <button class="offers-nav offers-prev" type="button" aria-label="قبلی" onclick="moveSpecialOffers(-1)">‹</button>
+      <div id="specialOffersGrid" class="special-offers-grid"></div>
+      <button class="offers-nav offers-next" type="button" aria-label="بعدی" onclick="moveSpecialOffers(1)">›</button>
+    </div>
+    <div id="specialOffersDots" class="offers-dots" aria-label="صفحات پیشنهادهای ویژه"></div>
+  </section>
+
+  <section id="categories" class="section container categories-section">
+    <div class="section-head categories-head">
+      <div><span class="section-kicker">انتخاب سریع</span><h2>دسته‌بندی محصولات 🛍️</h2><p>هرآنچه که نیاز دارید، در یک نگاه پیدا کنید.</p></div>
+      <a class="section-link" href="#products">مشاهده همه دسته‌بندی‌ها ←</a>
+    </div>
+    <div class="categories">
+      <button class="category-card" onclick="setCategory('همه')"><span class="category-art"><img src="/assets/categories/discount-real-aligned.webp" alt="تخفیف‌ها"></span><span>تخفیف‌ها</span><small>پیشنهادهای ویژه</small></button>
+      <button class="category-card" onclick="setCategory('موبایل')"><span class="category-art"><img src="/assets/categories/mobile-real-aligned.webp" alt="گوشی کارکرده"></span><span>گوشی موبایل</span><small>جدیدترین مدل‌ها</small></button>
+      <button class="category-card" onclick="setCategory('لوازم جانبی')"><span class="category-art"><img src="/assets/categories/earbuds-real-aligned.webp" alt="لوازم جانبی"></span><span>لوازم جانبی</span><small>کامل و کاربردی</small></button>
+      <button class="category-card" onclick="setCategory('تبلت')"><span class="category-art"><img src="/assets/categories/tablet-real-aligned.webp" alt="تبلت"></span><span>تبلت</span><small>برای کار و سرگرمی</small></button>
+      <button class="category-card" onclick="setCategory('لوازم گیمینگ')"><span class="category-art"><img src="/assets/categories/gaming-real-aligned.webp" alt="لوازم گیمینگ"></span><span>لوازم گیمینگ</span><small>برای گیمرها</small></button>
+      <button class="category-card" onclick="setCategory('کابل و شارژر')"><span class="category-art"><img src="/assets/categories/charger-real-aligned.webp" alt="شارژر و کابل"></span><span>شارژر و کابل</span><small>سریع و مطمئن</small></button>
+      <button class="category-card" onclick="setCategory('هدفون')"><span class="category-art"><img src="/assets/categories/headphones-real-aligned.webp" alt="هدفون و هندزفری"></span><span>هندزفری و هدفون</span><small>صدای بهتر</small></button>
+      <button class="category-card" onclick="setCategory('ساعت هوشمند')"><span class="category-art"><img src="/assets/categories/watch-real-aligned.webp" alt="ساعت هوشمند"></span><span>ساعت هوشمند</span><small>هوشمند و شیک</small></button>
+    </div>
+  </section>
+
+  <section id="products" class="section container">
+    <div class="section-head products-head">
+      <div><span class="section-kicker">منتخب برای شما</span><h2>محصولات ویژه 🔥</h2><p class="products-head-subtitle">انتخاب‌های محبوب با قیمت‌های جذاب</p></div>
+      <div class="products-head-actions">
+        <div class="filters">
+          <button class="filter active" data-cat="همه" onclick="setCategory('همه')">همه</button>
+          <button class="filter" data-cat="موبایل" onclick="setCategory('موبایل')">گوشی موبایل</button>
+          <button class="filter" data-cat="لوازم جانبی" onclick="setCategory('لوازم جانبی')">لوازم جانبی</button>
+          <button class="filter" data-cat="تبلت" onclick="setCategory('تبلت')">تبلت</button>
+          <button class="filter" data-cat="ساعت هوشمند" onclick="setCategory('ساعت هوشمند')">ساعت هوشمند</button>
+          <button class="filter" data-cat="هدفون" onclick="setCategory('هدفون')">هدفون</button>
+          <button class="filter" data-cat="اسپیکر" onclick="setCategory('اسپیکر')">اسپیکر</button>
+          <button class="filter" data-cat="کابل و شارژر" onclick="setCategory('کابل و شارژر')">کابل و شارژر</button>
+        </div>
+        <button class="compact-filter-btn" type="button" onclick="toggleAdvancedFilters()">⚙️ فیلتر حرفه‌ای</button>
+        <a class="section-link products-all-link" href="#products">مشاهده همه محصولات ←</a>
+      </div>
+    </div>
+    <div class="advanced-filter-bar v108-filterbar">
+      <div class="filter-search">🔎 <input id="productSearch" type="search" placeholder="جستجوی مدل، برند یا توضیحات..." oninput="syncProductSearch(this.value)"></div>
+      <button class="advanced-filter-toggle" type="button" onclick="toggleAdvancedFilters()">⚙️ فیلتر حرفه‌ای <span id="filterCount">۰</span></button>
+      <select id="sortProducts" class="sort-select" onchange="setSort(this.value)">
+        <option value="newest">جدیدترین</option>
+        <option value="priceAsc">ارزان‌ترین</option>
+        <option value="priceDesc">گران‌ترین</option>
+        <option value="name">نام محصول</option>
+      </select>
+    </div>
+    <div id="advancedFilters" class="advanced-filters hidden">
+      <div class="filter-field"><label>دسته‌بندی</label><select id="filterCategory" onchange="setAdvancedFilter('category',this.value)"><option value="همه">همه دسته‌ها</option></select></div>
+      <div class="filter-field"><label>برند</label><select id="filterBrand" onchange="setAdvancedFilter('brand',this.value)"><option value="همه">همه برندها</option></select></div>
+      <div class="filter-field"><label>وضعیت</label><select id="filterCondition" onchange="setAdvancedFilter('condition',this.value)"><option value="همه">همه</option><option value="نو">نو</option><option value="کارکرده">کارکرده</option></select></div>
+      <div class="filter-field"><label>حافظه</label><select id="filterStorage" onchange="setAdvancedFilter('storage',this.value)"><option value="همه">همه حافظه‌ها</option></select></div>
+      <div class="filter-field"><label>وضعیت موجودی</label><select id="filterAvailability" onchange="setAdvancedFilter('availability',this.value)"><option value="همه">همه</option><option value="available">فقط موجود</option><option value="unavailable">فقط ناموجود</option></select></div>
+      <div class="filter-field"><label>حداقل قیمت (تومان)</label><input id="filterMinPrice" inputmode="numeric" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰" oninput="setAdvancedFilter('minPrice',this.value)"></div>
+      <div class="filter-field"><label>حداکثر قیمت (تومان)</label><input id="filterMaxPrice" inputmode="numeric" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰" oninput="setAdvancedFilter('maxPrice',this.value)"></div>
+      <button class="clear-filters" type="button" onclick="clearAdvancedFilters()">پاک کردن فیلترها ↺</button>
+    </div>
+    <div id="productsResult" class="products-result"></div>
+    <div class="featured-products-layout">
+      <div id="productsGrid" class="products-grid"><div class="loading">در حال دریافت محصولات...</div></div>
+      <div id="productsSliderControls" class="products-slider-controls" hidden></div>
+      <aside class="featured-promo-card">
+        <div class="promo-orb">٪</div>
+        <span>فرصت محدود</span>
+        <h3>تخفیف‌های ویژه</h3>
+        <p>روی محصولات منتخب تا ۳۰٪ تخفیف بگیرید.</p>
+        <a href="#products" onclick="setCategory('همه')">مشاهده همه تخفیف‌ها <b>←</b></a>
+      </aside>
+    </div>
+  </section>
+
+  <section id="brands" class="premium-lower container">
+    <div class="premium-promo promo-used">
+      <div class="premium-promo-art"><span class="art-glow"></span><img src="/assets/categories/mobile-real-aligned.webp" alt="گوشی کارکرده"></div>
+      <div class="premium-promo-copy">
+        <small>خرید گوشی کارکرده</small>
+        <h3>با تضمین سلامت و اصالت</h3>
+        <div class="premium-promo-features"><span>✓ تست‌شده روی مغازه</span><span>✓ گارانتی ۷ روزه</span><span>✓ تحویل همون روز در قائم‌شهر</span></div>
+        <a href="#products" onclick="setCategory('همه')">مشاهده</a>
+      </div>
+    </div>
+    <div class="premium-promo promo-accessories">
+      <div class="premium-promo-art"><span class="art-wave"></span><img src="/assets/categories/headphones-real-aligned.webp" alt="هدفون و هندزفری"></div>
+      <div class="premium-promo-copy">
+        <small>لوازم جانبی اورجینال</small>
+        <h3>شارژر، کابل، هندزفری و بیشتر...</h3>
+        <div class="premium-promo-features"><span>✓ کیفیت اورجینال</span><span>✓ ارسال سریع</span><span>✓ قیمت مناسب</span></div>
+        <a href="#products" onclick="setCategory('لوازم جانبی')">مشاهده محصولات</a>
+      </div>
+    </div>
+
+    <section class="newsletter-premium">
+      <div class="newsletter-art"><span class="mail-box">✉</span><span class="mail-spark">•</span></div>
+      <div class="newsletter-copy"><h3>عضویت در خبرنامه</h3><p>از جدیدترین محصولات و تخفیف‌ها باخبر شوید.</p></div>
+      <input id="newsletterEmail" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="ایمیل خود را وارد کنید ...">
+      <button class="btn primary" onclick="subscribe()">عضویت</button>
+    </section>
+
+    <section id="about" class="about-premium">
+      <div class="about-premium-line"></div>
+      <h2>فقط یک <span>فروشگاه</span> نیستیم.</h2>
+      <p>اینجا هر گوشی و لوازم جانبی قبل از فروش، توسط خودمون چک و تست می‌شه — نه فقط یک آگهی آنلاین.</p>
+    </section>
+  </section>
+<div id="supportFab" class="support-fab" onclick="openSupportCenter()">💬 پشتیبانی</div>
+<div id="supportModal" class="modal"><div class="modal-card support-card"><button class="modal-close" onclick="closeSupportCenter()">×</button><div class="support-brand"><div class="support-brand-icon">🎧</div><div><h2>مرکز پشتیبانی</h2><p>ما همیشه کنار شما هستیم</p></div></div><div class="support-tabs"><button data-tab="tickets" onclick="supportTab('tickets')">🎫 تیکت‌ها</button><button data-tab="chat" onclick="supportTab('chat')">💬 چت آنلاین</button><button data-tab="account" onclick="supportTab('account')">👑 باشگاه مشتریان</button></div><div id="supportContent"></div></div></div>
+</main>
+
+<footer id="contact" class="footer premium-footer">
+  <div class="footer-glow footer-glow-a"></div><div class="footer-glow footer-glow-b"></div>
+  <div class="container">
+    <div class="footer-topline">
+      <div class="footer-brand-block">
+        <div class="footer-logo-wrap"><img src="/assets/mr-mobile-logo.png" alt="آقای موبایل"></div>
+        <div><span class="footer-kicker">MR MOBILE STORE</span><h3>آقای موبایل</h3><p>فروش انواع موبایل و لوازم جانبی با تجربه‌ای مطمئن و حرفه‌ای.</p></div>
+      </div>
+      <div class="footer-trust-row">
+        <div class="footer-trust"><b>✓</b><span>اصالت کالا</span></div>
+        <div class="footer-trust"><b>↯</b><span>ارسال سریع</span></div>
+        <div class="footer-trust"><b>24</b><span>پشتیبانی</span></div>
+      </div>
+    </div>
+    <div class="footer-grid premium-footer-grid">
+      <div class="footer-col"><h4>لینک‌های سریع</h4><a href="#home"><span>←</span> صفحه اصلی</a><a href="#products"><span>←</span> محصولات</a><a href="#categories"><span>←</span> دسته‌بندی‌ها</a><a href="#about"><span>←</span> درباره ما</a></div>
+      <div class="footer-col"><h4>خدمات مشتریان</h4><a href="javascript:void(0)" onclick="openInfo('faq')"><span>↗</span> سوالات متداول</a><a href="javascript:void(0)" onclick="openInfo('returns')"><span>↗</span> شرایط بازگشت کالا</a><a href="javascript:void(0)" onclick="openInfo('privacy')"><span>↗</span> حریم خصوصی</a><a href="javascript:void(0)" onclick="openInfo('terms')"><span>↗</span> قوانین و مقررات</a></div>
+      <div class="footer-col footer-contact"><h4>ارتباط با ما</h4><a href="tel:09393699909"><i>☎</i><span>09393699909</span></a><a href="https://instagram.com/mr.mobile.stor" target="_blank" rel="noopener"><i>◎</i><span>@mr.mobile.stor</span></a><p><i>⌖</i><span>مازندران، قائمشهر، ابتدای خیابان کوچکسرا، نبش شقایق یک</span></p><p><i>🕒</i><span>ساعت کاری: هر روز ۹ صبح تا ۹ شب</span></p></div>
+      <div class="footer-contact-card"><span class="card-label">نیاز به راهنمایی دارید؟</span><strong>با ما در تماس باشید</strong><p>برای خرید یا پیگیری سفارش، کارشناسان ما کنار شما هستند.</p><button class="footer-support-btn" onclick="openSupportCenter()">💬 پشتیبانی آنلاین</button></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© ۱۴۰۵ آقای موبایل — تمامی حقوق محفوظ است.</span>
+      <div class="footer-bottom-links"><a href="#home">بازگشت به بالا ↑</a><span>•</span><span>فروشگاه آنلاین موبایل و لوازم جانبی</span></div>
+    </div>
+  </div>
+</footer>
+
+<aside id="cartDrawer" class="drawer">
+  <div class="drawer-head"><h3>سبد خرید</h3><button onclick="toggleCart()">×</button></div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="coupon-box"><div class="coupon-row"><input id="couponCode" placeholder="کد تخفیف" autocomplete="off"><button class="btn ghost" onclick="applyCoupon()">اعمال</button></div><small id="couponMsg"></small></div><div class="cart-footer"><div><span>مجموع:</span><strong id="drawerTotal">۰ تومان</strong></div><button class="btn primary full" onclick="checkout()">ثبت سفارش</button><button class="btn ghost full" onclick="clearCart()">خالی کردن سبد</button></div>
+</aside>
+<div id="drawerBackdrop" class="backdrop" onclick="toggleCart()"></div>
+
+
+<div id="productDetailModal" class="modal product-detail-modal" onclick="if(event.target===this)closeProductDetail()">
+  <div class="modal-card product-detail-card">
+    <button class="modal-close" onclick="closeProductDetail()">×</button>
+    <div class="product-detail-top">
+      <div class="product-detail-gallery">
+        <div class="detail-main-image">
+          <span id="detailGalleryCount" class="detail-gallery-count">۱ / ۱</span>
+          <button id="detailPrev" class="detail-gallery-nav prev" onclick="prevDetailImage()">‹</button>
+          <img id="detailImage" src="/assets/mr-mobile-logo.png" alt="" ondblclick="zoomDetailImage()">
+          <button id="detailNext" class="detail-gallery-nav next" onclick="nextDetailImage()">›</button>
+          <button class="detail-zoom" onclick="zoomDetailImage()">⛶</button>
+        </div>
+        <div id="detailThumbs" class="detail-thumbs"></div>
+      </div>
+      <div class="product-detail-info">
+        <div class="detail-topline"><span id="detailCondition" class="detail-badge">نو</span><span id="detailCategory" class="detail-category">گوشی موبایل</span></div>
+        <h2 id="detailName">محصول</h2>
+        <div class="detail-price-row"><div id="detailPrice" class="detail-price">۰ تومان</div><span id="detailDiscount" class="detail-discount"></span></div>
+        <div id="detailOldPrice" class="detail-old-price"></div><div id="detailSaleCountdown" class="sale-countdown detail-sale-countdown" hidden></div>
+        <div id="detailStock" class="detail-stock in">● موجود در فروشگاه</div>
+        <p id="detailDesc">توضیحات محصول</p>
+        <div id="detailQuick" class="detail-quick">
+          <div id="detailStorageBox"><span>حافظه داخلی</span><b id="detailStorage">—</b></div>
+          <div><span>وضعیت</span><b id="detailCondition2">سالم و تست‌شده</b></div>
+        </div>
+        <div class="detail-actions"><button id="detailAdd" class="btn primary full">افزودن به سبد خرید 🛒</button><button id="detailFavorite" class="btn ghost" onclick="toggleFavorite(state.detailProductId)">♡ علاقه‌مندی</button><button id="detailCompare" class="btn ghost compare-detail-btn" onclick="toggleCompare(state.detailProductId)">⚖ مقایسه</button></div>
+        <div class="detail-benefits"><span>↩ ۷ روز ضمانت بازگشت</span><span>🚚 ارسال سریع</span><span>🛡️ ضمانت اصالت کالا</span></div>
+      </div>
+    </div>
+    <div class="detail-tabs"><button data-tab="specs" class="active" onclick="setDetailTab('specs')">مشخصات فنی</button><button data-tab="desc" onclick="setDetailTab('desc')">توضیحات</button><button data-tab="reviews" onclick="setDetailTab('reviews')">نظرات مشتریان</button></div>
+    <div class="detail-panel" data-panel="specs"><div class="detail-bottom"><div class="detail-spec-box"><h3>مشخصات محصول</h3><div id="detailSpecsRows"></div></div></div></div>
+    <div class="detail-panel hidden" data-panel="desc"><div class="detail-spec-box detail-description-box"><h3>توضیحات محصول</h3><p id="detailDescriptionFull">توضیحات محصول</p></div></div>
+    <div class="detail-panel hidden" data-panel="reviews"><div id="detailReviews" class="detail-reviews"></div></div>
+  </div>
+</div>
+
+
+<div id="compareModal" class="modal" onclick="if(event.target===this)closeCompare()">
+  <div class="modal-card compare-card">
+    <button class="modal-close" onclick="closeCompare()">×</button>
+    <div class="modal-heading"><span>⚖️</span><div><h2>مقایسه محصولات</h2><p>حداکثر ۳ محصول را کنار هم مقایسه کنید.</p></div></div>
+    <div id="compareContent"></div>
+  </div>
+</div>
+
+<div id="authModal" class="modal auth-modal">
+  <div class="auth-shell">
+    <button class="modal-close auth-close" onclick="closeAuth()">×</button>
+    <section class="auth-panel auth-single-panel">
+      <div class="auth-panel-head"><span class="auth-welcome">سلام! 👋</span><h2 id="authTitle">ورود به حساب</h2><p id="authSub">برای ادامه وارد حساب کاربری خود شوید.</p></div>
+      <div class="auth-tabs"><button id="authLoginTab" class="active" onclick="setAuthMode('login')">ورود به حساب</button><button id="authRegisterTab" onclick="setAuthMode('register')">ساخت حساب کاربری</button></div>
+      <div id="registerNameWrap" class="field hidden"><label>نام و نام خانوادگی</label><input id="authName" autocomplete="name" placeholder="مثلاً ابوالفضل رجبی"></div>
+      <div class="field"><label>شماره موبایل</label><input id="authPhone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx"></div>
+      <div class="field"><label>رمز عبور</label><div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید"><button type="button" onclick="toggleAuthPassword()" aria-label="نمایش رمز">◉</button></div></div>
+      <div class="auth-options"><label><input id="authRemember" type="checkbox" checked> مرا به خاطر بسپار</label><button type="button" onclick="authRecovery()">فراموشی رمز عبور؟</button></div>
+      <button id="authSubmit" class="btn primary full auth-submit" onclick="submitAuth()">ورود به حساب کاربری →</button>
+      <div class="auth-divider"><span>یا ورود سریع با</span></div>
+      <div class="social-login"><button type="button" class="social google" onclick="socialLogin('google')"><b>G</b><span>ورود با Google</span></button></div>
+      <div class="auth-security"><span>✓</span><div><b>ورود امن و رمزگذاری‌شده</b><small>اطلاعات حساب شما نزد ما محفوظ است.</small></div></div>
+      <button id="authSwitch" class="switch-auth" onclick="switchAuth()">ثبت نام نکرده‌اید؟ ثبت نام کنید</button>
+      <div id="authError" class="form-error"></div>
+    </section>
+  </div>
+</div>
+
+<div id="favoritesModal" class="modal">
+  <div class="modal-card favorites-card">
+    <button class="modal-close" onclick="closeFavorites()">×</button>
+    <div class="modal-heading"><span>❤️</span><div><h2>علاقه‌مندی‌های من</h2><p>محصولاتی که برای بعد ذخیره کرده‌اید</p></div></div>
+    <div id="favoritesList"></div>
+  </div>
+</div>
+
+<div id="accountModal" class="modal">
+  <div class="modal-card account-card">
+    <button class="modal-close" onclick="closeAccount()">×</button>
+    <h2>حساب کاربری</h2>
+    <div id="accountInfo"></div>
+    <div id="ordersList"></div>
+    <button class="btn ghost full" onclick="logout()">خروج از حساب</button>
+  </div>
+</div>
+
+
+<div id="addressModal" class="modal">
+  <div class="modal-card address-card">
+    <button class="modal-close" onclick="closeAddress()">×</button>
+    <div class="payment-icon">📍</div>
+    <h2>آدرس ارسال</h2>
+    <p>اطلاعات گیرنده را وارد کنید تا سفارش با همین آدرس ثبت شود.</p>
+    <div class="address-grid">
+      <div class="field"><label>نام *</label><input id="addressFirstName" placeholder="نام"></div>
+      <div class="field"><label>نام خانوادگی *</label><input id="addressLastName" placeholder="نام خانوادگی"></div>
+      <div class="field"><label>شماره موبایل *</label><input id="addressPhone" inputmode="tel" placeholder="09xxxxxxxxx"></div>
+      <div class="field"><label>استان *</label><input id="addressProvince" placeholder="مثلاً مازندران"></div>
+      <div class="field"><label>شهر *</label><input id="addressCity" placeholder="مثلاً قائمشهر"></div>
+      <div class="field full-field"><label>کد پستی ۱۰ رقمی *</label><input id="addressPostal" inputmode="numeric" maxlength="10" placeholder="۱۰ رقم"></div>
+      <div class="field full-field"><label>آدرس کامل *</label><textarea id="addressText" rows="3" placeholder="خیابان، کوچه، پلاک، واحد..."></textarea></div>
+    </div>
+    <label class="save-address"><input id="saveAddress" type="checkbox" checked> ذخیره این آدرس برای سفارش‌های بعدی</label>
+    <button id="addressSubmit" class="btn primary full" onclick="submitAddressAndOrder()">ادامه و ثبت سفارش</button>
+    <div id="addressError" class="form-error"></div>
+  </div>
+</div>
+
+<div id="paymentModal" class="modal">
+  <div class="modal-card payment-card">
+    <button class="modal-close" onclick="closePayment()">×</button>
+    <div class="payment-icon">💳</div>
+    <h2>پرداخت کارت‌به‌کارت</h2>
+    <p>سفارش <b id="paymentOrderId">#—</b> — مبلغ <strong id="paymentAmount">۰ تومان</strong></p>
+    <div class="payment-bank">
+      <small id="paymentBank">کارت فروشگاه</small>
+      <b id="paymentCard">در حال دریافت...</b>
+      <span id="paymentHolder"></span>
+      <button type="button" onclick="copyPaymentCard()">📋 کپی شماره کارت</button>
+    </div>
+    <p id="paymentInstructions" class="payment-instructions"></p>
+    <div class="field"><label>شماره پیگیری تراکنش *</label><input id="paymentTracking" inputmode="numeric" placeholder="مثلاً ۱۲۳۴۵۶۷۸۹"></div>
+    <div class="receipt-box">
+      <label class="receipt-pick"><input id="receiptFile" type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="prepareReceipt(this)"><span>📷 انتخاب تصویر رسید</span></label>
+      <small id="receiptName">هنوز فایلی انتخاب نشده</small>
+      <img id="receiptPreview" class="receipt-preview" hidden alt="پیش‌نمایش رسید">
+    </div>
+    <div class="payment-actions payment-actions-three">
+      <button id="onlinePayBtn" type="button" class="payment-action payment-online" onclick="startOnlinePayment()" disabled>
+        <span class="payment-action-icon">💳</span>
+        <strong>پرداخت آنلاین</strong>
+        <small>هنوز تنظیم نشده</small>
+      </button>
+      <button id="sendPaymentBtn" type="button" class="payment-action payment-receipt" onclick="submitPaymentReceipt()">
+        <span class="payment-action-icon">🧾</span>
+        <strong>ارسال رسید برای بررسی</strong>
+        <small>بعد از ارسال، سفارش ثبت می‌شود</small>
+      </button>
+      <button type="button" class="payment-action payment-cancel" onclick="cancelCurrentPayment()">
+        <span class="payment-action-icon">✕</span>
+        <strong>لغو پرداخت</strong>
+        <small>لغو کامل سفارش</small>
+      </button>
+    </div>
+    <div id="paymentError" class="form-error"></div>
+  </div>
+</div>
+
+<div id="infoModal" class="modal">
+  <div class="modal-card info-card">
+    <button class="modal-close" onclick="closeInfo()">×</button>
+    <div class="payment-icon" id="infoIcon">ℹ️</div>
+    <h2 id="infoTitle">اطلاعات</h2>
+    <div id="infoContent" class="info-content"></div>
+  </div>
+</div>
+<script src="/app.js?v=51"></script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});</script></body>
+</html>
