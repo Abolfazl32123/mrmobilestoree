@@ -1497,10 +1497,3 @@ html{scroll-behavior:auto}
 
 /* When content is slightly taller than the viewport, keep scrolling smooth and contained */
 .payment-card{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-
-/* ENAMAD: layout-only styles; the official ENAMAD HTML snippet is kept unchanged. */
-.footer-enamad{margin:18px 0 8px;display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 18px;border-top:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.10)}
-.footer-enamad-title{font-size:12px;color:#d8d8d8;white-space:nowrap}
-.footer-enamad-logo{display:flex;align-items:center;justify-content:center;min-height:82px;min-width:82px}
-.footer-enamad-logo img{max-width:100px;height:auto;display:block}
-@media (max-width:700px){.footer-enamad{flex-direction:column;gap:8px;padding:12px}.footer-enamad-title{font-size:11px}.footer-enamad-logo{min-height:76px;min-width:76px}}
