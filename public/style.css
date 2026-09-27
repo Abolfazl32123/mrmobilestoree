@@ -830,6 +830,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .products-head-subtitle{margin:0;color:#73817e;font-size:10px}
 .products-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .products-head-actions .filters{display:flex;gap:5px;padding:3px;border:1px solid #202d2f;background:#0b1214;border-radius:13px}
+.products-head-actions .filters{flex-wrap:wrap;max-width:min(100%,980px);max-height:96px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#31513a transparent}
 .products-head-actions .filter{border:0;border-radius:9px;padding:8px 11px}
 .compact-filter-btn{height:36px;border:1px solid #29383a;background:#10191b;color:#cbd5d2;border-radius:11px;padding:0 12px;font-family:inherit;font-size:10px;cursor:pointer}
 .compact-filter-btn:hover{border-color:var(--green);color:#fff}
@@ -853,7 +854,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .products-result{font-size:9px;margin:0 2px 7px}
 @media(max-width:1100px){.featured-products-layout{grid-template-columns:1fr}.featured-promo-card{order:-1;min-height:180px}.featured-products-layout .products-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:850px){.products-head{display:block}.products-head-actions{margin-top:12px}.featured-products-layout .products-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:700px){.categories-section{padding-top:18px}.categories{grid-template-columns:repeat(2,1fr)}.products-head-actions .products-all-link{display:none}.products-head-actions .filters{max-width:100%;overflow:auto}.compact-filter-btn{margin-right:auto}.featured-products-layout{gap:10px}.featured-products-layout .products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.product-image{height:170px}.product-bottom .price{font-size:12px}.product-bottom .add-btn{width:36px;flex-basis:36px;height:36px;min-height:36px}}
+@media(max-width:700px){.categories-section{padding-top:18px}.categories{grid-template-columns:repeat(2,1fr)}.products-head-actions .products-all-link{display:none}.products-head-actions .filters{max-width:100%;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:none}.products-head-actions .filters::-webkit-scrollbar{display:none}.compact-filter-btn{margin-right:auto}.featured-products-layout{gap:10px}.featured-products-layout .products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.product-image{height:170px}.product-bottom .price{font-size:12px}.product-bottom .add-btn{width:36px;flex-basis:36px;height:36px;min-height:36px}}
 
 /* ===== V109: category artwork + exact featured layout polish ===== */
 .categories{direction:rtl;grid-template-columns:repeat(8,minmax(0,1fr));gap:11px}
