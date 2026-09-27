@@ -312,13 +312,7 @@ window.openProductDetail=async function openProductDetail(id){
     'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
     'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
-    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']],
-    'پاوربانک':[['capacity','ظرفیت'],['power','توان خروجی'],['ports','درگاه‌ها'],['fastCharge','شارژ سریع'],['display','نمایشگر درصد'],['weight','وزن'],['color','رنگ'],['warranty','گارانتی']],
-    'حافظه و ذخیره‌سازی':[['type','نوع'],['capacity','ظرفیت'],['interface','رابط اتصال'],['speed','سرعت'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
-    'لوازم خودرو':[['type','نوع محصول'],['connection','اتصال'],['compatibility','سازگاری'],['power','توان'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']],
-    'گجت هوشمند':[['type','نوع محصول'],['connection','اتصال'],['compatibility','سازگاری'],['battery','باتری / شارژدهی'],['features','ویژگی‌ها'],['color','رنگ'],['warranty','گارانتی']],
-    'قطعات و تعمیرات':[['type','نوع قطعه'],['compatibility','سازگاری'],['condition','وضعیت'],['quality','کیفیت'],['color','رنگ'],['warranty','گارانتی']],
-    'سایر تجهیزات دیجیتال':[['type','نوع محصول'],['connection','اتصال'],['compatibility','سازگاری'],['power','توان / ظرفیت'],['color','رنگ'],['warranty','گارانتی']]
+    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
   };
   const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
   const box=$('detailSpecsRows');

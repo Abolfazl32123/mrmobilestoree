@@ -11,6 +11,3 @@ V155: the main products section now paginates into a slider with 5 products per 
 V156: both product and special-offers sliders auto-advance every 3 seconds and loop.
 
 V158: mobile-only special-offers card sizing and newsletter/about spacing. Desktop styles untouched.
-
-
-V168: expanded product categories for broad digital-store inventory; added category-specific admin/customer specs for new categories.
