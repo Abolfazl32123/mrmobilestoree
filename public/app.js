@@ -312,9 +312,7 @@ window.openProductDetail=async function openProductDetail(id){
     'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
     'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
-    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']],
-    'ایرپاد و لوازم جانبی':[['type','نوع محصول'],['connection','نوع اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
-    'لوازم جانبی خودرو':[['type','نوع محصول'],['compatibility','سازگاری'],['connection','نوع اتصال'],['power','توان / ظرفیت'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
+    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
   };
   const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
   const box=$('detailSpecsRows');
