@@ -1497,3 +1497,74 @@ html{scroll-behavior:auto}
 
 /* When content is slightly taller than the viewport, keep scrolling smooth and contained */
 .payment-card{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+
+/* eNAMAD official trust seal */
+.enamad-trust-wrap{margin:28px auto 0;padding:22px 18px;border-top:1px solid #182325;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;direction:rtl}.enamad-title{font-size:14px;font-weight:800;color:#fff}.enamad-logo{min-height:96px;display:flex;align-items:center;justify-content:center}.enamad-logo a{display:inline-flex;align-items:center;justify-content:center;line-height:0;text-decoration:none}.enamad-logo img{display:block;width:110px;height:auto;max-height:140px;object-fit:contain}.enamad-logo img[alt=""]{border:0}@media(max-width:700px){.enamad-trust-wrap{margin-top:22px;padding:18px 10px}.enamad-logo img{width:100px}}
+
+
+/* V175: mobile promo/featured card overlap fix */
+@media (max-width:700px){
+  /* Keep the special-offer promo card completely separate from product images */
+  .featured-products-layout{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto!important;
+    gap:12px!important;
+    width:100%!important;
+    min-width:0!important;
+    overflow:visible!important;
+    position:relative!important;
+    isolation:isolate!important;
+  }
+  .featured-products-layout>.featured-promo-card{
+    grid-column:1!important;
+    grid-row:1!important;
+    position:relative!important;
+    z-index:1!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:180px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  .featured-products-layout>.products-grid{
+    grid-column:1!important;
+    grid-row:2!important;
+    position:relative!important;
+    z-index:2!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  .featured-products-layout>.products-grid .product-card{
+    position:relative!important;
+    z-index:2!important;
+  }
+
+  /* Prevent the lower promotional banner from letting its product image
+     visually sit over the text/card on narrow screens. */
+  .premium-lower>.premium-promo{
+    position:relative!important;
+    z-index:1!important;
+    min-height:300px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    align-items:center!important;
+  }
+  .premium-promo-art{
+    z-index:1!important;
+    pointer-events:none!important;
+  }
+  .premium-promo-art img{
+    z-index:1!important;
+    max-width:100%!important;
+  }
+  .premium-promo-copy{
+    position:relative!important;
+    z-index:5!important;
+    box-sizing:border-box!important;
+  }
+}
