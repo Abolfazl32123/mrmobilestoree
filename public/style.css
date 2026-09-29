@@ -1570,54 +1570,25 @@ html{scroll-behavior:auto}
 }
 
 
-/* V177: preserve original featured layout; only fix stacking/stock visibility */
+/* V178: unique product pages + preserve original featured layout */
 .stock-overlay{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  z-index:20;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:110px;
-  padding:9px 15px;
-  border-radius:999px;
-  background:rgba(20,24,24,.94);
-  border:1px solid rgba(255,78,78,.78);
-  color:#ff6666;
-  font-size:12px;
-  font-weight:900;
-  white-space:nowrap;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
-  pointer-events:none;
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:20;display:inline-flex;align-items:center;justify-content:center;
+  min-width:110px;padding:9px 15px;border-radius:999px;
+  background:rgba(20,24,24,.94);border:1px solid rgba(255,78,78,.78);
+  color:#ff6666;font-size:12px;font-weight:900;white-space:nowrap;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);pointer-events:none;
 }
-.product-card .product-image,
-.offer-card .offer-img{position:relative}
-.product-card.unavailable .product-image img,
-.offer-card.unavailable .offer-img img{
-  filter:grayscale(.35) saturate(.7);
-  opacity:.72;
+.product-card .product-image,.offer-card .offer-img{position:relative}
+.product-card.unavailable .product-image img,.offer-card.unavailable .offer-img img{
+  filter:grayscale(.35) saturate(.7);opacity:.72;
 }
-
-/* Do NOT change the existing desktop/mobile grid dimensions/order. */
 .featured-products-layout{position:relative;isolation:isolate;overflow:visible}
-.featured-products-layout>.featured-promo-card{
-  position:relative;
-  z-index:10;
-}
-.featured-products-layout>.products-grid{
-  position:relative;
-  z-index:1;
-}
-.featured-products-layout>.products-grid .product-card{
-  position:relative;
-  z-index:2;
-}
-.featured-promo-card:before,
-.featured-promo-card:after{z-index:0}
+.featured-products-layout>.featured-promo-card{position:relative;z-index:10}
+.featured-products-layout>.products-grid{position:relative;z-index:1}
+.featured-products-layout>.products-grid .product-card{position:relative;z-index:2}
+.featured-promo-card:before,.featured-promo-card:after{z-index:0}
 .featured-promo-card>*{position:relative;z-index:2}
-
 @media(max-width:700px){
   .featured-products-layout>.featured-promo-card{z-index:10}
   .featured-products-layout>.products-grid{z-index:1}

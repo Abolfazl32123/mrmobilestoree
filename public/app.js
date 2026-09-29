@@ -60,6 +60,52 @@ function renderFavorites(){
 function openFavorites(){renderFavorites();$('favoritesModal')?.classList.add('show')}
 function closeFavorites(){$('favoritesModal')?.classList.remove('show')}
 
+
+function productSlug(p){
+  const s=String(p?.name||'product').trim().toLowerCase()
+    .replace(/[^\u0600-\u06ffa-z0-9]+/gi,'-').replace(/^-+|-+$/g,'');
+  return s || 'product';
+}
+function productUrl(p){
+  return `/product/${Number(p.id)}-${productSlug(p)}`;
+}
+function syncProductPageMeta(p){
+  if(!p)return;
+  document.title=`${p.name||'محصول'} | آقای موبایل`;
+  let desc=document.querySelector('meta[name="description"]');
+  if(!desc){desc=document.createElement('meta');desc.name='description';document.head.appendChild(desc);}
+  desc.content=String(p.description||`${p.name||'محصول'} — فروشگاه آقای موبایل`).slice(0,155);
+  let canonical=document.querySelector('link[data-product-canonical]');
+  if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';canonical.dataset.productCanonical='1';document.head.appendChild(canonical);}
+  canonical.href=new URL(productUrl(p),location.origin).href;
+}
+function clearProductPageMeta(){
+  document.title='آقای موبایل | فروشگاه موبایل و لوازم جانبی';
+  const canonical=document.querySelector('link[data-product-canonical]');
+  if(canonical)canonical.remove();
+}
+function openProductRoute(id){
+  const p=state.products.find(x=>Number(x.id)===Number(id));
+  if(!p)return;
+  const target=productUrl(p);
+  if(location.pathname!==target) history.pushState({productId:Number(id)},'',target);
+  syncProductPageMeta(p);
+}
+function closeProductRoute(){
+  if(/^\/product\/\d+(?:-[^/]+)?\/?$/.test(location.pathname)){
+    history.pushState({},'', '/');
+    clearProductPageMeta();
+  }
+}
+function handleProductRoute(){
+  const m=location.pathname.match(/^\/product\/(\d+)(?:-[^/]+)?\/?$/);
+  if(!m)return false;
+  const id=Number(m[1]);
+  const p=state.products.find(x=>Number(x.id)===id);
+  if(p) openProductDetail(id,true);
+  return true;
+}
+
 function productSpecs(p){try{return typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{return {}}}
 
 function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);if(!(discount>0&&discount<price))return price;const now=Date.now(),start=p.sale_start_at?Date.parse(p.sale_start_at):null,end=p.sale_end_at?Date.parse(p.sale_end_at):null;return (!start||now>=start)&&(!end||now<=end)?discount:price}
@@ -154,7 +200,7 @@ async function loadProducts(){
     if(!r.ok) throw new Error('HTTP '+r.status+' '+raw.slice(0,180));
     const data=JSON.parse(raw);
     if(!Array.isArray(data)) throw new Error('پاسخ محصولات معتبر نیست');
-    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();
+    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();handleProductRoute();
   }catch(e){
     console.error('loadProducts failed',e);
     const grid=$('productsGrid');
@@ -291,8 +337,9 @@ let detailTouchX=0;
 function initDetailSwipe(){const el=$('detailImage');if(!el||el.dataset.swipeReady)return;el.dataset.swipeReady='1';el.addEventListener('touchstart',e=>{detailTouchX=e.changedTouches[0].screenX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-detailTouchX;if(Math.abs(dx)>45){dx<0?nextDetailImage():prevDetailImage()}},{passive:true});}
 initDetailSwipe();
 
-window.openProductDetail=async function openProductDetail(id){
+window.openProductDetail=async function openProductDetail(id,fromRoute=false){
   const p=state.products.find(x=>Number(x.id)===Number(id)); if(!p)return;
+  if(!fromRoute) openProductRoute(Number(id)); else syncProductPageMeta(p);
   $('detailName').textContent=p.name||'محصول'; $('detailCondition').textContent=p.condition||'نو'; $('detailCategory').textContent=p.category||'موبایل';
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
@@ -344,7 +391,7 @@ function setDetailImage(i){const g=state.detailGallery;if(!g)return;g.index=Math
 function nextDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index+1)%g.urls.length;renderDetailGallery()}
 function prevDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index-1+g.urls.length)%g.urls.length;renderDetailGallery()}
 function zoomDetailImage(){const src=$('detailImage').src; if(src)window.open(src,'_blank','noopener,noreferrer')}
-function closeProductDetail(){$('productDetailModal').classList.remove('show')}
+function closeProductDetail(){$('productDetailModal').classList.remove('show');closeProductRoute()}
 
 {$('productDetailModal').classList.remove('show');}
 
@@ -464,6 +511,18 @@ function closeInfo(){$('infoModal').classList.remove('show')}
 function cleanNewsletterField(){const el=$('newsletterEmail');if(el && el.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) el.value=''}
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',cleanNewsletterField); else cleanNewsletterField();
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
+
+
+window.addEventListener('popstate',()=>{
+  const m=location.pathname.match(/^\/product\/(\d+)(?:-[^/]+)?\/?$/);
+  if(m){
+    const p=state.products.find(x=>Number(x.id)===Number(m[1]));
+    if(p) openProductDetail(Number(m[1]),true);
+  }else{
+    $('productDetailModal')?.classList.remove('show');
+    clearProductPageMeta();
+  }
+});
 
 loadProducts();loadMe();renderCart();updateFavoriteCount();updateCompareUI();
 restartAllAutoSlides();

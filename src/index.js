@@ -167,7 +167,7 @@ async function listProducts(env,all=false){
   const optional=['discount_price','badge','featured','bestseller','newest','category','specs','stock_qty','low_stock_threshold','sale_start_at','sale_end_at'];
   const cols=base.concat(optional.filter(c=>names.has(c)));
   let q='SELECT '+cols.join(',')+' FROM products';
-  /* V177: keep out-of-stock products visible in listings */
+  /* V176: keep out-of-stock products visible; cart/checkout still enforce stock */
   q+=' ORDER BY id DESC';
   const rows=(await env.DB.prepare(q).all()).results||[];
   return rows.map(p=>{
@@ -430,6 +430,12 @@ export default {async fetch(request,env){
       return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
     }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
+
+    if(/^\/product\/\d+(?:-[^/]+)?\/?$/.test(path)&&request.method==='GET'){
+      const assetReq=new Request(new URL('/index.html',request.url),request);
+      return env.ASSETS.fetch(assetReq);
+    }
+
     return env.ASSETS.fetch(request);
   }catch(e){return json({error:'خطای سرور: '+(e?.message||'unknown')},500)}
 }};
