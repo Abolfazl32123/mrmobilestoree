@@ -104,9 +104,12 @@ function renderSpecialOffers(){
   grid.innerHTML=pageItems.map((p)=>{
     const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p);
     const pct=Math.max(1,Math.round((1-effective/price)*100));
-    return `<article class="offer-card" onclick="openProductDetail(${p.id})">
+    const stockQty=Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0);
+    const inStock=stockQty>0;
+    return `<article class="offer-card ${inStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       <div class="offer-img">
         <img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" loading="lazy">
+        ${!inStock?`<span class="stock-overlay">اتمام موجودی</span>`:''}
         <span class="offer-badge">${pct}٪ تخفیف</span>
         <button class="offer-fav" type="button" aria-label="افزودن به علاقه‌مندی" onclick="event.stopPropagation();toggleFavorite(${p.id})">♡</button>
       </div>
