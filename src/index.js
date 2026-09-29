@@ -167,7 +167,7 @@ async function listProducts(env,all=false){
   const optional=['discount_price','badge','featured','bestseller','newest','category','specs','stock_qty','low_stock_threshold','sale_start_at','sale_end_at'];
   const cols=base.concat(optional.filter(c=>names.has(c)));
   let q='SELECT '+cols.join(',')+' FROM products';
-  /* V176: keep out-of-stock products visible; cart/checkout still enforce stock */
+  /* V177: keep out-of-stock products visible in listings */
   q+=' ORDER BY id DESC';
   const rows=(await env.DB.prepare(q).all()).results||[];
   return rows.map(p=>{
