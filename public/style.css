@@ -1355,19 +1355,15 @@ html{scroll-behavior:auto}
 .product-card .product-discount-badge{position:absolute!important;left:10px!important;bottom:10px!important;width:42px!important;height:42px!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#ff3b55!important;color:#fff!important;font-size:11px!important;font-weight:900!important;line-height:1!important;z-index:5!important;pointer-events:none!important;direction:rtl!important;box-shadow:0 5px 14px rgba(255,59,85,.28)!important;}
 @media(max-width:700px){.product-card .product-discount-badge{width:34px!important;height:34px!important;left:7px!important;bottom:7px!important;font-size:9px!important;}}
 
-/* V168: payment actions - vertical, equal-size cards on all screens */
+/* V167: payment area - three equal actions */
 .payment-actions-three{
-  display:flex!important;
-  flex-direction:column!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
   gap:10px!important;
   margin-top:14px!important;
-  width:100%!important;
 }
 .payment-actions-three .payment-action{
-  width:100%!important;
   min-height:88px!important;
-  height:88px!important;
-  box-sizing:border-box!important;
   border:1px solid var(--line,#263b3e)!important;
   border-radius:16px!important;
   background:rgba(8,18,20,.9)!important;
@@ -1377,7 +1373,7 @@ html{scroll-behavior:auto}
   align-items:center!important;
   justify-content:center!important;
   gap:5px!important;
-  padding:10px 12px!important;
+  padding:10px 8px!important;
   font-weight:800!important;
   cursor:pointer!important;
 }
@@ -1386,7 +1382,7 @@ html{scroll-behavior:auto}
   opacity:.62!important;
   font-weight:500!important;
 }
-.payment-actions-three .payment-action-icon{font-size:19px!important;line-height:1!important}
+.payment-actions-three .payment-action-icon{font-size:19px!important}
 .payment-actions-three .payment-online{
   opacity:.62!important;
   cursor:not-allowed!important;
@@ -1398,199 +1394,20 @@ html{scroll-behavior:auto}
   box-shadow:0 8px 22px rgba(69,255,24,.18)!important;
 }
 .payment-actions-three .payment-receipt small{color:#071007!important}
-.payment-actions-three .payment-cancel{border-color:#6a3038!important}
-.payment-actions-three .payment-cancel:hover{background:rgba(120,25,35,.18)!important}
+.payment-actions-three .payment-cancel{
+  border-color:#6a3038!important;
+}
+.payment-actions-three .payment-cancel:hover{
+  background:rgba(120,25,35,.18)!important;
+}
 @media(max-width:700px){
+  .payment-actions-three{grid-template-columns:1fr!important}
   .payment-actions-three .payment-action{
-    min-height:88px!important;
-    height:88px!important;
-    flex-direction:column!important;
-    justify-content:center!important;
-    text-align:center!important;
-    padding:10px 12px!important;
+    min-height:64px!important;
+    flex-direction:row!important;
+    justify-content:flex-start!important;
+    text-align:right!important;
+    padding:10px 14px!important;
   }
-  .payment-actions-three .payment-action small{margin-right:0!important}
-}
-
-
-/* V169: wider, cleaner payment modal with compact responsive layout */
-.payment-card{
-  width:min(644px,calc(100vw - 28px))!important;
-  max-width:644px!important;
-  max-height:calc(100vh - 28px)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding:22px 24px!important;
-  border-radius:24px!important;
-  scrollbar-width:thin!important;
-  scrollbar-color:#4d6a58 #0a1012!important;
-}
-.payment-card::-webkit-scrollbar{width:7px!important}
-.payment-card::-webkit-scrollbar-track{background:#0a1012!important;border-radius:99px!important}
-.payment-card::-webkit-scrollbar-thumb{background:#3f5f4b!important;border-radius:99px!important}
-.payment-card .payment-icon{width:52px!important;height:52px!important;border-radius:15px!important;font-size:24px!important;margin:0 auto 8px!important}
-.payment-card h2{font-size:24px!important;margin:7px 0 3px!important}
-.payment-card>p{margin:5px 0!important}
-.payment-bank{
-  padding:13px 16px!important;
-  margin:12px 0!important;
-  border-radius:16px!important;
-}
-.payment-bank b{
-  font-size:24px!important;
-  letter-spacing:.7px!important;
-  margin:6px 0!important;
-  direction:ltr!important;
-}
-.payment-bank button{padding:7px 11px!important}
-.payment-instructions{font-size:10px!important;line-height:1.65!important;margin:8px 0!important}
-.payment-card .field{margin:9px 0!important}
-.payment-card .field label{margin-bottom:5px!important}
-.payment-card .field input{height:42px!important}
-.receipt-box{
-  padding:10px!important;
-  margin:10px 0!important;
-  border-radius:14px!important;
-}
-.receipt-pick{padding:9px 14px!important;font-size:11px!important}
-.receipt-box small{margin-top:6px!important;font-size:10px!important}
-.receipt-preview{max-height:135px!important;margin-top:8px!important}
-.payment-actions-three{
-  gap:8px!important;
-  margin-top:10px!important;
-}
-.payment-actions-three .payment-action{
-  min-height:66px!important;
-  height:66px!important;
-  border-radius:14px!important;
-  padding:7px 10px!important;
-  gap:3px!important;
-}
-.payment-actions-three .payment-action-icon{font-size:17px!important}
-.payment-actions-three .payment-action strong{font-size:12px!important}
-.payment-actions-three .payment-action small{font-size:9px!important}
-.payment-card #paymentError{min-height:14px!important;margin-top:5px!important}
-
-@media(max-width:700px){
-  .modal{padding:8px!important;align-items:center!important}
-  .payment-card{
-    width:calc(100vw - 16px)!important;
-    max-width:none!important;
-    max-height:calc(100vh - 16px)!important;
-    padding:16px 14px!important;
-    border-radius:20px!important;
-  }
-  .payment-card .payment-icon{width:46px!important;height:46px!important;font-size:21px!important;margin-bottom:5px!important}
-  .payment-card h2{font-size:21px!important;margin:5px 0 2px!important}
-  .payment-bank{padding:10px 12px!important;margin:9px 0!important}
-  .payment-bank b{font-size:21px!important}
-  .payment-instructions{font-size:9px!important;line-height:1.55!important}
-  .payment-card .field{margin:7px 0!important}
-  .payment-card .field input{height:40px!important}
-  .receipt-box{padding:8px!important;margin:8px 0!important}
-  .receipt-preview{max-height:105px!important}
-  .payment-actions-three .payment-action{
-    min-height:62px!important;
-    height:62px!important;
-  }
-}
-
-/* When content is slightly taller than the viewport, keep scrolling smooth and contained */
-.payment-card{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-
-/* eNAMAD official trust seal */
-.enamad-trust-wrap{margin:28px auto 0;padding:22px 18px;border-top:1px solid #182325;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;direction:rtl}.enamad-title{font-size:14px;font-weight:800;color:#fff}.enamad-logo{min-height:96px;display:flex;align-items:center;justify-content:center}.enamad-logo a{display:inline-flex;align-items:center;justify-content:center;line-height:0;text-decoration:none}.enamad-logo img{display:block;width:110px;height:auto;max-height:140px;object-fit:contain}.enamad-logo img[alt=""]{border:0}@media(max-width:700px){.enamad-trust-wrap{margin-top:22px;padding:18px 10px}.enamad-logo img{width:100px}}
-
-
-/* V175: mobile promo/featured card overlap fix */
-@media (max-width:700px){
-  /* Keep the special-offer promo card completely separate from product images */
-  .featured-products-layout{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    grid-template-rows:auto auto!important;
-    gap:12px!important;
-    width:100%!important;
-    min-width:0!important;
-    overflow:visible!important;
-    position:relative!important;
-    isolation:isolate!important;
-  }
-  .featured-products-layout>.featured-promo-card{
-    grid-column:1!important;
-    grid-row:1!important;
-    position:relative!important;
-    z-index:1!important;
-    width:100%!important;
-    min-width:0!important;
-    min-height:180px!important;
-    margin:0!important;
-    box-sizing:border-box!important;
-    overflow:hidden!important;
-  }
-  .featured-products-layout>.products-grid{
-    grid-column:1!important;
-    grid-row:2!important;
-    position:relative!important;
-    z-index:2!important;
-    width:100%!important;
-    min-width:0!important;
-    margin:0!important;
-    box-sizing:border-box!important;
-    overflow:hidden!important;
-  }
-  .featured-products-layout>.products-grid .product-card{
-    position:relative!important;
-    z-index:2!important;
-  }
-
-  /* Prevent the lower promotional banner from letting its product image
-     visually sit over the text/card on narrow screens. */
-  .premium-lower>.premium-promo{
-    position:relative!important;
-    z-index:1!important;
-    min-height:300px!important;
-    overflow:hidden!important;
-    display:flex!important;
-    align-items:center!important;
-  }
-  .premium-promo-art{
-    z-index:1!important;
-    pointer-events:none!important;
-  }
-  .premium-promo-art img{
-    z-index:1!important;
-    max-width:100%!important;
-  }
-  .premium-promo-copy{
-    position:relative!important;
-    z-index:5!important;
-    box-sizing:border-box!important;
-  }
-}
-
-
-/* V178: unique product pages + preserve original featured layout */
-.stock-overlay{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  z-index:20;display:inline-flex;align-items:center;justify-content:center;
-  min-width:110px;padding:9px 15px;border-radius:999px;
-  background:rgba(20,24,24,.94);border:1px solid rgba(255,78,78,.78);
-  color:#ff6666;font-size:12px;font-weight:900;white-space:nowrap;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);pointer-events:none;
-}
-.product-card .product-image,.offer-card .offer-img{position:relative}
-.product-card.unavailable .product-image img,.offer-card.unavailable .offer-img img{
-  filter:grayscale(.35) saturate(.7);opacity:.72;
-}
-.featured-products-layout{position:relative;isolation:isolate;overflow:visible}
-.featured-products-layout>.featured-promo-card{position:relative;z-index:10}
-.featured-products-layout>.products-grid{position:relative;z-index:1}
-.featured-products-layout>.products-grid .product-card{position:relative;z-index:2}
-.featured-promo-card:before,.featured-promo-card:after{z-index:0}
-.featured-promo-card>*{position:relative;z-index:2}
-@media(max-width:700px){
-  .featured-products-layout>.featured-promo-card{z-index:10}
-  .featured-products-layout>.products-grid{z-index:1}
-  .stock-overlay{min-width:92px;padding:8px 12px;font-size:10px}
+  .payment-actions-three .payment-action small{margin-right:auto!important}
 }

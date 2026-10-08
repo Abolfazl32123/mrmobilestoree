@@ -60,52 +60,6 @@ function renderFavorites(){
 function openFavorites(){renderFavorites();$('favoritesModal')?.classList.add('show')}
 function closeFavorites(){$('favoritesModal')?.classList.remove('show')}
 
-
-function productSlug(p){
-  const s=String(p?.name||'product').trim().toLowerCase()
-    .replace(/[^\u0600-\u06ffa-z0-9]+/gi,'-').replace(/^-+|-+$/g,'');
-  return s || 'product';
-}
-function productUrl(p){
-  return `/product/${Number(p.id)}-${productSlug(p)}`;
-}
-function syncProductPageMeta(p){
-  if(!p)return;
-  document.title=`${p.name||'محصول'} | آقای موبایل`;
-  let desc=document.querySelector('meta[name="description"]');
-  if(!desc){desc=document.createElement('meta');desc.name='description';document.head.appendChild(desc);}
-  desc.content=String(p.description||`${p.name||'محصول'} — فروشگاه آقای موبایل`).slice(0,155);
-  let canonical=document.querySelector('link[data-product-canonical]');
-  if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';canonical.dataset.productCanonical='1';document.head.appendChild(canonical);}
-  canonical.href=new URL(productUrl(p),location.origin).href;
-}
-function clearProductPageMeta(){
-  document.title='آقای موبایل | فروشگاه موبایل و لوازم جانبی';
-  const canonical=document.querySelector('link[data-product-canonical]');
-  if(canonical)canonical.remove();
-}
-function openProductRoute(id){
-  const p=state.products.find(x=>Number(x.id)===Number(id));
-  if(!p)return;
-  const target=productUrl(p);
-  if(location.pathname!==target) history.pushState({productId:Number(id)},'',target);
-  syncProductPageMeta(p);
-}
-function closeProductRoute(){
-  if(/^\/product\/\d+(?:-[^/]+)?\/?$/.test(location.pathname)){
-    history.pushState({},'', '/');
-    clearProductPageMeta();
-  }
-}
-function handleProductRoute(){
-  const m=location.pathname.match(/^\/product\/(\d+)(?:-[^/]+)?\/?$/);
-  if(!m)return false;
-  const id=Number(m[1]);
-  const p=state.products.find(x=>Number(x.id)===id);
-  if(p) openProductDetail(id,true);
-  return true;
-}
-
 function productSpecs(p){try{return typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{return {}}}
 
 function getEffectivePrice(p){const price=numeric(p.price),discount=numeric(p.discount_price);if(!(discount>0&&discount<price))return price;const now=Date.now(),start=p.sale_start_at?Date.parse(p.sale_start_at):null,end=p.sale_end_at?Date.parse(p.sale_end_at):null;return (!start||now>=start)&&(!end||now<=end)?discount:price}
@@ -150,12 +104,9 @@ function renderSpecialOffers(){
   grid.innerHTML=pageItems.map((p)=>{
     const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p);
     const pct=Math.max(1,Math.round((1-effective/price)*100));
-    const stockQty=Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0);
-    const inStock=stockQty>0;
-    return `<article class="offer-card ${inStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
+    return `<article class="offer-card" onclick="openProductDetail(${p.id})">
       <div class="offer-img">
         <img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" loading="lazy">
-        ${!inStock?`<span class="stock-overlay">اتمام موجودی</span>`:''}
         <span class="offer-badge">${pct}٪ تخفیف</span>
         <button class="offer-fav" type="button" aria-label="افزودن به علاقه‌مندی" onclick="event.stopPropagation();toggleFavorite(${p.id})">♡</button>
       </div>
@@ -200,7 +151,7 @@ async function loadProducts(){
     if(!r.ok) throw new Error('HTTP '+r.status+' '+raw.slice(0,180));
     const data=JSON.parse(raw);
     if(!Array.isArray(data)) throw new Error('پاسخ محصولات معتبر نیست');
-    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();handleProductRoute();
+    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();
   }catch(e){
     console.error('loadProducts failed',e);
     const grid=$('productsGrid');
@@ -269,7 +220,7 @@ function renderProducts(){
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
   updateFilterCount();
   if(!list.length){
-    $('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>هنوز محصولی برای نمایش وجود ندارد</strong><span>محصولات جدید به‌زودی در فروشگاه قرار می‌گیرند. منتظر پیشنهادهای جذاب آقای موبایل باشید!</span></div>';
+    $('productsGrid').innerHTML='<div class="products-empty-state"><div class="empty-icon">📦</div><strong>محصولی برای نمایش پیدا نشد</strong><span>محصولات واقعی فروشگاه از پنل مدیریت این بخش نمایش داده می‌شوند.</span></div>';
     renderProductsSliderControls(0);
     return;
   }
@@ -337,9 +288,8 @@ let detailTouchX=0;
 function initDetailSwipe(){const el=$('detailImage');if(!el||el.dataset.swipeReady)return;el.dataset.swipeReady='1';el.addEventListener('touchstart',e=>{detailTouchX=e.changedTouches[0].screenX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-detailTouchX;if(Math.abs(dx)>45){dx<0?nextDetailImage():prevDetailImage()}},{passive:true});}
 initDetailSwipe();
 
-window.openProductDetail=async function openProductDetail(id,fromRoute=false){
+window.openProductDetail=async function openProductDetail(id){
   const p=state.products.find(x=>Number(x.id)===Number(id)); if(!p)return;
-  if(!fromRoute) openProductRoute(Number(id)); else syncProductPageMeta(p);
   $('detailName').textContent=p.name||'محصول'; $('detailCondition').textContent=p.condition||'نو'; $('detailCategory').textContent=p.category||'موبایل';
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
@@ -362,7 +312,8 @@ window.openProductDetail=async function openProductDetail(id,fromRoute=false){
     'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
     'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
-    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
+    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']],
+    'پاوربانک':[['capacity','ظرفیت باتری'],['outputPower','توان خروجی'],['inputPower','توان ورودی'],['ports','تعداد / نوع پورت‌ها'],['fastCharge','شارژ سریع'],['pd','پشتیبانی از PD'],['qc','پشتیبانی از QC'],['wireless','شارژ بی‌سیم'],['display','نمایشگر درصد شارژ'],['weight','وزن'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']]
   };
   const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
   const box=$('detailSpecsRows');
@@ -391,7 +342,7 @@ function setDetailImage(i){const g=state.detailGallery;if(!g)return;g.index=Math
 function nextDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index+1)%g.urls.length;renderDetailGallery()}
 function prevDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index-1+g.urls.length)%g.urls.length;renderDetailGallery()}
 function zoomDetailImage(){const src=$('detailImage').src; if(src)window.open(src,'_blank','noopener,noreferrer')}
-function closeProductDetail(){$('productDetailModal').classList.remove('show');closeProductRoute()}
+function closeProductDetail(){$('productDetailModal').classList.remove('show')}
 
 {$('productDetailModal').classList.remove('show');}
 
@@ -487,7 +438,7 @@ async function openPayment(orderId,amount){
   if(!state.user)return openAuth('login');
   state.payment={orderId,amount:Number(amount)||0,receiptData:''};
   $('paymentOrderId').textContent='#'+fa(orderId);$('paymentAmount').textContent=toman(amount);$('paymentTracking').value='';$('receiptName').textContent='هنوز فایلی انتخاب نشده';$('receiptPreview').hidden=true;$('receiptPreview').src='';$('paymentError').textContent='';$('sendPaymentBtn').disabled=false;
-  try{const r=await fetch('/api/payment-settings',{cache:'no-store'});const st=r.ok?await r.json():{};$('paymentBank').textContent=st.bank_name||'کارت فروشگاه';$('paymentCard').textContent=st.card_number||'شماره کارت هنوز تنظیم نشده';$('paymentHolder').textContent=st.card_holder?'به نام '+st.card_holder:'';$('paymentInstructions').textContent=st.instructions||'پس از کارت‌به‌کارت، شماره پیگیری و تصویر رسید را ارسال کنید.';const online=!!st.gateway_enabled&&!!st.gateway_provider;$('onlinePayBtn').disabled=!online;$('onlinePayBtn').querySelector('strong').textContent=online?('پرداخت آنلاین با '+(st.gateway_provider==='zarinpal'?'زرین‌پال':st.gateway_provider==='zibal'?'زیبال':'درگاه آنلاین')):'پرداخت آنلاین';$('onlinePayBtn').querySelector('small').textContent=online?'ورود به درگاه امن':'هنوز تنظیم نشده';$('paymentError').textContent=''}catch(e){$('paymentBank').textContent='کارت فروشگاه';$('paymentCard').textContent='شماره کارت هنوز تنظیم نشده';$('paymentHolder').textContent='';$('paymentInstructions').textContent='اطلاعات کارت فروشگاه هنوز تنظیم نشده است.';$('onlinePayBtn').disabled=true;$('paymentError').textContent=''}
+  try{const st=await fetch('/api/payment-settings').then(r=>r.json());$('paymentBank').textContent=st.bank_name||'کارت فروشگاه';$('paymentCard').textContent=st.card_number||'شماره کارت هنوز تنظیم نشده';$('paymentHolder').textContent=st.card_holder?'به نام '+st.card_holder:'';$('paymentInstructions').textContent=st.instructions||'پس از کارت‌به‌کارت، شماره پیگیری و تصویر رسید را ارسال کنید.';const online=!!st.gateway_enabled&&!!st.gateway_provider;$('onlinePayBtn').disabled=!online;$('onlinePayBtn').textContent=online?('💳 پرداخت آنلاین با '+(st.gateway_provider==='zarinpal'?'زرین‌پال':st.gateway_provider==='zibal'?'زیبال':'درگاه آنلاین')):'💳 پرداخت آنلاین';$('onlinePayBtn').querySelector('small').textContent=online?'ورود به درگاه امن':'هنوز تنظیم نشده'}catch(e){$('paymentError').textContent='دریافت اطلاعات کارت انجام نشد.'}
   $('paymentModal').classList.add('show');
 }
 async function startOnlinePayment(){const btn=$('onlinePayBtn');btn.disabled=true;btn.textContent='در حال انتقال به درگاه...';$('paymentError').textContent='';try{const r=await fetch('/api/gateway/create',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({order_id:state.payment.orderId})});const d=await r.json();if(!r.ok)throw Error(d.error||'شروع پرداخت آنلاین ناموفق بود.');if(!d.url)throw Error('آدرس درگاه دریافت نشد.');location.href=d.url}catch(e){$('paymentError').textContent=e.message;btn.disabled=false;btn.textContent='💳 پرداخت آنلاین'}}
@@ -511,18 +462,6 @@ function closeInfo(){$('infoModal').classList.remove('show')}
 function cleanNewsletterField(){const el=$('newsletterEmail');if(el && el.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) el.value=''}
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',cleanNewsletterField); else cleanNewsletterField();
 function subscribe(){const e=$('newsletterEmail').value.trim();if(!e)return toast('ایمیل را وارد کنید');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return toast('لطفاً یک ایمیل معتبر وارد کنید');toast('ایمیل شما ثبت شد 🌱');$('newsletterEmail').value=''}
-
-
-window.addEventListener('popstate',()=>{
-  const m=location.pathname.match(/^\/product\/(\d+)(?:-[^/]+)?\/?$/);
-  if(m){
-    const p=state.products.find(x=>Number(x.id)===Number(m[1]));
-    if(p) openProductDetail(Number(m[1]),true);
-  }else{
-    $('productDetailModal')?.classList.remove('show');
-    clearProductPageMeta();
-  }
-});
 
 loadProducts();loadMe();renderCart();updateFavoriteCount();updateCompareUI();
 restartAllAutoSlides();
