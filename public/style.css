@@ -1423,3 +1423,9 @@ html{scroll-behavior:auto}
 .footer-enamad a{display:block;line-height:0;}
 .footer-enamad img{width:120px;max-width:100%;height:auto;object-fit:contain;}
 @media(max-width:700px){.footer-enamad{padding:22px 0}.footer-enamad img{width:105px}.stock-overlay{font-size:16px}}
+
+/* V183: make out-of-stock state visible for legacy products and offer cards */
+.offer-img{position:relative!important;}
+.offer-card.unavailable .offer-img img{filter:grayscale(.45) saturate(.65)!important;opacity:.68!important;}
+.offer-card.unavailable .stock-overlay{background:rgba(5,9,10,.52)!important;}
+.product-card.unavailable .stock-overlay{display:flex!important;}
