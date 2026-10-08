@@ -104,10 +104,11 @@ function renderSpecialOffers(){
   grid.innerHTML=pageItems.map((p)=>{
     const price=numeric(p.price),effective=getEffectivePrice(p),remain=saleRemaining(p);
     const pct=Math.max(1,Math.round((1-effective/price)*100));
-    return `<article class="offer-card ${Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0)>0?'':'unavailable'}" onclick="openProductDetail(${p.id})">
+    const offerQty=Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0); const offerInStock=offerQty>0;
+    return `<article class="offer-card ${offerInStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       <div class="offer-img">
-        ${Math.max(0,Number(p.quantity??p.stock_qty??(p.available?1:0))||0)<=0?`<span class="stock-overlay">ناموجود</span>`:''}
         <img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" loading="lazy">
+        ${!offerInStock?'<span class="stock-overlay">ناموجود</span>':''}
         <span class="offer-badge">${pct}٪ تخفیف</span>
         <button class="offer-fav" type="button" aria-label="افزودن به علاقه‌مندی" onclick="event.stopPropagation();toggleFavorite(${p.id})">♡</button>
       </div>
@@ -152,7 +153,7 @@ async function loadProducts(){
     if(!r.ok) throw new Error('HTTP '+r.status+' '+raw.slice(0,180));
     const data=JSON.parse(raw);
     if(!Array.isArray(data)) throw new Error('پاسخ محصولات معتبر نیست');
-    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();
+    state.products=data;populateAdvancedFilters();renderProducts();renderSpecialOffers();handleProductRoute();
   }catch(e){
     console.error('loadProducts failed',e);
     const grid=$('productsGrid');
@@ -239,7 +240,7 @@ function renderProducts(){
     return `<article class="product-card ${inStock?'':'unavailable'}" onclick="openProductDetail(${p.id})">
       ${p.badge?`<span class="badge">${esc(p.badge)}</span>`:''}
       <button class="wish ${isFavorite(p.id)?'active':''}" data-favorite-id="${p.id}" aria-pressed="${isFavorite(p.id)?'true':'false'}" title="${isFavorite(p.id)?'حذف از علاقه‌مندی‌ها':'افزودن به علاقه‌مندی‌ها'}" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button>
-      <div class="product-image">${hasDiscount?`<span class="product-discount-badge">${Math.max(1,Math.round((1-effective/price)*100))}٪</span>`:''}${!inStock?`<span class="stock-overlay">ناموجود</span>`:''}<img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
+      <div class="product-image">${hasDiscount?`<span class="product-discount-badge">${Math.max(1,Math.round((1-effective/price)*100))}٪</span>`:''}${!inStock?'<span class="stock-overlay">ناموجود</span>':''}<img src="${esc(imgUrl(p))}" alt="${esc(p.name)}" onerror="this.src='/assets/mr-mobile-logo.png'"></div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-meta">${esc(p.condition||'نو')} · ${esc(getBrand(p.name))}${getStorage(p)!=='—'?' · '+esc(getStorage(p)):''}</div>
       <div class="product-bottom"><div class="price">${toman(effective)} ${hasDiscount?`<del>${toman(price)}</del>`:''}</div><div class="stock-mini ${inStock?'in':'out'}">${inStock?`● موجود · ${stockQty.toLocaleString('fa-IR')} عدد`:'● ناموجود'}</div><button class="add-btn" aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" ${inStock?'':'disabled'} onclick="event.stopPropagation();addToCart(${p.id})">${inStock?'🛒':'×'}</button></div>${remain?`<div class="sale-countdown" data-sale-end="${Date.now()+remain}">${formatCountdown(remain)}</div>`:''}
@@ -289,8 +290,17 @@ let detailTouchX=0;
 function initDetailSwipe(){const el=$('detailImage');if(!el||el.dataset.swipeReady)return;el.dataset.swipeReady='1';el.addEventListener('touchstart',e=>{detailTouchX=e.changedTouches[0].screenX},{passive:true});el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-detailTouchX;if(Math.abs(dx)>45){dx<0?nextDetailImage():prevDetailImage()}},{passive:true});}
 initDetailSwipe();
 
-window.openProductDetail=async function openProductDetail(id){
+function productSlug(p){return String(p?.name||'product').trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'')||'product'}
+function productUrl(p){return '/product/'+encodeURIComponent(String(p.id))+'-'+encodeURIComponent(productSlug(p))}
+function syncProductMeta(p){document.title=(p?.name?String(p.name)+' | ':'')+'آقای موبایل | فروشگاه موبایل و لوازم جانبی';let c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement('link');c.rel='canonical';document.head.appendChild(c)}c.href=new URL(productUrl(p),location.origin).href}
+function openProductRoute(id){const p=state.products.find(x=>Number(x.id)===Number(id));if(!p)return;const u=productUrl(p);if(location.pathname!==u){history.pushState({productId:Number(id)},'',u)}syncProductMeta(p)}
+function closeProductRoute(){if(location.pathname.startsWith('/product/')){history.pushState({},'',location.pathname.replace(/^\/product\/[^/]+/,'/')||'/')}document.title='آقای موبایل | فروشگاه موبایل و لوازم جانبی';const c=document.querySelector('link[rel="canonical"]');if(c)c.href=location.origin+'/'}
+function handleProductRoute(){const m=location.pathname.match(/^\/product\/(\d+)(?:-[^/]+)?\/?$/);if(!m)return;const id=Number(m[1]);if(state.products.some(x=>Number(x.id)===id))openProductDetail(id,true)}
+window.addEventListener('popstate',()=>{if(location.pathname.startsWith('/product/'))handleProductRoute();else if($('productDetailModal'))$('productDetailModal').classList.remove('show')});
+
+window.openProductDetail=async function openProductDetail(id,fromRoute=false){
   const p=state.products.find(x=>Number(x.id)===Number(id)); if(!p)return;
+  if(!fromRoute)openProductRoute(id);
   $('detailName').textContent=p.name||'محصول'; $('detailCondition').textContent=p.condition||'نو'; $('detailCategory').textContent=p.category||'موبایل';
   $('detailDesc').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.'; $('detailDescriptionFull').textContent=p.description||'برای این محصول توضیحی ثبت نشده است.';
   const price=numeric(p.price),discount=numeric(p.discount_price),effective=getEffectivePrice(p),hasDiscount=effective<price;
@@ -309,14 +319,14 @@ window.openProductDetail=async function openProductDetail(id){
   const detailSpecConfig={
     'موبایل':[['batteryHealth','سلامت باتری'],['appearance','وضعیت ظاهری'],['registry','رجیستری'],['simCount','تعداد سیم‌کارت'],['ram','RAM'],['storage','حافظه داخلی'],['color','رنگ'],['processor','پردازنده'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'لوازم جانبی':[['compatibility','سازگاری'],['connection','نوع اتصال'],['material','جنس'],['power','توان / ظرفیت'],['length','طول'],['color','رنگ'],['model','مدل / نسخه'],['accessories','لوازم همراه'],['warranty','گارانتی']],
-    'ایرپاد':[['model','مدل / نسل'],['connection','نوع اتصال'],['battery','شارژدهی ایرپاد'],['caseBattery','شارژدهی با کیس'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['controls','کنترل‌ها'],['chargingPort','درگاه شارژ کیس'],['wirelessCharge','شارژ بی‌سیم کیس'],['compatibility','سازگاری'],['color','رنگ'],['accessories','اقلام همراه'],['warranty','گارانتی']],
-    'لوازم جانبی خودرو':[['type','نوع محصول'],['compatibility','سازگاری'],['connection','نوع اتصال'],['power','توان خروجی'],['ports','تعداد / نوع پورت‌ها'],['inputVoltage','ولتاژ ورودی'],['fastCharge','شارژ سریع'],['mount','نوع نصب'],['material','جنس بدنه'],['color','رنگ'],['accessories','اقلام همراه'],['warranty','گارانتی']],
     'تبلت':[['display','اندازه صفحه‌نمایش'],['os','سیستم‌عامل'],['ram','RAM'],['processor','پردازنده'],['battery','ظرفیت باتری'],['simCount','تعداد سیم‌کارت'],['camera','دوربین'],['color','رنگ'],['warranty','گارانتی']],
     'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
     'هدفون':[['type','نوع'],['connection','اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
     'اسپیکر':[['power','توان خروجی'],['connection','اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
     'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']],
-    'پاوربانک':[['capacity','ظرفیت باتری'],['outputPower','توان خروجی'],['inputPower','توان ورودی'],['ports','تعداد / نوع پورت‌ها'],['fastCharge','شارژ سریع'],['pd','پشتیبانی از PD'],['qc','پشتیبانی از QC'],['wireless','شارژ بی‌سیم'],['display','نمایشگر درصد شارژ'],['weight','وزن'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']]
+    'پاوربانک':[['capacity','ظرفیت باتری'],['outputPower','توان خروجی'],['inputPower','توان ورودی'],['ports','تعداد / نوع پورت‌ها'],['fastCharge','شارژ سریع'],['pd','پشتیبانی از PD'],['qc','پشتیبانی از QC'],['wireless','شارژ بی‌سیم'],['display','نمایشگر درصد شارژ'],['weight','وزن'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'ایرپاد':[['generation','نسل / مدل'],['connection','نوع اتصال'],['battery','شارژدهی'],['caseBattery','باتری کیس'],['noiseCancel','حذف نویز ANC'],['transparency','حالت شفافیت'],['microphone','میکروفون'],['charging','نوع شارژ کیس'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
+    'لوازم جانبی خودرو':[['type','نوع محصول'],['compatibility','سازگاری خودرو'],['inputVoltage','ولتاژ ورودی'],['outputPower','توان خروجی'],['ports','درگاه‌ها'],['fastCharge','شارژ سریع'],['installation','نوع نصب'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
   };
   const specRows=detailSpecConfig[p.category||'موبایل']||detailSpecConfig['لوازم جانبی'];
   const box=$('detailSpecsRows');
@@ -345,7 +355,7 @@ function setDetailImage(i){const g=state.detailGallery;if(!g)return;g.index=Math
 function nextDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index+1)%g.urls.length;renderDetailGallery()}
 function prevDetailImage(){const g=state.detailGallery;if(!g||g.urls.length<2)return;g.index=(g.index-1+g.urls.length)%g.urls.length;renderDetailGallery()}
 function zoomDetailImage(){const src=$('detailImage').src; if(src)window.open(src,'_blank','noopener,noreferrer')}
-function closeProductDetail(){$('productDetailModal').classList.remove('show')}
+function closeProductDetail(){$('productDetailModal').classList.remove('show');closeProductRoute()}
 
 {$('productDetailModal').classList.remove('show');}
 

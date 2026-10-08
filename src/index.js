@@ -430,6 +430,10 @@ export default {async fetch(request,env){
       return json((await env.DB.prepare(`SELECT u.id,u.name,u.phone,u.created_at,COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC`).all()).results);
     }
     if(path==='/api/me'&&request.method==='GET')return json({admin:await adminOK(request,env)});
+    if(/^\/product\/\d+(?:-[^/]+)?\/?$/.test(path)&&request.method==='GET'){
+      const assetReq=new Request(new URL('/index.html',request.url),request);
+      return env.ASSETS.fetch(assetReq);
+    }
     return env.ASSETS.fetch(request);
   }catch(e){return json({error:'خطای سرور: '+(e?.message||'unknown')},500)}
 }};

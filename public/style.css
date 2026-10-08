@@ -1412,11 +1412,14 @@ html{scroll-behavior:auto}
   .payment-actions-three .payment-action small{margin-right:auto!important}
 }
 
-/* V180 isolated fixes: unavailable products remain visible but cannot be purchased */
-.product-image,.offer-img{position:relative;}
-.stock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(12,15,16,.58);color:#fff;font-size:22px;font-weight:900;letter-spacing:.2px;text-shadow:0 2px 10px rgba(0,0,0,.7);z-index:3;pointer-events:none;}
-.product-card.unavailable .product-image img,.offer-card.unavailable .offer-img img{filter:grayscale(.35) saturate(.72);opacity:.72;}
-.footer-enamad-wrap{display:flex;align-items:center;justify-content:center;margin:8px 0 4px;}
-.footer-enamad-wrap a{display:block;border-radius:12px;overflow:hidden;line-height:0;}
-.footer-enamad-wrap img{display:block;width:92px;height:auto;max-height:110px;object-fit:contain;background:#fff;border-radius:10px;}
-@media(max-width:700px){.footer-enamad-wrap{margin:10px 0 2px}.footer-enamad-wrap img{width:84px}.stock-overlay{font-size:18px}}
+/* V182: out-of-stock presentation */
+.product-image{position:relative!important;}
+.stock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,9,10,.48);color:#fff;font-size:20px;font-weight:900;letter-spacing:.3px;z-index:6;pointer-events:none;}
+.product-card.unavailable .product-image img{filter:grayscale(.35) saturate(.7);opacity:.68;}
+.add-btn:disabled{opacity:.45!important;cursor:not-allowed!important;filter:grayscale(.35);}
+/* V182: enamad block */
+.footer-enamad{border-top:1px solid #182325;padding:26px 0 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.footer-enamad h4{margin:0!important;font-size:14px!important;color:#f0f5f3;}
+.footer-enamad a{display:block;line-height:0;}
+.footer-enamad img{width:120px;max-width:100%;height:auto;object-fit:contain;}
+@media(max-width:700px){.footer-enamad{padding:22px 0}.footer-enamad img{width:105px}.stock-overlay{font-size:16px}}
