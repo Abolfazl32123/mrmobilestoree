@@ -1444,3 +1444,20 @@ html{scroll-behavior:auto}
 .premium-promo-art{background:transparent!important;isolation:isolate;}
 .premium-promo-art img{display:block;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;mix-blend-mode:normal!important;object-fit:contain!important;padding:0!important;}
 .promo-used .premium-promo-art img,.promo-accessories .premium-promo-art img{background-color:transparent!important;}
+
+/* V192: category product thumbnails styled like clean studio product cards */
+.categories .category-card .category-art{
+  background:#fff!important;
+  border:1px solid rgba(255,255,255,.8)!important;
+  border-radius:14px!important;
+  padding:5px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  box-shadow:0 4px 16px rgba(0,0,0,.12)!important;
+}
+.categories .category-card .category-art img{
+  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;object-position:center!important;border-radius:0!important;
+  background:transparent!important;mix-blend-mode:normal!important;
+}
+.categories .category-card:hover .category-art{box-shadow:0 6px 20px rgba(0,0,0,.18)!important;border-color:#fff!important}
