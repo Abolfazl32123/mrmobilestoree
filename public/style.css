@@ -1438,3 +1438,9 @@ html{scroll-behavior:auto}
 /* V190: use transparent source photos in promo cards; remove baked rectangular backgrounds */
 .premium-promo-art{background:transparent!important;}
 .premium-promo-art img{background:transparent!important;mix-blend-mode:normal!important;object-fit:contain;filter:drop-shadow(0 20px 24px rgba(0,0,0,.34))!important;}
+
+
+/* V191: remove image-canvas backgrounds from the two lower promotional cards */
+.premium-promo-art{background:transparent!important;isolation:isolate;}
+.premium-promo-art img{display:block;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;mix-blend-mode:normal!important;object-fit:contain!important;padding:0!important;}
+.promo-used .premium-promo-art img,.promo-accessories .premium-promo-art img{background-color:transparent!important;}
