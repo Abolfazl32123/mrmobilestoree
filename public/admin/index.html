@@ -363,7 +363,7 @@ function openProductForm(p=null){
   $('imageFile').value='';renderImagePreview();$('msg').textContent='';$('productModal').hidden=false;
 }
 function closeProductForm(){$('productModal').hidden=true;editing=null;selectedImageData=[];originalEditImages=[];originalEditImageText=''}
-function clearImageFile(){selectedImageData=[];$('imageFile').value='';$('fileName').textContent='فایلی انتخاب نشده';renderImagePreview()}
+function clearImageFile(){selectedImageData=[];originalEditImages=[];originalEditImageText='';$('imageFile').value='';$('imageUrl').value='';$('fileName').textContent='فایلی انتخاب نشده';renderImagePreview()}
 $('category').addEventListener('change',()=>{renderSpecFields($('category').value,{});});
 $('imageUrl').addEventListener('input',()=>{
   selectedImageData=[];
@@ -372,18 +372,32 @@ $('imageUrl').addEventListener('input',()=>{
 $('imageFile').addEventListener('change',async()=>{
   const files=[...($('imageFile').files||[])];
   if(!files.length)return;
-  if(files.length>5){$('imageFile').value='';$('msg').textContent='حداکثر ۵ تصویر برای هر محصول انتخاب کنید.';return}
+  // Add each new selection to the current gallery instead of replacing earlier images.
+  const previous=[...selectedImageData];
+  const existingCount=previous.length || (editing ? originalEditImages.length : splitImageInput($('imageUrl').value).length);
+  if(existingCount+files.length>5){
+    $('imageFile').value='';
+    $('msg').textContent=`در حال حاضر ${existingCount} تصویر دارید؛ حداکثر ۵ تصویر مجاز است.`;
+    return;
+  }
   try{
-    selectedImageData=[];
-    for(const f of files)selectedImageData.push(await compressImage(f));
-    const total=selectedImageData.join('\n').length;
+    const newlySelected=[];
+    for(const f of files)newlySelected.push(await compressImage(f));
+    const combined=[...previous,...newlySelected];
+    const total=combined.join('\n').length;
     if(total>1650000)throw new Error('حجم مجموع تصاویر زیاد است؛ لطفاً تعداد یا کیفیت تصاویر را کمتر کنید.');
+    selectedImageData=combined;
     $('imageUrl').value=selectedImageData.join('\n');
-    $('fileName').textContent=`${files.length} تصویر انتخاب شد`;
+    $('fileName').textContent=`${selectedImageData.length} تصویر انتخاب شد`;
     renderImagePreview();$('msg').textContent='';
   }catch(e){
-    selectedImageData=[];$('imageFile').value='';$('msg').textContent=e.message||'خطا در آماده‌سازی تصاویر.'
+    selectedImageData=previous;
+    $('imageFile').value='';
+    $('msg').textContent=e.message||'خطا در آماده‌سازی تصاویر.';
+    renderImagePreview();
   }
+  // Clear the native input so the same file can be picked again if needed.
+  $('imageFile').value='';
 });
 function compressImage(file){
   return new Promise((resolve,reject)=>{
