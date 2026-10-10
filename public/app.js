@@ -582,6 +582,21 @@ async function renderLoyaltyClub(){
 async function copyReferralCode(code){if(!code||code==='—')return;try{await navigator.clipboard.writeText(code);toast('کد دعوت کپی شد ✓')}catch{toast('کپی خودکار در این مرورگر در دسترس نیست')}}
 
 
+// V185: make the hero "درباره ما" button use controlled scrolling like the main nav.
+// Native hash jumps could land incorrectly while the lower sections are laid out.
+document.querySelectorAll('a.hero-secondary-btn[href="#about"]').forEach(link=>{
+  link.addEventListener('click',function(e){
+    const target=document.getElementById('about');
+    if(!target)return;
+    e.preventDefault();
+    const nav=document.getElementById('mainNav');
+    const navH=nav ? nav.getBoundingClientRect().height : 0;
+    const y=target.getBoundingClientRect().top + window.scrollY - navH - 18;
+    history.replaceState(null,'','#about');
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+  });
+});
+
 // V153: controlled main navigation. Use an offset-aware scroll so sticky navigation
 // never leaves a section hidden underneath the bar or appears to break the page.
 (function(){
