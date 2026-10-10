@@ -11,3 +11,12 @@ V155: the main products section now paginates into a slider with 5 products per 
 V156: both product and special-offers sliders auto-advance every 3 seconds and loop.
 
 V158: mobile-only special-offers card sizing and newsletter/about spacing. Desktop styles untouched.
+
+## بازیابی رمز عبور با ایمیل (V186)
+برای ارسال کد بازیابی، این نسخه از Resend API در سمت Worker استفاده می‌کند. کلیدها را در Cloudflare Worker > Settings > Variables and Secrets تنظیم کنید:
+- `RESEND_API_KEY` (Secret): کلید API از Resend
+- `EMAIL_FROM` (Text): فرستنده تأییدشده در Resend، مانند `MR Mobile <no-reply@your-verified-domain.com>`
+
+دامنه فرستنده باید در Resend تأیید شده باشد. Cloudflare Email Routing فقط برای دریافت ایمیل است و به‌تنهایی ارسال ایمیل انجام نمی‌دهد. سپس Worker را Deploy کنید.
+
+کاربران جدید هنگام ثبت‌نام باید ایمیل وارد کنند. کاربران قدیمی باید پس از ورود، از بخش «حساب کاربری» ایمیل خود را ذخیره کنند تا بتوانند رمز را از طریق آن بازیابی کنند. کد ۶ رقمی ۱۰ دقیقه اعتبار دارد؛ تعداد درخواست و تلاش برای جلوگیری از سوءاستفاده محدود شده است.

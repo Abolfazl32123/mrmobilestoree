@@ -292,7 +292,9 @@
     <section class="auth-panel auth-single-panel">
       <div class="auth-panel-head"><span class="auth-welcome">سلام! 👋</span><h2 id="authTitle">ورود به حساب</h2><p id="authSub">برای ادامه وارد حساب کاربری خود شوید.</p></div>
       <div class="auth-tabs"><button id="authLoginTab" class="active" onclick="setAuthMode('login')">ورود به حساب</button><button id="authRegisterTab" onclick="setAuthMode('register')">ساخت حساب کاربری</button></div>
+      <div id="authMain">
       <div id="registerNameWrap" class="field hidden"><label>نام و نام خانوادگی</label><input id="authName" autocomplete="name" placeholder="مثلاً ابوالفضل رجبی"></div>
+      <div id="registerEmailWrap" class="field hidden"><label>ایمیل (برای بازیابی رمز)</label><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
       <div class="field"><label>شماره موبایل</label><input id="authPhone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx"></div>
       <div class="field"><label>رمز عبور</label><div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید"><button type="button" onclick="toggleAuthPassword()" aria-label="نمایش رمز">◉</button></div></div>
       <div class="auth-options"><label><input id="authRemember" type="checkbox" checked> مرا به خاطر بسپار</label><button type="button" onclick="authRecovery()">فراموشی رمز عبور؟</button></div>
@@ -302,6 +304,16 @@
       <div class="auth-security"><span>✓</span><div><b>ورود امن و رمزگذاری‌شده</b><small>اطلاعات حساب شما نزد ما محفوظ است.</small></div></div>
       <button id="authSwitch" class="switch-auth" onclick="switchAuth()">ثبت نام نکرده‌اید؟ ثبت نام کنید</button>
       <div id="authError" class="form-error"></div>
+      </div>
+      <div id="recoveryPanel" class="hidden">
+        <div class="field"><label>ایمیل ثبت‌شده در حساب</label><input id="recoveryEmail" type="email" autocomplete="email" placeholder="name@example.com"></div>
+        <button id="recoverySendBtn" class="btn primary full" type="button" onclick="sendRecoveryCode()">ارسال کد به ایمیل</button>
+        <div id="recoveryCodeWrap" class="field hidden"><label>کد ۶ رقمی ایمیل</label><input id="recoveryCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="کد تأیید"></div>
+        <div id="recoveryPasswordWrap" class="field hidden"><label>رمز عبور جدید</label><input id="recoveryPassword" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر"></div>
+        <div id="recoveryError" class="form-error"></div>
+        <button id="recoveryFinishBtn" class="btn primary full hidden" type="button" onclick="finishRecovery()">تأیید کد و تغییر رمز</button>
+        <button class="switch-auth" type="button" onclick="cancelRecovery()">بازگشت به ورود</button>
+      </div>
     </section>
   </div>
 </div>
