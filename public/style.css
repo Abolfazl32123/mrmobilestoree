@@ -1461,3 +1461,7 @@ html{scroll-behavior:auto}
   background:transparent!important;mix-blend-mode:normal!important;
 }
 .categories .category-card:hover .category-art{box-shadow:0 6px 20px rgba(0,0,0,.18)!important;border-color:#fff!important}
+
+/* V193: preserve product colors while using clean white image tiles */
+.categories .category-card .category-art{background:#fff!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:15px!important;overflow:hidden!important;padding:4px!important;box-sizing:border-box!important;}
+.categories .category-card .category-art img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;border-radius:10px!important;background:transparent!important;}
