@@ -415,7 +415,7 @@ export default {async fetch(request,env){
       await ensureCustomerTables(env);
       const p=await env.DB.prepare('SELECT COUNT(*) AS c FROM products').first();
       const u=await env.DB.prepare('SELECT COUNT(*) AS c FROM users').first();
-      const o=await env.DB.prepare('SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total, COALESCE(AVG(total),0) AS avg FROM orders WHERE (EXISTS (SELECT 1 FROM payments px WHERE px.order_id=orders.id) OR EXISTS (SELECT 1 FROM gateway_transactions gx WHERE gx.order_id=orders.id AND gx.status='paid'))').first();
+      const o=await env.DB.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total, COALESCE(AVG(total),0) AS avg FROM orders WHERE (EXISTS (SELECT 1 FROM payments px WHERE px.order_id=orders.id) OR EXISTS (SELECT 1 FROM gateway_transactions gx WHERE gx.order_id=orders.id AND gx.status='paid'))").first();
       const n=await env.DB.prepare("SELECT COUNT(*) AS c FROM orders WHERE status='در انتظار بررسی' AND (EXISTS (SELECT 1 FROM payments px WHERE px.order_id=orders.id) OR EXISTS (SELECT 1 FROM gateway_transactions gx WHERE gx.order_id=orders.id AND gx.status='paid'))").first();
       const done=await env.DB.prepare("SELECT COUNT(*) AS c FROM orders WHERE status='تکمیل شده' AND (EXISTS (SELECT 1 FROM payments px WHERE px.order_id=orders.id) OR EXISTS (SELECT 1 FROM gateway_transactions gx WHERE gx.order_id=orders.id AND gx.status='paid'))").first();
       const today=await env.DB.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(total),0) AS total FROM orders WHERE date(created_at)=date('now','localtime') AND (EXISTS (SELECT 1 FROM payments px WHERE px.order_id=orders.id) OR EXISTS (SELECT 1 FROM gateway_transactions gx WHERE gx.order_id=orders.id AND gx.status='paid'))").first();
