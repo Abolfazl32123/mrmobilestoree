@@ -1465,3 +1465,18 @@ html{scroll-behavior:auto}
 /* V193: preserve product colors while using clean white image tiles */
 .categories .category-card .category-art{background:#fff!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:15px!important;overflow:hidden!important;padding:4px!important;box-sizing:border-box!important;}
 .categories .category-card .category-art img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;border-radius:10px!important;background:transparent!important;}
+
+/* V194: transparent natural product cutouts for category cards */
+.categories .category-card .category-art{
+  height:78px!important; padding:0!important; overflow:hidden!important;
+  display:grid!important; place-items:center!important;
+  background:transparent!important; border:0!important; border-radius:12px!important;
+  box-shadow:none!important;
+}
+.categories .category-card .category-art img{
+  width:100%!important; height:100%!important; max-width:100%!important; max-height:100%!important;
+  object-fit:contain!important; object-position:center!important; display:block!important;
+  border-radius:0!important; background:transparent!important;
+}
+@media(max-width:900px){.categories .category-card .category-art{height:74px!important}}
+@media(max-width:600px){.categories .category-card .category-art{height:72px!important}}
