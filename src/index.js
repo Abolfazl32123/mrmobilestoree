@@ -184,6 +184,45 @@ async function listProducts(env,all=false){
   });
 }
 
+
+async function sendFarazSms(env, recipients, text) {
+  const apiKey = String(env.FARAZSMS_API_KEY || '').trim();
+  const lineNumber = String(env.FARAZSMS_LINE_NUMBER || '').trim();
+  const list = (Array.isArray(recipients) ? recipients : [recipients])
+    .map(v => String(v || '').replace(/[^\d+]/g, '').trim())
+    .filter(v => v.length >= 10 && v.length <= 16);
+  if (!apiKey || !lineNumber) return { ok: false, skipped: true, error: 'تنظیمات پیامک فراز کامل نیست.' };
+  if (!list.length) return { ok: false, skipped: true, error: 'شماره دریافت‌کننده معتبر نیست.' };
+  const response = await fetch('https://api.iranpayamak.com/ws/v1/sms/simple', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Api-Key': apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      text: String(text || '').slice(0, 900),
+      line_number: lineNumber,
+      recipients: list,
+      number_format: 'persian',
+      schedule: null
+    })
+  });
+  const bodyText = await response.text();
+  let body;
+  try { body = JSON.parse(bodyText); } catch { body = { raw: bodyText.slice(0, 500) }; }
+  return { ok: response.ok, status: response.status, body };
+}
+
+async function notifyOrderPhone(env, orderId, text) {
+  try {
+    const row = await env.DB.prepare('SELECT phone FROM order_addresses WHERE order_id=? ORDER BY id DESC LIMIT 1').bind(orderId).first();
+    if (row?.phone) await sendFarazSms(env, [row.phone], text);
+  } catch (e) {
+    console.error('FarazSMS order notification failed', String(e?.message || e));
+  }
+}
+
 export default {async fetch(request,env){
   const url=new URL(request.url),path=url.pathname;
   try{
@@ -325,6 +364,15 @@ export default {async fetch(request,env){
     }
     if(path==='/api/login'&&request.method==='POST'){if(!env.ADMIN_PASSWORD||!env.ADMIN_SECRET)return json({error:'ADMIN_PASSWORD و ADMIN_SECRET تنظیم نشده‌اند.'},500);const b=await request.json().catch(()=>({}));if(b.password!==env.ADMIN_PASSWORD)return json({error:'رمز عبور اشتباه است.'},401);const exp=Date.now()+8*3600000,token=await signSession(env.ADMIN_SECRET,'mr_admin',{exp});return json({ok:true,token},200,{'Set-Cookie':cookie('mr_admin',token,28800)})}
     if(path==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'Set-Cookie':cookie('mr_admin','',0)})
+    if(path==='/api/admin/sms/test'&&request.method==='POST'){
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);
+      const b=await request.json().catch(()=>({}));
+      const phone=String(b.phone||'').trim();
+      if(!/^\+?\d{10,15}$/.test(phone.replace(/[\s()-]/g,'')))return json({error:'شماره موبایل معتبر وارد کنید.'},400);
+      const result=await sendFarazSms(env,[phone],String(b.text||'پیام آزمایشی فروشگاه آقای موبایل از طریق فراز اس‌ام‌اس.').trim());
+      if(!result.ok)return json({ok:false,error:'ارسال پیامک ناموفق بود.',details:result.body||result.error||null,status:result.status||null},502);
+      return json({ok:true,message:'درخواست ارسال پیامک به فراز ارسال شد.',provider:result.body||null});
+    }
     if(path==='/api/admin/reviews'&&request.method==='GET'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const rows=(await env.DB.prepare(`SELECT r.id,r.product_id,r.user_id,r.rating,r.comment,r.status,r.created_at,p.name AS product_name,u.name AS customer_name,u.phone FROM product_reviews r LEFT JOIN products p ON p.id=r.product_id LEFT JOIN users u ON u.id=r.user_id ORDER BY r.id DESC`).all()).results;return json(rows)}
     if(path.match(/^\/api\/admin\/reviews\/\d+\/status$/)&&request.method==='PUT'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const status=['pending','approved','rejected'].includes(b.status)?b.status:'pending';await env.DB.prepare('UPDATE product_reviews SET status=? WHERE id=?').bind(status,id).run();return json({ok:true})}
     if(path.match(/^\/api\/admin\/reviews\/\d+$/)&&request.method==='DELETE'){if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureReviewTables(env);const id=Number(path.split('/').pop());await env.DB.prepare('DELETE FROM product_reviews WHERE id=?').bind(id).run();return json({ok:true})}
@@ -446,10 +494,12 @@ export default {async fetch(request,env){
       }
       if(status==='ارسال شد')await env.DB.prepare("UPDATE orders SET status='در حال ارسال' WHERE id=? AND status NOT IN ('لغو شده','تکمیل شده')").bind(id).run();
       if(status==='تحویل داده شد')await env.DB.prepare("UPDATE orders SET status='تکمیل شده' WHERE id=? AND status!='لغو شده'").bind(id).run();
+      const shipMessage=status==='ارسال شد'?`فروشگاه آقای موبایل: سفارش #${id} ارسال شد.${tracking?` کد رهگیری: ${tracking}.`:''}`:status==='تحویل داده شد'?`فروشگاه آقای موبایل: سفارش #${id} تحویل داده شد.`:`فروشگاه آقای موبایل: وضعیت ارسال سفارش #${id} به «${status}» تغییر کرد.`;
+      await notifyOrderPhone(env,id,shipMessage);
       return json({ok:true});
     }
     if(path.startsWith('/api/admin/orders/')&&path.endsWith('/status')&&request.method==='PUT'){
-      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const allowed=['در انتظار بررسی','تأیید شده','در حال ارسال','تکمیل شده','لغو شده'];if(!allowed.includes(b.status))return json({error:'وضعیت نامعتبر است.'},400);await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(b.status,id).run();return json({ok:true});
+      if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);const id=Number(path.split('/')[4]);const b=await request.json().catch(()=>({}));const allowed=['در انتظار بررسی','تأیید شده','در حال ارسال','تکمیل شده','لغو شده'];if(!allowed.includes(b.status))return json({error:'وضعیت نامعتبر است.'},400);await env.DB.prepare('UPDATE orders SET status=? WHERE id=?').bind(b.status,id).run();await notifyOrderPhone(env,id,`فروشگاه آقای موبایل: وضعیت سفارش #${id} به «${b.status}» تغییر کرد.`);return json({ok:true});
     }
     if(path==='/api/admin/users'&&request.method==='GET'){
       if(!await adminOK(request,env))return json({error:'Unauthorized'},401);await ensureCustomerTables(env);

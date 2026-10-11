@@ -1,0 +1,33 @@
+FarazSMS integration - V191 baseline
+
+Added:
+- Server-side FarazSMS sender using Cloudflare Worker secrets:
+  FARAZSMS_API_KEY (Secret)
+  FARAZSMS_LINE_NUMBER (Secret or Text)
+- Admin-only test endpoint: POST /api/admin/sms/test
+- Customer SMS notifications when an admin changes order status or shipping status/tracking code.
+
+Security:
+- API key is read only from Worker environment and never sent to the browser.
+- The test endpoint requires existing admin authentication.
+- No SMS is sent at deployment time.
+- Password-reset email (Resend) and other existing flows are unchanged.
+
+Test after deployment:
+1. Log in to the admin panel in the same browser.
+2. Open browser DevTools Console on the store's domain.
+3. Run this, replacing the phone number with your own mobile number:
+fetch('/api/admin/sms/test', {
+  method: 'POST',
+  headers: {'Content-Type':'application/json'},
+  credentials: 'same-origin',
+  body: JSON.stringify({phone: '09XXXXXXXXX', text: 'پیام آزمایشی فروشگاه آقای موبایل'})
+}).then(r => r.json()).then(console.log)
+
+The test sends a real SMS and may incur a fee. Run only when ready.
+If the response reports provider failure, check Cloudflare Worker logs and the FarazSMS account's API permissions/line status.
+
+Deployment:
+- Keep existing Cloudflare D1 binding and other secrets unchanged.
+- Ensure FARAZSMS_API_KEY and FARAZSMS_LINE_NUMBER are set in Production.
+- Deploy using the normal GitHub/Cloudflare workflow.
