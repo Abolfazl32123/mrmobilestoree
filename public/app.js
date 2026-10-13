@@ -623,6 +623,29 @@ document.querySelectorAll('a.hero-secondary-btn[href="#about"]').forEach(link=>{
   });
 })();
 
+// V191 footer quick links: use the same offset-aware navigation as the main menu.
+// Native #anchor navigation could jump abruptly and leave sections under the sticky bar.
+(function(){
+  const nav=document.getElementById('mainNav');
+  document.querySelectorAll('.premium-footer .footer-col a[href^="#"]').forEach(link=>{
+    link.addEventListener('click',function(e){
+      const href=this.getAttribute('href')||'';
+      const target=document.getElementById(href.slice(1));
+      if(!target)return;
+      e.preventDefault();
+      const navH=nav ? nav.getBoundingClientRect().height : 0;
+      const y=target.getBoundingClientRect().top + window.pageYOffset - navH - 12;
+      window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+      history.replaceState(null,'',href);
+      const mainLink=document.querySelector('#mainNav a.nav-scroll[href="'+href+'"]');
+      if(mainLink){
+        document.querySelectorAll('#mainNav a.nav-scroll').forEach(a=>a.classList.remove('active'));
+        mainLink.classList.add('active');
+      }
+    });
+  });
+})();
+
 
 
 async function cancelCurrentPayment(){
