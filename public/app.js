@@ -189,7 +189,10 @@ function getProductsPerPage(){
   return window.innerWidth<=700?2:5;
 }
 function setProductsPage(page){
-  state.productsPage=Math.max(0,Number(page)||0);
+  const dots=document.querySelectorAll('#productsSliderControls .products-slide-dots button');
+  const total=dots.length;
+  const requested=Number(page)||0;
+  state.productsPage=total>0?((requested%total)+total)%total:Math.max(0,requested);
   renderProducts();
 }
 function renderProductsSliderControls(totalPages){
@@ -198,7 +201,8 @@ function renderProductsSliderControls(totalPages){
   if(totalPages<=1){box.hidden=true;box.innerHTML='';return}
   const current=Math.min(state.productsPage,totalPages-1);
   box.hidden=false;
-  box.innerHTML=`<button type="button" class="products-slide-btn" aria-label="محصولات قبلی" ${current<=0?'disabled':''} onclick="setProductsPage(${current-1})">‹</button><div class="products-slide-dots">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="${i===current?'active':''}" aria-label="اسلاید ${i+1}" onclick="setProductsPage(${i})"></button>`).join('')}</div><button type="button" class="products-slide-btn" aria-label="محصولات بعدی" ${current>=totalPages-1?'disabled':''} onclick="setProductsPage(${current+1})">›</button>`;
+  // RTL controls: left arrow advances to newer carousel pages; right arrow returns.
+  box.innerHTML=`<button type="button" class="products-slide-btn" aria-label="محصولات بعدی" onclick="setProductsPage(${(current+1)%totalPages})">‹</button><div class="products-slide-dots">${Array.from({length:totalPages},(_,i)=>`<button type="button" class="${i===current?'active':''}" aria-label="اسلاید ${i+1}" onclick="setProductsPage(${i})"></button>`).join('')}</div><button type="button" class="products-slide-btn" aria-label="محصولات قبلی" onclick="setProductsPage(${(current-1+totalPages)%totalPages})">›</button>`;
 }
 function renderProducts(){
   const q=state.search.trim().toLowerCase();
@@ -219,12 +223,13 @@ function renderProducts(){
   else if(state.sort==='priceDesc')list.sort((a,b)=>getEffectivePrice(b)-getEffectivePrice(a));
   else if(state.sort==='name')list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'fa'));
   else list.sort((a,b)=>{
-    // Products use an auto-increment database ID; larger IDs are newer.
-    const ia=Number(a.id),ib=Number(b.id);
-    if(Number.isFinite(ia)&&Number.isFinite(ib)&&ia!==ib)return ib-ia;
+    // Creation timestamp is authoritative: imported/restored products may have IDs
+    // that do not reflect their actual creation order. Newest must appear on page 1.
     const ta=Date.parse(a.created_at||a.createdAt||'')||0;
     const tb=Date.parse(b.created_at||b.createdAt||'')||0;
     if(ta!==tb)return tb-ta;
+    const ia=Number(a.id),ib=Number(b.id);
+    if(Number.isFinite(ia)&&Number.isFinite(ib)&&ia!==ib)return ib-ia;
     return String(b.id??'').localeCompare(String(a.id??''),'en',{numeric:true});
   });
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
@@ -269,8 +274,8 @@ function restartProductsAutoSlide(){
     const total=controls.querySelectorAll('button').length;
     if(total<=1)return;
     const current=Number(state.productsPage)||0;
-    // Advance in RTL reading order every five seconds, looping to page one after the last page.
-    setProductsPage(current>=total-1?0:current+1);
+    // Move right-to-left every five seconds and loop seamlessly from the last page to the first.
+    setProductsPage((current+1)%total);
   },5000);
 }
 function restartSpecialOffersAutoSlide(){

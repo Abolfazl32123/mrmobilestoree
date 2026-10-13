@@ -1180,11 +1180,11 @@ html{scroll-behavior:auto}
 /* ===== V155: products section slider (5 cards per desktop slide) ===== */
 .featured-products-layout{position:relative}
 .featured-products-layout>.products-grid{min-height:0;overflow:hidden}
-.products-slider-controls{grid-column:2;grid-row:2;display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 0 2px;direction:ltr}
+.products-slider-controls{grid-column:2;grid-row:2;display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 0 2px;direction:rtl}
 .products-slide-btn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(97,255,34,.55);background:#0c1715;color:var(--green);font-size:26px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:.2s}
 .products-slide-btn:hover:not(:disabled){background:var(--green);color:#061005;box-shadow:0 0 22px rgba(97,255,34,.18)}
 .products-slide-btn:disabled{opacity:.28;cursor:not-allowed}
-.products-slide-dots{display:flex;align-items:center;gap:7px;direction:ltr}
+.products-slide-dots{display:flex;align-items:center;gap:7px;direction:rtl}
 .products-slide-dots button{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:#344241;cursor:pointer;transition:.2s}
 .products-slide-dots button.active{width:24px;border-radius:8px;background:var(--green);box-shadow:0 0 12px rgba(97,255,34,.22)}
 .products-page-enter{animation:productsPageIn .28s ease both}
