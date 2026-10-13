@@ -218,7 +218,7 @@ function renderProducts(){
   if(state.sort==='priceAsc')list.sort((a,b)=>getEffectivePrice(a)-getEffectivePrice(b));
   else if(state.sort==='priceDesc')list.sort((a,b)=>getEffectivePrice(b)-getEffectivePrice(a));
   else if(state.sort==='name')list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'fa'));
-  else list.sort((a,b)=>Number(b.id)-Number(a.id));
+  else list.sort((a,b)=>{const ta=Date.parse(a.created_at||'')||0,tb=Date.parse(b.created_at||'')||0;return (tb-ta)||(Number(b.id)-Number(a.id));});
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
   updateFilterCount();
   if(!list.length){
