@@ -263,7 +263,7 @@ function renderProducts(){
   renderProductsSliderControls(totalPages);
   restartProductsAutoSlide();
 }
-// V156: automatic 3-second slide rotation for both product sections.
+// V192: cinematic product-page transitions; products auto-advance every 5 seconds.
 let productsAutoSlideTimer=null;
 let specialOffersAutoSlideTimer=null;
 function restartProductsAutoSlide(){
