@@ -219,11 +219,13 @@ function renderProducts(){
   else if(state.sort==='priceDesc')list.sort((a,b)=>getEffectivePrice(b)-getEffectivePrice(a));
   else if(state.sort==='name')list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'fa'));
   else list.sort((a,b)=>{
-    // Newest products first: database IDs increase as products are added.
-    const byId=Number(b.id)-Number(a.id);
-    if(Number.isFinite(byId)&&byId!==0)return byId;
-    const ta=Date.parse(a.created_at||'')||0,tb=Date.parse(b.created_at||'')||0;
-    return tb-ta;
+    // Products use an auto-increment database ID; larger IDs are newer.
+    const ia=Number(a.id),ib=Number(b.id);
+    if(Number.isFinite(ia)&&Number.isFinite(ib)&&ia!==ib)return ib-ia;
+    const ta=Date.parse(a.created_at||a.createdAt||'')||0;
+    const tb=Date.parse(b.created_at||b.createdAt||'')||0;
+    if(ta!==tb)return tb-ta;
+    return String(b.id??'').localeCompare(String(a.id??''),'en',{numeric:true});
   });
   $('productsResult').textContent=`${list.length.toLocaleString('fa-IR')} محصول نمایش داده شد`;
   updateFilterCount();
@@ -266,11 +268,10 @@ function restartProductsAutoSlide(){
     if(!controls)return;
     const total=controls.querySelectorAll('button').length;
     if(total<=1)return;
-    const current=state.productsPage||0;
-    // Stop on the final page instead of looping from the last page back to page 1.
-    if(current<total-1)setProductsPage(current+1);
-    else clearInterval(productsAutoSlideTimer);
-  },3000);
+    const current=Number(state.productsPage)||0;
+    // Advance in RTL reading order every five seconds, looping to page one after the last page.
+    setProductsPage(current>=total-1?0:current+1);
+  },5000);
 }
 function restartSpecialOffersAutoSlide(){
   if(specialOffersAutoSlideTimer) clearInterval(specialOffersAutoSlideTimer);
