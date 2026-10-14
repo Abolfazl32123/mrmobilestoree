@@ -858,10 +858,10 @@ html,body{max-width:100%;overflow-x:hidden}
 /* ===== V109: category artwork + exact featured layout polish ===== */
 .categories{direction:rtl;grid-template-columns:repeat(8,minmax(0,1fr));gap:11px}
 .category-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center}
-.categories .category-card .category-art{display:grid;width:100%;height:82px;place-items:center;margin:0 auto 8px;border-radius:15px;background:transparent;overflow:hidden;border:1px solid transparent;box-shadow:none}
-.categories .category-card .category-art img{width:100%;height:100%;object-fit:contain;display:block;background:transparent;mix-blend-mode:normal;filter:drop-shadow(0 5px 8px rgba(0,0,0,.22));transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s ease}
+.categories .category-card .category-art{display:grid;width:100%;height:100px;place-items:center;margin:0 auto 8px;border-radius:15px;background:transparent;overflow:hidden;border:1px solid transparent;box-shadow:none}
+.categories .category-card .category-art img{width:100%;height:100%;object-fit:contain;object-position:center center;display:block;background:transparent!important;mix-blend-mode:normal;filter:drop-shadow(0 5px 8px rgba(0,0,0,.22));transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s ease;image-rendering:auto}
 .categories .category-card:hover .category-art img{transform:scale(1.055) translateY(-2px);filter:drop-shadow(0 7px 12px rgba(97,255,34,.12))}
-@media(max-width:700px){.categories .category-card .category-art{height:68px}}
+@media(max-width:700px){.categories .category-card .category-art{height:78px}}
 .categories .category-card span:not(.category-art){display:block;font-size:11px;font-weight:900;line-height:1.5;color:#eef4f1}
 .categories .category-card small{display:block;font-size:8px;line-height:1.5;color:#71807c;margin-top:3px}
 .categories .category-card:hover .category-art{border-color:rgba(97,255,34,.3);box-shadow:0 0 24px rgba(97,255,34,.08)}
@@ -1519,3 +1519,19 @@ html{scroll-behavior:auto}
 #categories .category-card .category-art img{object-fit:contain!important;object-position:center!important;background:transparent!important;border-radius:0!important;mix-blend-mode:normal!important;filter:drop-shadow(0 5px 8px rgba(0,0,0,.24));}
 #categories .category-card:hover .category-art img{transform:translateY(-2px) scale(1.055);filter:drop-shadow(0 7px 12px rgba(97,255,34,.13));}
 @media(max-width:600px){#categories .category-card .category-art{height:94px!important}}
+
+
+/* V195: refined category cutouts, consistent scale and placement */
+#categories .category-card .category-art{height:94px!important;display:grid;place-items:center;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;margin-bottom:7px!important;padding:0!important}
+#categories .category-card .category-art img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;background:transparent!important;border:0!important;border-radius:0!important;mix-blend-mode:normal!important;filter:drop-shadow(0 4px 7px rgba(0,0,0,.2));}
+#categories .category-card .category-art img[src*="charger-real"]{transform:scale(1.04)}
+#categories .category-card .category-art img[src*="watch-real"]{transform:scale(1.03)}
+#categories .category-card .category-art img[src*="tablet-real"]{transform:scale(.98)}
+#categories .category-card .category-art img[src*="gaming-real"]{transform:scale(1.02)}
+#categories .category-card .category-art img[src*="mobile-real"],#categories .category-card .category-art img[src*="used-phone-promo"]{transform:scale(1.02)}
+#categories .category-card .category-art img[src*="discount-real"]{transform:scale(.96)}
+#categories .category-card .category-art img[src*="headphones-promo"]{transform:scale(1.02)}
+#categories .category-card:hover .category-art img{filter:drop-shadow(0 6px 11px rgba(97,255,34,.15));}
+@media(max-width:900px){#categories .category-card .category-art{height:clamp(84px,13vw,104px)!important}}
+@media(max-width:600px){#categories .category-card .category-art{height:98px!important}}
+@media(max-width:360px){#categories .category-card .category-art{height:86px!important}}

@@ -13,3 +13,6 @@ Deploy this ZIP to the existing `mrmobilestoree` Cloudflare Worker. No database 
 ## V193 category image layout
 - Category artwork uses consistent contain framing, responsive card dimensions, and dark-theme blending to reduce visible image backplates without cropping products.
 - Preserves category links and existing app behavior.
+
+
+V196: refined transparent category artwork by trimming transparent padding and normalizing image canvas dimensions; category image area adjusted responsively. Original V195 archive preserved separately.
