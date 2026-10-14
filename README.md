@@ -8,3 +8,8 @@ Based on V186. This release keeps the existing checkout and receipt-upload flow 
 - Existing email password recovery, stock, Enamad, product image, navigation, and design changes are preserved.
 
 Deploy this ZIP to the existing `mrmobilestoree` Cloudflare Worker. No database migration or new secret is required for these changes.
+
+
+## V193 category image layout
+- Category artwork uses consistent contain framing, responsive card dimensions, and dark-theme blending to reduce visible image backplates without cropping products.
+- Preserves category links and existing app behavior.
