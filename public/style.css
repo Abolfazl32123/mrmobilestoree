@@ -858,8 +858,10 @@ html,body{max-width:100%;overflow-x:hidden}
 /* ===== V109: category artwork + exact featured layout polish ===== */
 .categories{direction:rtl;grid-template-columns:repeat(8,minmax(0,1fr));gap:11px}
 .category-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center}
-.categories .category-card .category-art{display:grid;width:100%;height:70px;place-items:center;margin:0 auto 8px;border-radius:15px;background:linear-gradient(180deg,#0d1719,#091012);overflow:hidden}
-.categories .category-card .category-art img{width:100%;height:100%;object-fit:contain;display:block}
+.categories .category-card .category-art{display:grid;width:100%;height:82px;place-items:center;margin:0 auto 8px;border-radius:15px;background:transparent;overflow:hidden;border:1px solid transparent;box-shadow:none}
+.categories .category-card .category-art img{width:100%;height:100%;object-fit:contain;display:block;background:transparent;mix-blend-mode:normal;filter:drop-shadow(0 5px 8px rgba(0,0,0,.22));transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s ease}
+.categories .category-card:hover .category-art img{transform:scale(1.055) translateY(-2px);filter:drop-shadow(0 7px 12px rgba(97,255,34,.12))}
+@media(max-width:700px){.categories .category-card .category-art{height:68px}}
 .categories .category-card span:not(.category-art){display:block;font-size:11px;font-weight:900;line-height:1.5;color:#eef4f1}
 .categories .category-card small{display:block;font-size:8px;line-height:1.5;color:#71807c;margin-top:3px}
 .categories .category-card:hover .category-art{border-color:rgba(97,255,34,.3);box-shadow:0 0 24px rgba(97,255,34,.08)}
@@ -1511,3 +1513,9 @@ html{scroll-behavior:auto}
 @media(max-width:600px){#categories .categories{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#categories .category-card{padding:10px 8px!important}#categories .category-card .category-art{height:100px!important;padding:4px!important}#categories .category-card>span:not(.category-art){font-size:12px!important}#categories .category-card small{font-size:9px!important}}
 @media(max-width:360px){#categories .category-card .category-art{height:84px!important}#categories .categories{gap:7px}}
 @media(prefers-reduced-motion:reduce){#categories .category-card .category-art img{transition:none!important}}
+
+/* V194: true transparent category artwork, no dark image tiles */
+#categories .category-card .category-art{background:transparent!important;border-color:transparent!important;box-shadow:none!important;overflow:visible!important;padding:0!important}
+#categories .category-card .category-art img{object-fit:contain!important;object-position:center!important;background:transparent!important;border-radius:0!important;mix-blend-mode:normal!important;filter:drop-shadow(0 5px 8px rgba(0,0,0,.24));}
+#categories .category-card:hover .category-art img{transform:translateY(-2px) scale(1.055);filter:drop-shadow(0 7px 12px rgba(97,255,34,.13));}
+@media(max-width:600px){#categories .category-card .category-art{height:94px!important}}
