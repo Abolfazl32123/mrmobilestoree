@@ -19,3 +19,10 @@ V196: refined transparent category artwork by trimming transparent padding and n
 
 
 V197 category artwork refinement: transparent category assets cropped to visible artwork bounds, improved sizing and responsive image placement.
+
+
+## V200 — Product color variants
+- Product admin supports per-color stock using lines: `نام رنگ | #hex | موجودی`.
+- Storefront displays selectable color swatches and disables unavailable colors.
+- Selected color is kept in cart and order items; backend validates and decrements per-color stock.
+- Color column is added lazily to existing `order_items` tables.

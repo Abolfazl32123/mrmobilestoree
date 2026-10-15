@@ -321,12 +321,22 @@ function renderSpecFields(category, values={}){
       return `<label>${esc(label)}<input data-spec-key="${esc(key)}" value="${esc(value)}" placeholder="${esc(third)}"></label>`;
     }).join('')+`</div>`;
 }
+function parseProductColors(raw){
+  return String(raw||'').split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{
+    const parts=line.split('|').map(x=>x.trim());
+    const name=(parts[0]||'').slice(0,40), hex=/^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(parts[1]||'')?parts[1]:'#777777';
+    const quantity=Math.max(0,Math.min(99999,parseInt(parts[2]||'0',10)||0));
+    return {name,hex,quantity};
+  }).filter(c=>c.name);
+}
 function collectSpecs(){
   const out={};
   document.querySelectorAll('#specFields [data-spec-key]').forEach(el=>{
     const key=el.dataset.specKey, value=String(el.value||'').trim();
     if(value)out[key]=value;
   });
+  const colors=parseProductColors($('productColors')?.value||'');
+  if(colors.length)out.colors=colors; else delete out.colors;
   return out;
 }
 function splitImageInput(raw){
@@ -353,6 +363,7 @@ function openProductForm(p=null){
   $('condition').value=p?.condition||'نو'; $('category').value=p?.category||'موبایل'; $('badge').value=p?.badge||'';
   let sp={};try{sp=typeof p?.specs==='string'?JSON.parse(p.specs||'{}'):(p?.specs||{})}catch{}
   renderSpecFields($('category').value,sp);
+  $('productColors').value=Array.isArray(sp.colors)?sp.colors.map(c=>`${c.name||''} | ${c.hex||'#777777'} | ${Math.max(0,Number(c.quantity)||0)}`).join('\n'):'';
   $('featured').checked=!!p?.featured;$('bestseller').checked=!!p?.bestseller;$('newest').checked=!!p?.newest;
   $('desc').value=p?.description||'';
   // Text inputs cannot reliably retain newline-separated data URLs. Keep the real

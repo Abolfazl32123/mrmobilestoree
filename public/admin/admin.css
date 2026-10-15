@@ -117,3 +117,6 @@ html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover,.sidebar
     min-width:0!important;
   }
 }
+
+/* Product color inventory editor */
+.color-admin-box{display:grid;gap:7px;padding:14px;border:1px solid rgba(57,255,20,.22);border-radius:14px;background:rgba(10,25,16,.45)}.color-admin-box strong{color:#e9fff0}.color-admin-box small{color:#9aafa1;line-height:1.8}.color-admin-box textarea{width:100%;min-height:100px;resize:vertical;background:#0b1210;color:#f5fff7;border:1px solid #293c32;border-radius:10px;padding:10px;direction:rtl}
