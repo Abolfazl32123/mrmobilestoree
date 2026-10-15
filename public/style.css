@@ -1535,3 +1535,51 @@ html{scroll-behavior:auto}
 @media(max-width:900px){#categories .category-card .category-art{height:clamp(84px,13vw,104px)!important}}
 @media(max-width:600px){#categories .category-card .category-art{height:98px!important}}
 @media(max-width:360px){#categories .category-card .category-art{height:86px!important}}
+
+
+/* V197 category artwork: transparent assets, consistent sizing and responsive placement */
+#categories .category-card .category-art{
+  height: clamp(104px, 10vw, 132px) !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto 8px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#categories .category-card .category-art img{
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  mix-blend-mode: normal !important;
+  filter: drop-shadow(0 5px 9px rgba(0,0,0,.24));
+  transform: none !important;
+  transition: transform .32s cubic-bezier(.2,.8,.2,1), filter .32s ease !important;
+}
+#categories .category-card:hover .category-art img{
+  transform: translateY(-3px) scale(1.045) !important;
+  filter: drop-shadow(0 8px 12px rgba(97,255,34,.16));
+}
+#categories .category-card .category-art img[src*="charger-real"]{transform:scale(1.08)!important}
+#categories .category-card .category-art img[src*="watch-real"]{transform:scale(1.08)!important}
+#categories .category-card .category-art img[src*="gaming-real"]{transform:scale(1.05)!important}
+#categories .category-card .category-art img[src*="tablet-real"]{transform:scale(1.03)!important}
+#categories .category-card .category-art img[src*="mobile-real"],
+#categories .category-card .category-art img[src*="used-phone-promo"]{transform:scale(1.04)!important}
+#categories .category-card .category-art img[src*="discount-real"]{transform:scale(1.04)!important}
+#categories .category-card .category-art img[src*="headphones-promo"]{transform:scale(1.05)!important}
+@media(max-width:900px){#categories .category-card .category-art{height:clamp(94px,12vw,116px)!important}}
+@media(max-width:600px){#categories .category-card .category-art{height:108px!important;margin-bottom:7px!important}}
+@media(max-width:360px){#categories .category-card .category-art{height:94px!important}}
+@media(prefers-reduced-motion:reduce){#categories .category-card .category-art img{transition:none!important}}

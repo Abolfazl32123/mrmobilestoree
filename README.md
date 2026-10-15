@@ -16,3 +16,6 @@ Deploy this ZIP to the existing `mrmobilestoree` Cloudflare Worker. No database 
 
 
 V196: refined transparent category artwork by trimming transparent padding and normalizing image canvas dimensions; category image area adjusted responsively. Original V195 archive preserved separately.
+
+
+V197 category artwork refinement: transparent category assets cropped to visible artwork bounds, improved sizing and responsive image placement.
