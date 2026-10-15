@@ -69,7 +69,7 @@
 
       <section id="orders" class="page"><div class="page-head"><div><h1>مدیریت سفارش‌ها</h1><p>سفارش‌های مشتریان را بررسی و وضعیت آن‌ها را مدیریت کنید.</p></div><button class="primary" onclick="loadOrders()">↻ بروزرسانی</button></div><div class="filter-row"><input id="orderSearch" placeholder="جستجوی نام مشتری یا شماره سفارش..." oninput="renderOrders()"><select id="orderStatus" onchange="renderOrders()"><option value="">همه وضعیت‌ها</option><option>در انتظار بررسی</option><option>تأیید شده</option><option>در حال ارسال</option><option>تکمیل شده</option><option>لغو شده</option></select></div><div class="panel"><div id="ordersTable" class="table-wrap"></div></div></section>
 
-      <section id="products" class="page"><div class="page-head"><div><h1>مدیریت محصولات</h1><p>محصولات فروشگاه را اضافه، ویرایش و حذف کنید.</p></div><button class="primary" onclick="openProductForm()">＋ افزودن محصول</button></div><div class="panel"><div class="filter-row product-admin-filters"><input id="productSearch" placeholder="جستجوی محصول، برند یا توضیحات..." oninput="renderProducts()"><select id="productCategory" onchange="renderProducts()"><option value="">همه دسته‌ها</option></select><select id="productCondition" onchange="renderProducts()"><option value="">همه وضعیت‌ها</option><option value="نو">نو</option><option value="کارکرده">کارکرده</option><option value="استوک">استوک</option></select><select id="productAvailability" onchange="renderProducts()"><option value="">همه موجودی</option><option value="1">موجود</option><option value="0">ناموجود</option></select><select id="productSort" onchange="renderProducts()"><option value="newest">جدیدترین</option><option value="priceAsc">ارزان‌ترین</option><option value="priceDesc">گران‌ترین</option><option value="name">نام محصول</option></select></div><div id="productsTable" class="table-wrap"></div></div></section>
+      <section id="products" class="page"><div class="page-head"><div><h1>مدیریت محصولات</h1><p>محصولات فروشگاه را اضافه، ویرایش و حذف کنید.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" onclick="watermarkExistingProducts()">🟢 افزودن واترمارک به محصولات قبلی</button><button class="primary" onclick="openProductForm()">＋ افزودن محصول</button></div></div><div class="panel"><div class="filter-row product-admin-filters"><input id="productSearch" placeholder="جستجوی محصول، برند یا توضیحات..." oninput="renderProducts()"><select id="productCategory" onchange="renderProducts()"><option value="">همه دسته‌ها</option></select><select id="productCondition" onchange="renderProducts()"><option value="">همه وضعیت‌ها</option><option value="نو">نو</option><option value="کارکرده">کارکرده</option><option value="استوک">استوک</option></select><select id="productAvailability" onchange="renderProducts()"><option value="">همه موجودی</option><option value="1">موجود</option><option value="0">ناموجود</option></select><select id="productSort" onchange="renderProducts()"><option value="newest">جدیدترین</option><option value="priceAsc">ارزان‌ترین</option><option value="priceDesc">گران‌ترین</option><option value="name">نام محصول</option></select></div><div id="productsTable" class="table-wrap"></div></div></section>
 
       <section id="users" class="page"><div class="page-head"><div><h1>مدیریت کاربران</h1><p>فهرست مشتریان ثبت‌نام‌شده فروشگاه.</p></div></div><div class="panel"><div id="usersTable" class="table-wrap"></div></div></section>
 
@@ -431,6 +431,48 @@ function compressImage(file){
       };im.onerror=()=>reject(new Error('خواندن یکی از تصاویر ممکن نشد.'));im.src=r.result
     };r.onerror=()=>reject(new Error('خواندن فایل تصویر ممکن نشد.'));r.readAsDataURL(file)
   })
+}
+
+async function watermarkExistingProducts(){
+  if(!products.length){toast('ابتدا فهرست محصولات را بارگذاری کنید.');return}
+  const candidates=products.filter(p=>String(p.image_url||'').trim());
+  if(!candidates.length){toast('تصویری برای پردازش پیدا نشد.');return}
+  if(!confirm(`واترمارک به تصاویر قابل‌پردازش ${candidates.length} محصول اضافه شود؟ این عملیات تصاویر ذخیره‌شده را تغییر می‌دهد. از هر محصول نسخه پشتیبان بگیرید. برای جلوگیری از واترمارک تکراری، این عملیات را فقط یک‌بار اجرا کنید.`))return;
+  const btn=[...document.querySelectorAll('button')].find(b=>b.getAttribute('onclick')==='watermarkExistingProducts()');
+  if(btn){btn.disabled=true;btn.textContent='در حال پردازش تصاویر…'}
+  let done=0, skipped=0, failed=0;
+  try{
+    const logo=await loadMrMobileWatermark();
+    for(const p of candidates){
+      try{
+        const urls=String(p.image_url||'').split(/\n|\|/).map(x=>x.trim()).filter(Boolean);
+        let changed=false;
+        const output=[];
+        for(const src of urls){
+          // Existing remote images cannot be safely rewritten here due to cross-origin restrictions.
+          if(!/^data:image\//i.test(src)){output.push(src);skipped++;continue}
+          const im=await new Promise((resolve,reject)=>{const x=new Image();x.onload=()=>resolve(x);x.onerror=()=>reject(Error('تصویر خوانده نشد'));x.src=src});
+          const c=document.createElement('canvas'),scale=Math.min(1,1100/Math.max(im.naturalWidth,im.naturalHeight));
+          c.width=Math.max(1,Math.round(im.naturalWidth*scale));c.height=Math.max(1,Math.round(im.naturalHeight*scale));
+          const ctx=c.getContext('2d',{alpha:false});ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,0,0,c.width,c.height);
+          const w=Math.min(c.width*.19,Math.max(72,c.width*.19)),h=w*(logo.naturalHeight/logo.naturalWidth),pad=Math.max(12,Math.round(c.width*.025));
+          ctx.save();ctx.globalAlpha=.92;ctx.drawImage(logo,pad,pad,w,h);ctx.restore();
+          let q=.78,data=c.toDataURL('image/jpeg',q);while(data.length>430000&&q>.40){q-=.06;data=c.toDataURL('image/jpeg',q)}
+          if(data.length>500000){output.push(src);failed++;continue}
+          output.push(data);changed=true;
+        }
+        if(!changed)continue;
+        const body={...p,image_url:output.join('\n')};
+        const id=Number(p.id);
+        if(!id)throw Error('شناسه محصول موجود نیست');
+        await api('/api/products/'+id,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+        done++;
+      }catch(e){failed++}
+    }
+    await loadAll();
+    alert(`پردازش واترمارک تمام شد.\nمحصولات به‌روزشده: ${done}\nتصاویر غیرقابل‌پردازش یا ردشده: ${skipped}\nخطاها: ${failed}\n\nتصاویر دارای URL خارجی تغییر داده نشدند. این عملیات را دوباره اجرا نکنید تا لوگو تکراری نشود.`);
+  }catch(e){toast(e.message||'پردازش تصاویر ناموفق بود')}
+  finally{if(btn){btn.disabled=false;btn.textContent='🟢 افزودن واترمارک به محصولات قبلی'}}
 }
 async function saveProduct(){
   try{
