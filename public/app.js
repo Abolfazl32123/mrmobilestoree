@@ -684,3 +684,30 @@ async function cancelCurrentPayment(){
     $('paymentError').textContent=e.message||'لغو سفارش انجام نشد.';
   }
 }
+
+
+// V201: cinematic eased return-to-top animation from the footer.
+(function(){
+  const link=document.querySelector('.premium-footer .footer-bottom-links a[href="#home"]');
+  if(!link)return;
+  let activeFrame=0;
+  link.addEventListener('click',function(e){
+    e.preventDefault();
+    if(activeFrame)cancelAnimationFrame(activeFrame);
+    const start=window.scrollY||window.pageYOffset||0;
+    if(start<=2){window.scrollTo({top:0,behavior:'auto'});return;}
+    const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced){window.scrollTo({top:0,behavior:'smooth'});history.replaceState(null,'','#home');return;}
+    const duration=Math.min(1900,Math.max(900,start*.42));
+    const startTime=performance.now();
+    const easeInOutCubic=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    function frame(now){
+      const progress=Math.min(1,(now-startTime)/duration);
+      const eased=easeInOutCubic(progress);
+      window.scrollTo(0,Math.round(start*(1-eased)));
+      if(progress<1)activeFrame=requestAnimationFrame(frame);
+      else{activeFrame=0;window.scrollTo(0,0);history.replaceState(null,'','#home');}
+    }
+    activeFrame=requestAnimationFrame(frame);
+  });
+})();

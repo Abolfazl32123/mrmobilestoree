@@ -26,3 +26,9 @@ V197 category artwork refinement: transparent category assets cropped to visible
 - Storefront displays selectable color swatches and disables unavailable colors.
 - Selected color is kept in cart and order items; backend validates and decrements per-color stock.
 - Color column is added lazily to existing `order_items` tables.
+
+## V201 update
+- Fixed the admin product editor: the color-stock textarea expected by the existing V200 JavaScript is now present, preventing `openProductForm()` from failing before the modal opens.
+- Added explicit button types and repaired the nested label structure around product quantity/availability controls.
+- Added a smooth eased return-to-top animation for the footer link, with reduced-motion support.
+- Preserved the V200 color options and inventory data format.
