@@ -1675,3 +1675,40 @@ html{scroll-behavior:auto}
 @media(prefers-reduced-motion:reduce){
   .categories .category-card .category-art img{transition:none!important}
 }
+
+/* ===== V204: unify category artwork backdrop with the clean headphones/mobile cards ===== */
+#categories .category-card .category-art{
+  background: radial-gradient(ellipse at 50% 38%, rgba(25,55,37,.28) 0%, rgba(10,22,19,.12) 48%, rgba(5,12,12,0) 78%) !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  isolation: isolate;
+}
+#categories .category-card .category-art img{
+  background: transparent !important;
+  mix-blend-mode: normal !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  filter: drop-shadow(0 5px 8px rgba(0,0,0,.16)) !important;
+}
+/* Per-category sizing: keep the entire product visible while balancing visual weight. */
+#categories .category-card .category-art img[src*="watch-real-transparent"]{transform:scale(1.12)!important}
+#categories .category-card .category-art img[src*="headphones-promo-transparent"]{transform:scale(1.18)!important}
+#categories .category-card .category-art img[src*="charger-real-transparent"]{transform:scale(1.13)!important}
+#categories .category-card .category-art img[src*="gaming-real-transparent"]{transform:scale(1.13)!important}
+#categories .category-card .category-art img[src*="tablet-real-transparent"]{transform:scale(1.13)!important}
+#categories .category-card .category-art img[src*="earbuds-real-transparent"]{transform:scale(1.12)!important}
+#categories .category-card .category-art img[src*="used-phone-promo-transparent"]{transform:scale(1.16)!important}
+#categories .category-card .category-art img[src*="discount-real-transparent"]{transform:scale(1.13)!important}
+#categories .category-card:hover .category-art img{filter:drop-shadow(0 7px 10px rgba(57,255,20,.12))!important}
+@media(max-width:700px){
+ #categories .category-card .category-art{background:radial-gradient(ellipse at 50% 38%,rgba(25,55,37,.24),rgba(5,12,12,0) 78%)!important}
+ #categories .category-card .category-art img[src*="watch-real-transparent"]{transform:scale(1.06)!important}
+ #categories .category-card .category-art img[src*="headphones-promo-transparent"]{transform:scale(1.10)!important}
+ #categories .category-card .category-art img[src*="charger-real-transparent"]{transform:scale(1.07)!important}
+ #categories .category-card .category-art img[src*="gaming-real-transparent"]{transform:scale(1.07)!important}
+ #categories .category-card .category-art img[src*="tablet-real-transparent"]{transform:scale(1.07)!important}
+ #categories .category-card .category-art img[src*="earbuds-real-transparent"]{transform:scale(1.07)!important}
+ #categories .category-card .category-art img[src*="used-phone-promo-transparent"]{transform:scale(1.08)!important}
+ #categories .category-card .category-art img[src*="discount-real-transparent"]{transform:scale(1.07)!important}
+}
