@@ -444,7 +444,18 @@ async function submitAddressAndOrder(){
 
 function openAuth(mode='login'){$('authModal').classList.add('show');setAuthMode(mode)}
 function closeAuth(){$('authModal').classList.remove('show')}
-function setAuthMode(mode){state.authMode=mode;updateAuth()}
+let authCaptchaAnswer = null;
+function newCaptcha(){
+  const a=Math.floor(Math.random()*9)+2, b=Math.floor(Math.random()*9)+2;
+  const multiply=Math.random()<0.5;
+  const x=multiply?a:Math.max(a,b), y=multiply?b:Math.min(a,b);
+  authCaptchaAnswer=multiply?x*y:x+y;
+  $('captchaQuestion').textContent=`${x} ${multiply?'×':'+'} ${y} = ?`;
+  $('captchaAnswer').value='';
+  $('captchaStatus').textContent='';
+  $('captchaStatus').className='captcha-status';
+}
+function setAuthMode(mode){state.authMode=mode;updateAuth();newCaptcha()}
 function switchAuth(){setAuthMode(state.authMode==='login'?'register':'login')}
 function updateAuth(){const reg=state.authMode==='register';$('authMain').classList.remove('hidden');$('recoveryPanel').classList.add('hidden');$('authTitle').textContent=reg?'ساخت حساب کاربری':'ورود به حساب';$('authSub').textContent=reg?'برای ثبت سفارش یک حساب بسازید.':'برای ادامه وارد حساب کاربری خود شوید.';$('registerNameWrap').classList.toggle('hidden',!reg);$('registerEmailWrap').classList.toggle('hidden',!reg);$('authSubmit').textContent=reg?'ساخت حساب کاربری →':'ورود به حساب کاربری →';$('authSwitch').textContent=reg?'حساب دارید؟ وارد شوید':'ثبت نام نکرده‌اید؟ ثبت نام کنید';$('authLoginTab')?.classList.toggle('active',!reg);$('authRegisterTab')?.classList.toggle('active',reg);$('authError').textContent=''}
 function toggleAuthPassword(){const x=$('authPassword');x.type=x.type==='password'?'text':'password'}
@@ -454,6 +465,18 @@ async function sendRecoveryCode(){const email=$('recoveryEmail').value.trim().to
 async function finishRecovery(){const email=$('recoveryEmail').value.trim().toLowerCase(),code=$('recoveryCode').value.trim(),password=$('recoveryPassword').value;if(!/^\d{6}$/.test(code))return $('recoveryError').textContent='کد ۶ رقمی را درست وارد کنید.';if(password.length<6)return $('recoveryError').textContent='رمز جدید باید حداقل ۶ کاراکتر باشد.';const btn=$('recoveryFinishBtn');btn.disabled=true;$('recoveryError').textContent='در حال بررسی کد...';try{const r=await fetch('/api/auth/password-reset/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,code,password})});const d=await r.json();if(!r.ok)throw Error(d.error||'تغییر رمز انجام نشد.');$('authMain').classList.remove('hidden');$('recoveryPanel').classList.add('hidden');setAuthMode('login');$('authError').textContent='رمز عبور با موفقیت تغییر کرد؛ با رمز جدید وارد شوید.';$('authPhone').focus()}catch(e){$('recoveryError').textContent=e.message}finally{btn.disabled=false}}
 function socialLogin(provider){$('authError').textContent='در حال اتصال امن...';location.href='/api/auth/'+provider+'/start'}
 async function submitAuth(){
+  const captchaInput=$('captchaAnswer').value.trim();
+  if(!captchaInput || !/^[0-9]+$/.test(captchaInput) || Number(captchaInput)!==authCaptchaAnswer){
+    $('captchaStatus').textContent='پاسخ اشتباه است؛ سؤال جدید نمایش داده شد.';
+    $('captchaStatus').className='captcha-status error';
+    newCaptcha();
+    $('captchaStatus').textContent='پاسخ اشتباه است؛ سؤال جدید نمایش داده شد.';
+    $('captchaStatus').className='captcha-status error';
+    return;
+  }
+  $('captchaStatus').textContent='پاسخ صحیح است؛ تأیید شد.';
+  $('captchaStatus').className='captcha-status success';
+
   const phone=$('authPhone').value.trim(),password=$('authPassword').value;
   if(!phone||!password)return $('authError').textContent='شماره موبایل و رمز عبور را وارد کنید.';
   const body={phone,password};if(state.authMode==='register'){body.name=$('authName').value.trim();body.email=$('authEmail').value.trim().toLowerCase();}
@@ -711,3 +734,5 @@ async function cancelCurrentPayment(){
     activeFrame=requestAnimationFrame(frame);
   });
 })();
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('captchaQuestion'))newCaptcha()},{once:true})}else if(document.getElementById('captchaQuestion'))newCaptcha();

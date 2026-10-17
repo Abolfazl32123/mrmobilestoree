@@ -298,6 +298,12 @@
       <div class="field"><label>شماره موبایل</label><input id="authPhone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxxx"></div>
       <div class="field"><label>رمز عبور</label><div class="password-wrap"><input id="authPassword" type="password" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید"><button type="button" onclick="toggleAuthPassword()" aria-label="نمایش رمز">◉</button></div></div>
       <div class="auth-options"><label><input id="authRemember" type="checkbox" checked> مرا به خاطر بسپار</label><button type="button" onclick="authRecovery()">فراموشی رمز عبور؟</button></div>
+      <div class="math-captcha" id="authCaptcha">
+        <div class="captcha-copy"><b>تأیید امنیتی</b><small>برای ادامه، حاصل عبارت زیر را وارد کنید.</small></div>
+        <div class="captcha-question" id="captchaQuestion" dir="ltr">3 + 4 = ?</div>
+        <div class="captcha-answer"><input id="captchaAnswer" type="text" inputmode="numeric" autocomplete="off" maxlength="3" placeholder="پاسخ شما" aria-label="پاسخ تأیید امنیتی"><button type="button" class="captcha-refresh" onclick="newCaptcha()" aria-label="سؤال جدید">↻</button></div>
+        <div class="captcha-status" id="captchaStatus" aria-live="polite"></div>
+      </div>
       <button id="authSubmit" class="btn primary full auth-submit" onclick="submitAuth()">ورود به حساب کاربری →</button>
       <div class="auth-divider"><span>یا ورود سریع با</span></div>
       <div class="social-login"><button type="button" class="social google" onclick="socialLogin('google')"><b>G</b><span>ورود با Google</span></button></div>
