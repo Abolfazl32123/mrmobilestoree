@@ -387,7 +387,41 @@ function saveCompare(){state.compare=[...new Set((state.compare||[]).map(Number)
 function isCompared(id){return (state.compare||[]).includes(Number(id))}
 function updateCompareUI(){const c=$('compareCount');if(c)c.textContent=(state.compare||[]).length.toLocaleString('fa-IR');document.querySelectorAll('[data-compare-id]').forEach(b=>{const a=isCompared(b.dataset.compareId);b.classList.toggle('active',a);b.textContent=a?'✓ حذف از مقایسه':'⚖ مقایسه'});const d=$('detailCompare');if(d&&state.detailProductId!=null){const a=isCompared(state.detailProductId);d.classList.toggle('active',a);d.textContent=a?'✓ حذف از مقایسه':'⚖ مقایسه'}}
 function toggleCompare(id){const n=Number(id);if(!Number.isFinite(n))return;if(isCompared(n)){state.compare=state.compare.filter(x=>Number(x)!==n);saveCompare();return}if(state.compare.length>=3)return;state.compare.push(n);saveCompare()}
-function renderCompare(){const box=$('compareContent');if(!box)return;const items=(state.compare||[]).map(id=>state.products.find(p=>Number(p.id)===Number(id))).filter(Boolean);if(!items.length){box.innerHTML='<div class="compare-empty"><div>⚖️</div><h3>هنوز محصولی برای مقایسه انتخاب نشده</h3><p>از روی کارت محصولات، گزینه «مقایسه» را بزنید.</p></div>';return}const rows=[['قیمت',p=>{const price=numeric(p.price),d=numeric(p.discount_price);return toman(d>0&&d<price?d:price)}],['برند',p=>getBrand(p.name)],['دسته‌بندی',p=>p.category||'موبایل'],['وضعیت',p=>p.condition||'نو'],['حافظه',p=>productSpecs(p).storage||getStorage(p)],['سلامت باتری',p=>productSpecs(p).batteryHealth||'ثبت نشده'],['RAM',p=>productSpecs(p).ram||'ثبت نشده'],['پردازنده',p=>productSpecs(p).processor||'ثبت نشده'],['رجیستری',p=>productSpecs(p).registry||'ثبت نشده'],['تعداد سیم‌کارت',p=>productSpecs(p).simCount||'ثبت نشده'],['رنگ',p=>productSpecs(p).color||'ثبت نشده']];box.innerHTML='<div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>مشخصات</th>'+items.map(p=>`<th><button class="compare-remove" onclick="toggleCompare(${Number(p.id)});renderCompare()">×</button><img src="${esc(imgUrl(p))}" alt=""><b>${esc(p.name)}</b></th>`).join('')+'</tr></thead><tbody>'+rows.map(([l,f])=>`<tr><td>${esc(l)}</td>`+items.map(p=>`<td>${esc(f(p))}</td>`).join('')+'</tr>').join('')+'</tbody></table></div><div class="compare-open-note">برای دیدن همه مشخصات، داخل جدول اسکرول کنید ↔️</div>';updateCompareUI()}
+function renderCompare(){
+  const box=$('compareContent');if(!box)return;
+  const items=(state.compare||[]).map(id=>state.products.find(p=>Number(p.id)===Number(id))).filter(Boolean);
+  if(!items.length){box.innerHTML='<div class="compare-empty"><div>⚖️</div><h3>هنوز محصولی برای مقایسه انتخاب نشده</h3><p>از روی کارت محصولات، گزینه «مقایسه» را بزنید.</p></div>';return}
+  const categoryKey=p=>String(p?.category||'موبایل').trim();
+  const sameCategory=items.every(p=>categoryKey(p)===categoryKey(items[0]));
+  const categoryConfigs={
+    'موبایل':[['batteryHealth','سلامت باتری'],['appearance','وضعیت ظاهری'],['registry','رجیستری'],['simCount','تعداد سیم‌کارت'],['ram','RAM'],['storage','حافظه داخلی'],['color','رنگ'],['processor','پردازنده'],['display','نمایشگر'],['camera','دوربین'],['battery','ظرفیت باتری'],['os','سیستم‌عامل'],['warranty','گارانتی']],
+    'لوازم جانبی':[['type','نوع محصول'],['compatibility','سازگاری'],['connection','نوع اتصال'],['material','جنس'],['power','توان / ظرفیت'],['length','طول'],['model','مدل / نسخه'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'تبلت':[['display','اندازه صفحه‌نمایش'],['os','سیستم‌عامل'],['ram','RAM'],['processor','پردازنده'],['battery','ظرفیت باتری'],['simCount','تعداد سیم‌کارت'],['camera','دوربین'],['storage','حافظه داخلی'],['color','رنگ'],['warranty','گارانتی']],
+    'ساعت هوشمند':[['display','نوع / اندازه نمایشگر'],['os','سیستم‌عامل'],['connection','اتصال'],['battery','باتری'],['waterResistance','مقاومت در برابر آب'],['sensors','حسگرها'],['size','اندازه / بند'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'هدفون':[['type','نوع'],['connection','نوع اتصال'],['battery','شارژدهی'],['noiseCancel','حذف نویز'],['microphone','میکروفون'],['driver','درایور'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
+    'اسپیکر':[['power','توان خروجی'],['connection','نوع اتصال'],['battery','باتری / شارژدهی'],['waterResistance','مقاومت در برابر آب'],['inputs','درگاه‌ها / ورودی‌ها'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['warranty','گارانتی']],
+    'کابل و شارژر':[['type','نوع محصول'],['connector','نوع کانکتور'],['power','توان خروجی'],['length','طول کابل'],['fastCharge','شارژ سریع'],['compatibility','سازگاری'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']],
+    'پاوربانک':[['capacity','ظرفیت باتری'],['outputPower','توان خروجی'],['inputPower','توان ورودی'],['ports','تعداد / نوع درگاه‌ها'],['fastCharge','شارژ سریع'],['pd','پشتیبانی از PD'],['qc','پشتیبانی از QC'],['wireless','شارژ بی‌سیم'],['display','نمایشگر درصد شارژ'],['weight','وزن'],['dimensions','ابعاد'],['color','رنگ'],['accessories','لوازم همراه'],['warranty','گارانتی']],
+    'ایرپاد':[['generation','نسل / مدل'],['connection','نوع اتصال'],['battery','شارژدهی'],['caseBattery','باتری کیس'],['noiseCancel','حذف نویز ANC'],['transparency','حالت شفافیت'],['microphone','میکروفون'],['charging','نوع شارژ کیس'],['compatibility','سازگاری'],['color','رنگ'],['warranty','گارانتی']],
+    'لوازم جانبی خودرو':[['type','نوع محصول'],['compatibility','سازگاری خودرو'],['inputVoltage','ولتاژ ورودی'],['outputPower','توان خروجی'],['ports','درگاه‌ها'],['fastCharge','شارژ سریع'],['installation','نوع نصب'],['material','جنس'],['color','رنگ'],['warranty','گارانتی']]
+  };
+  const fallback=[['color','رنگ'],['model','مدل / نسخه'],['connection','نوع اتصال'],['compatibility','سازگاری'],['power','توان / ظرفیت'],['battery','باتری'],['material','جنس'],['weight','وزن'],['dimensions','ابعاد'],['warranty','گارانتی']];
+  const rows=[['قیمت',p=>{const price=numeric(p.price),d=numeric(p.discount_price);return toman(d>0&&d<price?d:price)}],['برند',p=>getBrand(p.name)],['دسته‌بندی',p=>p.category||'موبایل'],['وضعیت کالا',p=>p.condition||'نو']];
+  if(sameCategory){
+    const config=categoryConfigs[categoryKey(items[0])]||fallback;
+    config.forEach(([key,label])=>rows.push([label,p=>{const v=productSpecs(p)[key];return v!==undefined&&v!==null&&String(v).trim()!==''?String(v):((key==='storage'&&categoryKey(p)==='موبایل')?getStorage(p):'ثبت نشده')}]));
+  }else{
+    rows.push(['توضیح',p=>p.description||'ثبت نشده']);
+    const allKeys=[...new Set(items.flatMap(p=>(categoryConfigs[categoryKey(p)]||fallback).map(x=>x[0])))];
+    allKeys.forEach(key=>{
+      const labels=items.map(p=>(categoryConfigs[categoryKey(p)]||fallback).find(x=>x[0]===key)?.[1]).filter(Boolean);
+      if(labels.length===items.length&&new Set(labels).size===1){
+        const label=labels[0];rows.push([label,p=>{const v=productSpecs(p)[key];return v!==undefined&&v!==null&&String(v).trim()!==''?String(v):'ثبت نشده'}]);
+      }
+    });
+  }
+  box.innerHTML='<div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>مشخصات</th>'+items.map(p=>`<th><button class="compare-remove" onclick="toggleCompare(${Number(p.id)});renderCompare()">×</button><img src="${esc(imgUrl(p))}" alt=""><b>${esc(p.name)}</b></th>`).join('')+'</tr></thead><tbody>'+rows.map(([l,f])=>`<tr><td>${esc(l)}</td>`+items.map(p=>`<td>${esc(f(p))}</td>`).join('')+'</tr>').join('')+'</tbody></table></div><div class="compare-open-note">برای دیدن همه مشخصات، داخل جدول اسکرول کنید ↔️</div>';updateCompareUI()
+}
 function openCompare(){
   const modal=$('compareModal');
   if(!modal)return;
