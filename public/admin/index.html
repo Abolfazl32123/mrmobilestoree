@@ -126,7 +126,7 @@ const $=id=>document.getElementById(id);
 const toman=n=>Number(n||0).toLocaleString('fa-IR')+' تومان';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
-async function api(url,opt={}){opt={...opt,credentials:'include',headers:{...(opt.headers||{})}};const t=sessionStorage.getItem('mr_admin_token');if(t&&!opt.headers.Authorization)opt.headers.Authorization='Bearer '+t;const r=await fetch(url,opt);const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'خطا');return d}
+async function api(url,opt={}){opt={...opt,credentials:'include',headers:{...(opt.headers||{})}};const t=sessionStorage.getItem('mr_admin_token');if(t&&!opt.headers.Authorization)opt.headers.Authorization='Bearer '+t;let r;try{r=await fetch(url,opt)}catch(e){throw Error('ارتباط با سرور برقرار نشد. اگر تصاویر انتخاب کرده‌اید، حجم آن‌ها را کاهش دهید و دوباره تلاش کنید. ('+(e?.message||'خطای شبکه')+')')}const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||('خطای سرور: '+r.status));return d}
 async function check(){try{const d=await api('/api/me');if(d.admin){$('login').hidden=true;$('app').hidden=false;setToday();await loadAll();const sec=new URLSearchParams(location.search).get('section');if(sec&&document.getElementById(sec))showSection(sec);return true} $('login').hidden=false;return false}catch(e){$('login').hidden=false;return false}}
 async function login(){try{const d=await api('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:$('pass').value})});if(d.token)sessionStorage.setItem('mr_admin_token',d.token);$('err').textContent='';const ok=await check();if(!ok)throw Error('ورود انجام نشد؛ صفحه را یک‌بار تازه‌سازی کنید.')}catch(e){$('err').textContent=e.message}}
 async function logout(){sessionStorage.removeItem('mr_admin_token');await api('/api/logout',{method:'POST'});location.reload()}
@@ -396,7 +396,7 @@ $('imageFile').addEventListener('change',async()=>{
     for(const f of files)newlySelected.push(await compressImage(f));
     const combined=[...previous,...newlySelected];
     const total=combined.join('\n').length;
-    if(total>1650000)throw new Error('حجم مجموع تصاویر زیاد است؛ لطفاً تعداد یا کیفیت تصاویر را کمتر کنید.');
+    if(total>450000)throw new Error('حجم مجموع تصاویر زیاد است؛ لطفاً تعداد یا کیفیت تصاویر را کمتر کنید.');
     selectedImageData=combined;
     $('imageUrl').value=selectedImageData.join('\n');
     $('fileName').textContent=`${selectedImageData.length} تصویر انتخاب شد`;
@@ -424,7 +424,7 @@ function compressImage(file){
       const im=new Image();
       im.onload=async()=>{
         try{
-          const max=1100,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');
+          const max=700,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');
           c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));
           const ctx=c.getContext('2d',{alpha:false});
           ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,0,0,c.width,c.height);
@@ -434,9 +434,9 @@ function compressImage(file){
           const markH=markW*(logo.naturalHeight/logo.naturalWidth);
           const pad=Math.max(12,Math.round(c.width*.025));
           ctx.save();ctx.globalAlpha=.92;ctx.drawImage(logo,pad,pad,markW,markH);ctx.restore();
-          let q=.78,data=c.toDataURL('image/jpeg',q);
-          while(data.length>430000&&q>.40){q-=.06;data=c.toDataURL('image/jpeg',q)}
-          if(data.length>500000)return reject(new Error('یکی از تصاویر هنوز بزرگ است.'));
+          let q=.68,data=c.toDataURL('image/jpeg',q);
+          while(data.length>85000&&q>.24){q-=.06;data=c.toDataURL('image/jpeg',q)}
+          if(data.length>100000)return reject(new Error('حجم این تصویر زیاد است؛ تصویر کم‌حجم‌تری انتخاب کنید.'));
           resolve(data);
         }catch(e){reject(e)}
       };im.onerror=()=>reject(new Error('خواندن یکی از تصاویر ممکن نشد.'));im.src=r.result
@@ -495,7 +495,7 @@ async function saveProduct(){
     if(!String($('name').value||'').trim()) throw Error('نام محصول الزامی است.');
     if(!String($('price').value||'').trim()) throw Error('قیمت محصول الزامی است.');
     if(images.length>5) throw Error('حداکثر ۵ تصویر برای هر محصول انتخاب کنید.');
-    if(image_url.length>1650000) throw Error('حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.');
+    if(image_url.length>450000) throw Error('حجم مجموع تصاویر زیاد است؛ لطفاً تصاویر کم‌حجم‌تری انتخاب کنید.');
     const quantity=Math.max(0,parseInt($('quantity').value||'0',10)||0);
     $('available').checked=quantity>0;
     syncSaleDateInputs();
@@ -518,6 +518,7 @@ async function saveProduct(){
       available:quantity>0,
       quantity
     };
+    $('msg').textContent='در حال ذخیره محصول...';
     const result=await api(editing?'/api/products/'+editing:'/api/products',{
       method:editing?'PUT':'POST',
       headers:{'content-type':'application/json'},
