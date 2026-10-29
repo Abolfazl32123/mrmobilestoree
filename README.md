@@ -32,3 +32,9 @@ V197 category artwork refinement: transparent category assets cropped to visible
 - Added explicit button types and repaired the nested label structure around product quantity/availability controls.
 - Added a smooth eased return-to-top animation for the footer link, with reduced-motion support.
 - Preserved the V200 color options and inventory data format.
+
+
+## Product image upload note
+- Original image files up to 10 MiB each are accepted in the admin UI.
+- Images are resized/compressed in the browser before sending to the Worker so JSON requests remain small enough for the D1-backed product record.
+- Combined stored data URLs are capped at 1,200,000 characters. This is a post-compression/storage limit, not a limit on the original selected file.
